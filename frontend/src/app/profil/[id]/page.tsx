@@ -19,131 +19,156 @@ export default function ProfilPage() {
 
   const [kontak, setKontak] = useState<Kontak | null>(null);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   // ================= FETCH =================
   useEffect(() => {
-    fetch(`${API_URL}/${id}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setKontak(json.data);
-        setLoading(false);
-      });
+    let ignore = false;
+
+    async function fetchKontak() {
+      try {
+        const res = await fetch(`${API_URL}/${id}`);
+
+        if (!res.ok) {
+          setErrorMessage("Gagal memuat data kontak");
+          return;
+        }
+
+        const json = await res.json();
+        if (!ignore) setKontak(json.data);
+      } catch {
+        setErrorMessage("Backend tidak dapat dihubungi");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    fetchKontak();
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   // ================= UPDATE =================
   async function updateKontak(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!kontak) return;
+
+    setSaving(true);
+    setErrorMessage(null);
+
     const formData = new FormData(e.currentTarget);
 
-    await fetch(`${API_URL}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nama: formData.get("nama"),
-        umur: Number(formData.get("umur")),
-      }),
-    });
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nama: formData.get("nama"),
+          umur: Number(formData.get("umur")),
+        }),
+      });
 
-    alert("Kontak berhasil diupdate");
-    router.push("/");
+      if (!res.ok) {
+        setErrorMessage("Gagal menyimpan perubahan");
+        return;
+      }
+
+      router.push("/");
+    } catch {
+      setErrorMessage("Backend tidak dapat dihubungi");
+    } finally {
+      setSaving(false);
+    }
   }
 
   // ================= DELETE =================
   async function deleteKontak() {
     if (!confirm("Yakin ingin menghapus kontak ini?")) return;
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    router.push("/");
+
+    setSaving(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+
+      if (!res.ok) {
+        setErrorMessage("Gagal menghapus kontak");
+        return;
+      }
+
+      router.push("/");
+    } catch {
+      setErrorMessage("Backend tidak dapat dihubungi");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  if (loading)
+  // ================= LOADING =================
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-gray-400">
         Loading...
       </div>
     );
-
-  if (!kontak)
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-gray-400">
-        Kontak tidak ditemukan
-      </div>
-    );
+  }
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center font-poppins">
-      <div
-        className="bg-[#111] w-[400px] rounded-2xl p-8 text-white
-        shadow-[0_0_30px_rgba(255,255,255,0.05)]
-        transition-all duration-300
-        hover:-translate-y-1
-        hover:shadow-[0_0_35px_rgba(255,255,255,0.1)]"
-      >
-        <h1 className="text-lg font-semibold mb-6 tracking-wide text-center">
+      <div className="bg-[#111] w-[400px] rounded-2xl p-8 text-white shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+        <h1 className="text-lg font-semibold mb-4 tracking-wide text-center">
           👤 Profil Kontak
         </h1>
+
+        {/* ================= ERROR INFO ================= */}
+        {errorMessage && (
+          <div className="mb-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-4 py-3 text-sm text-yellow-400">
+            ⚠ {errorMessage}
+          </div>
+        )}
 
         {/* ================= FORM ================= */}
         <form onSubmit={updateKontak} className="flex flex-col gap-3 mb-6">
           <input
             name="nama"
-            defaultValue={kontak.nama}
-            placeholder="Nama"
-            className="w-full px-4 py-3 rounded-xl
-              bg-[#1a1a1a] border border-[#222]
-              text-white text-sm
-              placeholder:text-gray-500
-              focus:outline-none focus:border-gray-400
-              focus:bg-[#1e1e1e] transition"
+            defaultValue={kontak?.nama ?? ""}
+            disabled={!kontak || saving}
+            className="w-full px-4 py-3 rounded-xl bg-[#1a1a1a] border border-[#222] text-white text-sm disabled:opacity-40"
             required
           />
 
           <input
             type="number"
             name="umur"
-            defaultValue={kontak.umur}
-            placeholder="Umur"
-            className="w-full px-4 py-3 rounded-xl
-              bg-[#1a1a1a] border border-[#222]
-              text-white text-sm
-              placeholder:text-gray-500
-              focus:outline-none focus:border-gray-400
-              focus:bg-[#1e1e1e] transition"
+            defaultValue={kontak?.umur ?? 0}
+            disabled={!kontak || saving}
+            className="w-full px-4 py-3 rounded-xl bg-[#1a1a1a] border border-[#222] text-white text-sm disabled:opacity-40"
             required
           />
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl
-              bg-gradient-to-r from-[#333] to-[#222]
-              text-gray-300 text-sm font-medium
-              transition-all duration-300
-              hover:from-[#444] hover:to-[#2a2a2a]
-              hover:text-white
-              active:scale-95"
+            disabled={!kontak || saving}
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#333] to-[#222] text-gray-300 text-sm font-medium disabled:opacity-40"
           >
-            💾 Simpan Perubahan
+            💾 {saving ? "Menyimpan..." : "Simpan Perubahan"}
           </button>
         </form>
 
         {/* ================= DELETE ================= */}
         <button
           onClick={deleteKontak}
-          className="w-full py-3 rounded-xl mb-4
-            bg-gradient-to-r from-red-700 to-red-900
-            text-red-100 text-sm font-medium
-            transition-all duration-300
-            hover:from-red-600 hover:to-red-800
-            active:scale-95"
+          disabled={!kontak || saving}
+          className="w-full py-3 rounded-xl mb-4 bg-gradient-to-r from-red-700 to-red-900 text-red-100 text-sm font-medium disabled:opacity-40"
         >
-          🗑 Hapus Kontak
+          🗑 {saving ? "Memproses..." : "Hapus Kontak"}
         </button>
 
         {/* ================= FOOTER ================= */}
         <div className="text-center text-sm text-gray-400">
-          <Link
-            href="/"
-            className="text-blue-400 hover:text-blue-300 hover:underline transition"
-          >
+          <Link href="/" className="text-blue-400 hover:underline">
             ← Kembali ke Home
           </Link>
         </div>
