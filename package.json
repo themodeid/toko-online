@@ -1,0 +1,20 @@
+{
+  "name": "1-file-backend-mongo-noauth-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "app.js",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "build:backend": "cd backend && npm install && npm run build --if-present",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "adam",
+  "license": "ISC",
+  "description": "Full-stack app dengan MongoDB, Express, dan Next.js"
+}
