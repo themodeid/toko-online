@@ -64,17 +64,36 @@ class AppError extends Error {
 // 🧯 GLOBAL ERROR HANDLER
 // ======================================================
 const globalErrorHandler = (
-  err: Error,
+  err: any,
   _req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
-  const error =
-    err instanceof AppError ? err : new AppError("Internal Server Error", 500);
+  // 🔥 LOG ERROR ASLI (WAJIB)
+  console.error("🔥 ERROR ORIGINAL:");
+  console.error(err);
 
-  res.status(error.statusCode).json({
-    status: error.status,
-    message: error.message,
+  // Jika error dari AppError, pakai langsung
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+    });
+  }
+
+  // Jika error dari PostgreSQL
+  if (err.code) {
+    return res.status(500).json({
+      status: "error",
+      message: "Database error",
+      detail: err.message, // ⚠️ boleh dihapus di production
+    });
+  }
+
+  // Fallback (benar-benar error tak terduga)
+  return res.status(500).json({
+    status: "error",
+    message: "Internal Server Error",
   });
 };
 
@@ -233,7 +252,6 @@ app.use((_req, _res, next) => {
 });
 
 app.use(globalErrorHandler);
-
 
 // ======================================================
 // 🚀 START SERVER
