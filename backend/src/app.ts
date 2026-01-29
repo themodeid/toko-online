@@ -5,17 +5,20 @@
 
 // ================= IMPORT CORE =================
 import express, { Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
+import { Pool } from "pg";
 
 // ================= CONFIG =================
-const PORT: number = Number(process.env.PORT) || 3000;
-const MONGO_URI: string =
-  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/belajar_mongo";
+const PORT: number = 3000;
+
+const pool = new Pool({
+  connectionString:
+    "postgresql://postgres:adamwahyukur@localhost:5433/kontakdb",
+});
 
 // ======================================================
 // ⚙️ EXPRESS APP
@@ -36,11 +39,12 @@ app.use(
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10kb" }));
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-});
-app.use(limiter);
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  }),
+);
 
 // ======================================================
 // 🧠 ERROR CLASS
@@ -57,8 +61,6 @@ class AppError extends Error {
   }
 }
 
-const isValidObjectId = (id: string) => mongoose.Types.ObjectId.isValid(id);
-
 // ======================================================
 // 🧯 GLOBAL ERROR HANDLER
 // ======================================================
@@ -68,47 +70,34 @@ const globalErrorHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
-  let error = err;
+  const error =
+    err instanceof AppError ? err : new AppError("Internal Server Error", 500);
 
-  if (!(error instanceof AppError)) {
-    console.error(error);
-    error = new AppError("Internal Server Error", 500);
-  }
-
-  const appError = error as AppError;
-
-  res.status(appError.statusCode).json({
-    status: appError.status,
-    message: appError.message,
+  res.status(error.statusCode).json({
+    status: error.status,
+    message: error.message,
   });
 };
 
+// ======================================================
 // utils
+// ======================================================
 type AsyncFn = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => Promise<any>;
+) => Promise<void>;
 
 const catchAsync =
-  (fn: AsyncFn) => (req: Request, res: Response, next: NextFunction) => {
+  (fn: AsyncFn) => (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch(next);
-  };
 
 // ======================================================
-// 🧪 ZOD SCHEMA (TAMBAHAN)
+// 🧪 ZOD SCHEMA
 // ======================================================
 const kontakCreateSchema = z.object({
-  nama: z
-    .string()
-    .min(1, "nama wajib diisi")
-    .max(100, "nama maksimal 100 karakter"),
-  umur: z
-    .number()
-    .int("umur harus bilangan bulat")
-    .min(0, "umur tidak boleh negatif")
-    .max(100, "umur tidak boleh lebih dari 100")
-    .optional(),
+  nama: z.string().min(1).max(100),
+  umur: z.number().int().min(0).max(100).optional(),
 });
 
 const kontakUpdateSchema = z.object({
@@ -123,52 +112,39 @@ const validateBody =
   (schema: z.ZodSchema) =>
   (req: Request, _res: Response, next: NextFunction) => {
     const parsed = schema.safeParse(req.body);
-
     if (!parsed.success) {
       return next(new AppError(parsed.error.issues[0].message, 400));
     }
-
     req.body = parsed.data;
     next();
   };
-
-// ======================================================
-// 📦 MODEL
-// ======================================================
-interface IKontak {
-  nama: string;
-  umur: number;
-}
-
-const kontakSchema = new mongoose.Schema<IKontak>(
-  {
-    nama: { type: String, required: true },
-    umur: { type: Number, default: 0 },
-  },
-  { timestamps: true },
-);
-
-const Kontak = mongoose.model<IKontak>("Kontak", kontakSchema);
 
 // ======================================================
 // 🎯 ROUTES
 // ======================================================
 
 // Health check
-app.get("/api/health", (_req: Request, res: Response) => {
+app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// CREATE (ZOD + SEMUA FITUR TETAP)
+// CREATE
 app.post(
   "/api/kontak",
   validateBody(kontakCreateSchema),
-  catchAsync(async (req: Request, res: Response) => {
-    const data = await Kontak.create(req.body);
+  catchAsync(async (req, res) => {
+    const { nama, umur = 0 } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO kontak (nama, umur)
+       VALUES ($1, $2)
+       RETURNING *`,
+      [nama, umur],
+    );
 
     res.status(201).json({
       message: "kontak berhasil dibuat",
-      data,
+      data: result.rows[0],
     });
   }),
 );
@@ -176,12 +152,12 @@ app.post(
 // READ ALL
 app.get(
   "/api/kontak",
-  catchAsync(async (_req: Request, res: Response) => {
-    const data = await Kontak.find();
+  catchAsync(async (_req, res) => {
+    const result = await pool.query(`SELECT * FROM kontak ORDER BY id DESC`);
 
     res.json({
       message: "data berhasil diambil",
-      data,
+      data: result.rows,
     });
   }),
 );
@@ -189,37 +165,47 @@ app.get(
 // READ ONE
 app.get(
   "/api/kontak/:id",
-  catchAsync(async (req: Request, res: Response) => {
-    const data = await Kontak.findById(req.params.id);
+  catchAsync(async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) throw new AppError("ID tidak valid", 400);
 
-    if (!isValidObjectId(req.params.id)) {
-      throw new AppError("ID tidak valid", 400);
+    const result = await pool.query(`SELECT * FROM kontak WHERE id = $1`, [id]);
+
+    if (!result.rows[0]) {
+      throw new AppError("Data tidak ditemukan", 404);
     }
 
-    res.json({
-      message: "data berhasil diambil",
-      data,
-    });
+    res.json({ data: result.rows[0] });
   }),
 );
 
-// UPDATE (ZOD)
+// UPDATE
 app.put(
   "/api/kontak/:id",
   validateBody(kontakUpdateSchema),
-  catchAsync(async (req, res, next) => {
-    const data = await Kontak.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+  catchAsync(async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) throw new AppError("ID tidak valid", 400);
 
-    if (!isValidObjectId(req.params.id)) {
-      throw new AppError("ID tidak valid", 400);
+    const { nama, umur } = req.body;
+
+    const result = await pool.query(
+      `UPDATE kontak
+       SET nama = COALESCE($1, nama),
+           umur = COALESCE($2, umur),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $3
+       RETURNING *`,
+      [nama, umur, id],
+    );
+
+    if (!result.rows[0]) {
+      throw new AppError("Data tidak ditemukan", 404);
     }
 
     res.json({
       message: "kontak berhasil diupdate",
-      data,
+      data: result.rows[0],
     });
   }),
 );
@@ -227,22 +213,24 @@ app.put(
 // DELETE
 app.delete(
   "/api/kontak/:id",
-  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const data = await Kontak.findByIdAndDelete(req.params.id);
-    if (!isValidObjectId(req.params.id)) {
-      throw new AppError("ID tidak valid", 400);
+  catchAsync(async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) throw new AppError("ID tidak valid", 400);
+
+    const result = await pool.query(`DELETE FROM kontak WHERE id = $1`, [id]);
+
+    if (result.rowCount === 0) {
+      throw new AppError("Data tidak ditemukan", 404);
     }
 
-    res.json({
-      message: "kontak berhasil dihapus",
-    });
+    res.json({ message: "kontak berhasil dihapus" });
   }),
 );
 
 // ======================================================
 // 🧯 NOT FOUND
 // ======================================================
-app.use((_req: Request, _res: Response, next: NextFunction) => {
+app.use((_req, _res, next) => {
   next(new AppError("Route tidak ditemukan", 404));
 });
 
@@ -251,28 +239,8 @@ app.use(globalErrorHandler);
 // ======================================================
 // 🚀 START SERVER
 // ======================================================
-const startServer = async (): Promise<void> => {
-  try {
-    console.log("\n=========================================");
-    console.log("🔌 Connecting to MongoDB...");
-
-    await mongoose.connect(MONGO_URI);
-
-    console.log("✅ MongoDB Connected");
-
-    app.listen(PORT, () => {
-      console.log("=========================================");
-      console.log(`🚀 API Server is running`);
-      console.log(`🌐 URL : http://localhost:${PORT}/api`);
-      console.log("=========================================\n");
-    });
-  } catch (error) {
-    console.error("=========================================");
-    console.error("❌ Failed to start server");
-    console.error("🧨 MongoDB Error:", (error as Error).message);
-    console.error("=========================================");
-    process.exit(1);
-  }
-};
-
-startServer();
+app.listen(PORT, () => {
+  console.log("=========================================");
+  console.log(`🚀 API Server running on http://localhost:${PORT}/`);
+  console.log("=========================================");
+});
