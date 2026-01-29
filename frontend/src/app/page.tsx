@@ -105,7 +105,7 @@ export default async function HomePage() {
           ) : (
             kontak.map((k) => (
               <li
-                key={k._id}
+                key={k.id}
                 className="bg-[#1a1a1a] border border-[#222] rounded-xl px-4 py-3 flex justify-between items-center"
               >
                 <div>
@@ -114,7 +114,7 @@ export default async function HomePage() {
                 </div>
 
                 <Link
-                  href={`/profil/${k._id}`}
+                  href={`/profil/${k.id}`}
                   className="text-xs px-3 py-1.5 rounded-lg bg-[#222] text-gray-300 hover:text-white"
                 >
                   Profil

@@ -135,7 +135,7 @@ app.post(
     const { nama, umur = 0 } = req.body;
 
     const result = await pool.query(
-      `INSERT INTO kontak (nama, umur, id)
+      `INSERT INTO kontak (nama, umur)
        VALUES ($1, $2)
        RETURNING *`,
       [nama, umur],
@@ -190,11 +190,10 @@ app.put(
 
     const result = await pool.query(
       `UPDATE kontak
-       SET nama = COALESCE($1, nama),
-           umur = COALESCE($2, umur),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $3
-       RETURNING *`,
+   SET nama = COALESCE($1, nama),
+       umur = COALESCE($2, umur)
+   WHERE id = $3
+   RETURNING *`,
       [nama, umur, id],
     );
 
