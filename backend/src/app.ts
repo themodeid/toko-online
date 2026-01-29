@@ -16,8 +16,7 @@ import { Pool } from "pg";
 const PORT: number = 3000;
 
 const pool = new Pool({
-  connectionString:
-    "postgresql://postgres:adamwahyukur@localhost:5433/kontakdb",
+  connectionString: "postgresql://postgres:adamwahyukur@localhost:5433/toko",
 });
 
 // ======================================================
@@ -191,11 +190,10 @@ app.put(
 
     const result = await pool.query(
       `UPDATE kontak
-       SET nama = COALESCE($1, nama),
-           umur = COALESCE($2, umur),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $3
-       RETURNING *`,
+   SET nama = COALESCE($1, nama),
+       umur = COALESCE($2, umur)
+   WHERE id = $3
+   RETURNING *`,
       [nama, umur, id],
     );
 
@@ -239,8 +237,24 @@ app.use(globalErrorHandler);
 // ======================================================
 // 🚀 START SERVER
 // ======================================================
-app.listen(PORT, () => {
-  console.log("=========================================");
-  console.log(`🚀 API Server running on http://localhost:${PORT}/`);
-  console.log("=========================================");
-});
+async function startServer() {
+  try {
+    // 🔑 TEST DATABASE CONNECTION
+    await pool.query("SELECT 1");
+
+    console.log("✅ Database connected successfully");
+
+    // 🚀 START SERVER
+    app.listen(PORT, () => {
+      console.log("=========================================");
+      console.log(`🚀 API Server running on http://localhost:${PORT}/api`);
+      console.log("=========================================");
+    });
+  } catch (error) {
+    console.error("❌ Failed to connect to database");
+    console.error(error);
+    process.exit(1); // ⛔ jangan hidupkan server
+  }
+}
+
+startServer();
