@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { revalidatePath } from "next/cache";
+"use client";
 
-export const dynamic = "force-dynamic";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type Kontak = {
   id: number;
@@ -11,36 +11,44 @@ type Kontak = {
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/kontak`;
 
-export default async function HomePage() {
-  let kontak: Kontak[] = [];
-  let errorMessage: string | null = null;
+export default function HomePage() {
+  const [kontak, setKontak] = useState<Kontak[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // ================= FETCH DATA (SAFE) =================
-  try {
-    const res = await fetch(API_URL, { cache: "no-store" });
+  // ================= FETCH DATA =================
+  const fetchKontak = async () => {
+    try {
+      setErrorMessage(null);
 
-    if (!res.ok) {
-      errorMessage = "Gagal memuat data kontak. Coba lagi nanti.";
-    } else {
+      const res = await fetch(API_URL, { cache: "no-store" });
+
+      if (!res.ok) {
+        setErrorMessage("Gagal memuat data kontak. Coba lagi nanti.");
+        return;
+      }
+
       const json = await res.json();
-      kontak = json.data ?? [];
+      setKontak(json.data ?? []);
+    } catch {
+      setErrorMessage("Backend tidak dapat dihubungi.");
     }
-  } catch {
-    errorMessage = "Backend tidak dapat dihubungi.";
-  }
+  };
 
-  // ================= CREATE (SERVER ACTION) =================
-  async function createKontakAction(formData: FormData) {
-    "use server";
+  useEffect(() => {
+    fetchKontak();
+  }, []);
 
+  // ================= CREATE =================
+  const createKontak = async (formData: FormData) => {
     const nama = formData.get("nama");
     const umur = Number(formData.get("umur"));
 
-    if (!nama || !umur) {
-      return;
-    }
+    if (!nama || !umur) return;
 
     try {
+      setLoading(true);
+
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,11 +57,13 @@ export default async function HomePage() {
 
       if (!res.ok) return;
 
-      revalidatePath("/");
+      await fetchKontak(); // 🔁 refresh list
     } catch {
       return;
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center font-poppins">
@@ -62,19 +72,19 @@ export default async function HomePage() {
           📇 Manajemen Kontak
         </h1>
 
-        {/* ================= ERROR INFO (HALUS) ================= */}
+        {/* ================= ERROR INFO ================= */}
         {errorMessage && (
           <div className="mb-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-4 py-3 text-sm text-yellow-400">
             ⚠ {errorMessage}
           </div>
         )}
 
-        {/* ================= FORM CREATE ================= */}
-        <form action={createKontakAction} className="flex flex-col gap-3 mb-6">
+        {/* ================= FORM ================= */}
+        <form action={createKontak} className="flex flex-col gap-3 mb-6">
           <input
             name="nama"
             placeholder="Nama"
-            disabled={!!errorMessage}
+            disabled={!!errorMessage || loading}
             className="w-full px-4 py-3 rounded-xl bg-[#1a1a1a] border border-[#222] text-white text-sm placeholder:text-gray-500 disabled:opacity-40"
           />
 
@@ -83,46 +93,44 @@ export default async function HomePage() {
             type="number"
             min={0}
             placeholder="Umur"
-            disabled={!!errorMessage}
+            disabled={!!errorMessage || loading}
             className="w-full px-4 py-3 rounded-xl bg-[#1a1a1a] border border-[#222] text-white text-sm placeholder:text-gray-500 disabled:opacity-40"
           />
 
           <button
             type="submit"
-            disabled={!!errorMessage}
+            disabled={!!errorMessage || loading}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-[#333] to-[#222] text-gray-300 text-sm font-medium disabled:opacity-40"
           >
-            ➕ Tambah Kontak
+            {loading ? "⏳ Menyimpan..." : "➕ Tambah Kontak"}
           </button>
         </form>
 
-        {/* ================= LIST KONTAK ================= */}
+        {/* ================= LIST ================= */}
         <ul className="flex flex-col gap-3 max-h-[260px] overflow-y-auto pr-1">
           {kontak.length === 0 ? (
             <p className="text-center text-gray-500 text-sm">
               {errorMessage ? "Data tidak tersedia" : "Belum ada kontak"}
             </p>
           ) : (
-            kontak.map((k) =>
-              k.id ? (
-                <li
-                  key={k.id}
-                  className="bg-[#1a1a1a] border border-[#222] rounded-xl px-4 py-3 flex justify-between items-center"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-white">{k.nama}</p>
-                    <p className="text-xs text-gray-400">Umur: {k.umur}</p>
-                  </div>
+            kontak.map((k) => (
+              <li
+                key={k.id}
+                className="bg-[#1a1a1a] border border-[#222] rounded-xl px-4 py-3 flex justify-between items-center"
+              >
+                <div>
+                  <p className="text-sm font-medium text-white">{k.nama}</p>
+                  <p className="text-xs text-gray-400">Umur: {k.umur}</p>
+                </div>
 
-                  <Link
-                    href={`/profil/${k.id}`}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-[#222] text-gray-300 hover:text-white"
-                  >
-                    Profil
-                  </Link>
-                </li>
-              ) : null,
-            )
+                <Link
+                  href={`/profil/${k.id}`}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-[#222] text-gray-300 hover:text-white"
+                >
+                  Profil
+                </Link>
+              </li>
+            ))
           )}
         </ul>
 

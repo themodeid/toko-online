@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/kontak`;
 
 type Kontak = {
-  _id: string;
+  id: number;
   nama: string;
   umur: number;
 };
