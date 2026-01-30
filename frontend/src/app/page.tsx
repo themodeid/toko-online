@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 export const dynamic = "force-dynamic";
 
 type Kontak = {
-  _id: string;
+  id: number;
   nama: string;
   umur: number;
 };
 
-const API_URL = "http://localhost:3000/api/kontak";
+const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/kontak`;
 
 export default async function HomePage() {
   let kontak: Kontak[] = [];
