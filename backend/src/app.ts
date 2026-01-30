@@ -11,12 +11,15 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { Pool } from "pg";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // ================= CONFIG =================
-const PORT: number = 3000;
+const PORT = Number(process.env.PORT) ;
 
 const pool = new Pool({
-  connectionString: "postgresql://postgres:adamwahyukur@localhost:5433/toko",
+  connectionString: process.env.DATABASE_URL,
 });
 
 // ======================================================
@@ -27,11 +30,7 @@ const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: [
-      "http://localhost:3001",
-      "http://192.168.1.7:3001",
-      "http://127.0.0.1:3001",
-    ],
+    origin: process.env.CORS_ORIGIN?.split(","),
     credentials: true,
   }),
 );

@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 export const dynamic = "force-dynamic";
 
 type Kontak = {
-  _id: string;
+  id: number;
   nama: string;
   umur: number;
 };
 
-const API_URL = "http://localhost:3000/api/kontak";
+const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/kontak`;
 
 export default async function HomePage() {
   let kontak: Kontak[] = [];
@@ -103,24 +103,26 @@ export default async function HomePage() {
               {errorMessage ? "Data tidak tersedia" : "Belum ada kontak"}
             </p>
           ) : (
-            kontak.map((k) => (
-              <li
-                key={k.id}
-                className="bg-[#1a1a1a] border border-[#222] rounded-xl px-4 py-3 flex justify-between items-center"
-              >
-                <div>
-                  <p className="text-sm font-medium text-white">{k.nama}</p>
-                  <p className="text-xs text-gray-400">Umur: {k.umur}</p>
-                </div>
-
-                <Link
-                  href={`/profil/${k.id}`}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-[#222] text-gray-300 hover:text-white"
+            kontak.map((k) =>
+              k.id ? (
+                <li
+                  key={k.id}
+                  className="bg-[#1a1a1a] border border-[#222] rounded-xl px-4 py-3 flex justify-between items-center"
                 >
-                  Profil
-                </Link>
-              </li>
-            ))
+                  <div>
+                    <p className="text-sm font-medium text-white">{k.nama}</p>
+                    <p className="text-xs text-gray-400">Umur: {k.umur}</p>
+                  </div>
+
+                  <Link
+                    href={`/profil/${k.id}`}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-[#222] text-gray-300 hover:text-white"
+                  >
+                    Profil
+                  </Link>
+                </li>
+              ) : null,
+            )
           )}
         </ul>
 
