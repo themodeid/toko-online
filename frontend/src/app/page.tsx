@@ -2,140 +2,123 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-type Kontak = {
-  id: number;
-  nama: string;
-  umur: number;
-};
-
-const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/kontak`;
+import { Kontak } from "@/types/kontak";
+import { getKontak, createKontak } from "@/lib/api/kontak";
 
 export default function HomePage() {
   const [kontak, setKontak] = useState<Kontak[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // ================= FETCH DATA =================
-  const fetchKontak = async () => {
+  async function fetchKontak() {
     try {
       setErrorMessage(null);
-
-      const res = await fetch(API_URL, { cache: "no-store" });
-
-      if (!res.ok) {
-        setErrorMessage("Gagal memuat data kontak. Coba lagi nanti.");
-        return;
-      }
-
-      const json = await res.json();
-      setKontak(json.data ?? []);
+      const data = await getKontak();
+      setKontak(data);
     } catch {
       setErrorMessage("Backend tidak dapat dihubungi.");
     }
-  };
+  }
 
   useEffect(() => {
     fetchKontak();
   }, []);
 
-  // ================= CREATE =================
-  const createKontak = async (formData: FormData) => {
-    const nama = formData.get("nama");
+  async function handleCreate(formData: FormData) {
+    const nama = formData.get("nama") as string;
     const umur = Number(formData.get("umur"));
-
     if (!nama || !umur) return;
 
     try {
       setLoading(true);
-
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nama, umur }),
-      });
-
-      if (!res.ok) return;
-
-      await fetchKontak(); // 🔁 refresh list
-    } catch {
-      return;
+      setErrorMessage(null);
+      await createKontak({ nama, umur });
+      await fetchKontak();
+      // Reset form
+      const form = document.getElementById("create-form") as HTMLFormElement;
+      if (form) form.reset();
+    } catch (error) {
+      setErrorMessage("Gagal membuat kontak");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center font-poppins">
-      <div className="bg-[#111] w-[400px] rounded-2xl p-8 text-white shadow-[0_0_30px_rgba(255,255,255,0.05)]">
-        <h1 className="text-lg font-semibold mb-4 tracking-wide text-center">
-          📇 Manajemen Kontak
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4 font-poppins">
+      <div className="w-full max-w-4xl">
+        <h1 className="text-4xl font-bold text-white mb-8 text-center">
+          Daftar Kontak
         </h1>
 
-        {/* ================= ERROR INFO ================= */}
+        {/* Form Create */}
+        <form
+          id="create-form"
+          action={handleCreate}
+          className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20 shadow-2xl"
+        >
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Tambah Kontak Baru
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              type="text"
+              name="nama"
+              placeholder="Nama"
+              required
+              className="px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="number"
+              name="umur"
+              placeholder="Umur"
+              required
+              min="0"
+              max="100"
+              className="px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
+            >
+              {loading ? "Menambah..." : "Tambah"}
+            </button>
+          </div>
+        </form>
+
+        {/* Error Message */}
         {errorMessage && (
-          <div className="mb-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-4 py-3 text-sm text-yellow-400">
-            ⚠ {errorMessage}
+          <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg mb-6">
+            {errorMessage}
           </div>
         )}
 
-        {/* ================= FORM ================= */}
-        <form action={createKontak} className="flex flex-col gap-3 mb-6">
-          <input
-            name="nama"
-            placeholder="Nama"
-            disabled={!!errorMessage || loading}
-            className="w-full px-4 py-3 rounded-xl bg-[#1a1a1a] border border-[#222] text-white text-sm placeholder:text-gray-500 disabled:opacity-40"
-          />
-
-          <input
-            name="umur"
-            type="number"
-            min={0}
-            placeholder="Umur"
-            disabled={!!errorMessage || loading}
-            className="w-full px-4 py-3 rounded-xl bg-[#1a1a1a] border border-[#222] text-white text-sm placeholder:text-gray-500 disabled:opacity-40"
-          />
-
-          <button
-            type="submit"
-            disabled={!!errorMessage || loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#333] to-[#222] text-gray-300 text-sm font-medium disabled:opacity-40"
-          >
-            {loading ? "⏳ Menyimpan..." : "➕ Tambah Kontak"}
-          </button>
-        </form>
-
-        {/* ================= LIST ================= */}
-        <ul className="flex flex-col gap-3 max-h-[260px] overflow-y-auto pr-1">
+        {/* List Kontak */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Daftar Kontak ({kontak.length})
+          </h2>
           {kontak.length === 0 ? (
-            <p className="text-center text-gray-500 text-sm">
-              {errorMessage ? "Data tidak tersedia" : "Belum ada kontak"}
+            <p className="text-white/60 text-center py-8">
+              Belum ada kontak. Tambahkan kontak baru di atas.
             </p>
           ) : (
-            kontak.map((k) => (
-              <li
-                key={k.id}
-                className="bg-[#1a1a1a] border border-[#222] rounded-xl px-4 py-3 flex justify-between items-center"
-              >
-                <div>
-                  <p className="text-sm font-medium text-white">{k.nama}</p>
-                  <p className="text-xs text-gray-400">Umur: {k.umur}</p>
-                </div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {kontak.map((item) => (
                 <Link
-                  href={`/profil/${k.id}`}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-[#222] text-gray-300 hover:text-white"
+                  key={item.id}
+                  href={`/profil/${item.id}`}
+                  className="block bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg p-4 transition-all hover:scale-105"
                 >
-                  Profil
+                  <h3 className="text-white font-semibold text-lg mb-2">
+                    {item.nama}
+                  </h3>
+                  <p className="text-white/70">Umur: {item.umur} tahun</p>
                 </Link>
-              </li>
-            ))
+              ))}
+            </div>
           )}
-        </ul>
-
-        <div className="mt-8 text-center text-gray-500 text-sm">
-          © 2026 Manajemen Kontak - by adam wahyu kurniawan
         </div>
       </div>
     </div>
