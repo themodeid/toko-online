@@ -27,9 +27,9 @@ export const login = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const register = catchAsync(async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
-  const user = await registerAkun(username, password);
+  const user = await registerAkun(username, password, role);
 
   const token = signToken({
     id: user.id,

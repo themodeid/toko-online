@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { AppError } from "../../errors/AppError";
 import { pool } from "../../config/database";
 
-export const registerAkun = async (username: string, password: string) => {
+export const registerAkun = async (username: string, password: string, role?: string) => {
   // Check if username already exists
   const existingUser = await pool.query(
     "SELECT * FROM users WHERE username = $1",
@@ -15,15 +15,32 @@ export const registerAkun = async (username: string, password: string) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Default role adalah 'user'
-  const result = await pool.query(
-    `INSERT INTO users (username, password, role)
-     VALUES ($1, $2, 'user')
-     RETURNING id, username, role`,
-    [username, hashedPassword],
-  );
+  // Gunakan role yang diberikan atau default 'user'
+  const userRole = role || "user";
 
-  return result.rows[0];
+  try {
+    const result = await pool.query(
+      `INSERT INTO users (username, password, role)
+       VALUES ($1, $2, $3)
+       RETURNING id, username, role`,
+      [username, hashedPassword, userRole],
+    );
+
+    return result.rows[0];
+  } catch (error: any) {
+    // Jika kolom role belum ada, coba insert tanpa role
+    if (error.code === "42703" || error.message?.includes("role")) {
+      const result = await pool.query(
+        `INSERT INTO users (username, password)
+         VALUES ($1, $2)
+         RETURNING id, username`,
+        [username, hashedPassword],
+      );
+      
+      return { ...result.rows[0], role: userRole };
+    }
+    throw error;
+  }
 };
 
 export const loginAkun = async (username: string, password: string) => {

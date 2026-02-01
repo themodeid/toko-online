@@ -8,5 +8,6 @@ const router = Router()
 
 router.post("/login", validateBody(loginSchema), controller.login)
 router.post("/register", validateBody(registerSchema), controller.register)
-router.put("/:id", protect, restrictTo("owner"), validateBody(updateUserSchema), controller.updateUser)
+router.put("/user/:id", protect, restrictTo("owner", "admin"), validateBody(updateUserSchema), controller.updateUser)
+
 export default router;
