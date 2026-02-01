@@ -1,0 +1,89 @@
+import { Request, Response } from "express";
+import {
+  getAllProduk as getAllProdukService,
+  getProdukById as getProdukByIdService,
+  createProduk as createProdukService,
+  updateProduk as updateProdukService,
+  deleteProduk as deleteProdukService,
+} from "./produk.services";
+import { AppError } from "../../errors/AppError";
+
+import { catchAsync } from "../../utils/catchAsync";
+
+export const getAllProduk = catchAsync(async (req: Request, res: Response) => {
+  const produk = await getAllProdukService();
+  res.status(200).json({
+    message: "berhasil mengambil semua produk",
+    produk,
+  });
+});
+
+export const getProdukById = catchAsync(async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    throw new AppError("ID tidak valid", 400);
+  }
+
+  const produk = await getProdukByIdService(id);
+
+  if (!produk) {
+    throw new AppError("Produk tidak ditemukan", 404);
+  }
+
+  res.status(200).json({
+    message: "berhasil mengambil produk by id",
+    produk,
+  });
+});
+
+export const createProduk = catchAsync(async (req: Request, res: Response) => {
+  const { nama, harga, stock } = req.body;
+
+  const produk = await createProdukService(nama, harga, stock);
+
+  res.status(201).json({
+    message: "berhasil membuat produk",
+    produk,
+  });
+});
+
+export const updateProduk = catchAsync(async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id);
+  const { nama, harga, stock } = req.body;
+
+  if (isNaN(id)) {
+    throw new AppError("ID tidak valid", 400);
+  }
+
+  const existing = await getProdukByIdService(id);
+  if (!existing) {
+    throw new AppError("Produk tidak ditemukan", 404);
+  }
+
+  const produk = await updateProdukService(id, nama, harga, stock);
+
+  res.status(200).json({
+    message: "berhasil mengupdate produk",
+    produk,
+  });
+});
+
+export const deleteProduk = catchAsync(async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    throw new AppError("ID tidak valid", 400);
+  }
+
+  const existing = await getProdukByIdService(id);
+  if (!existing) {
+    throw new AppError("Produk tidak ditemukan", 404);
+  }
+
+  await deleteProdukService(id);
+
+  res.status(200).json({
+    message: "berhasil menghapus produk",
+  });
+});

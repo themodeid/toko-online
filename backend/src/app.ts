@@ -21,7 +21,28 @@ app.use(
   })
 );
 
+// Handle JSON parsing errors
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid JSON format",
+      statusCode: 400,
+    });
+  }
+  next(err);
+});
+
 app.use("/api", routes);
+
+// 404 handler for undefined routes
+app.use((req, res) => {
+  res.status(404).json({
+    status: "error",
+    message: `Route ${req.method} ${req.path} tidak ditemukan`,
+    statusCode: 404,
+  });
+});
 
 // Error handler must be last
 app.use(errorHandler);
