@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AppError } from "../errors/AppError";
+import { JwtPayloadUser } from "../types/express"; // optional, hanya untuk typing
 
 export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -16,6 +17,6 @@ export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
     role: string;
   };
 
-  req.user = payload; // pastikan type di-extend
+  req.user = payload;
   next();
 };

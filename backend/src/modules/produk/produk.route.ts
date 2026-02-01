@@ -2,18 +2,32 @@ import { Router } from "express";
 import * as controller from "./produk.controller";
 import { validateBody } from "../../middlewares/validateBody";
 import { produkSchema, updateProdukSchema } from "./produk.schema";
+import { authGuard } from "../../middlewares/auth";
+import { roleGuard } from "../../middlewares/roleGuard";
 
 const router = Router();
 
-// Public
-router.get("/", controller.getAllProduk);
-router.get("/:id", controller.getProdukById);
+// Public / user login
+router.get("/", authGuard, controller.getAllProduk);
+router.get("/:id", authGuard, controller.getProdukById);
 
-// Semua user login bisa CRUD
-router.post("/", validateBody(produkSchema), controller.createProduk);
+// Admin only
+router.post(
+  "/",
+  authGuard,
+  roleGuard("admin"),
+  validateBody(produkSchema),
+  controller.createProduk,
+);
 
-router.patch("/:id", validateBody(updateProdukSchema), controller.updateProduk);
+router.patch(
+  "/:id",
+  authGuard,
+  roleGuard("admin"),
+  validateBody(updateProdukSchema),
+  controller.updateProduk,
+);
 
-router.delete("/:id", controller.deleteProduk);
+router.delete("/:id", authGuard, roleGuard("admin"), controller.deleteProduk);
 
 export default router;
