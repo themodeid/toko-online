@@ -52,7 +52,6 @@ export default function HomePage() {
           Daftar Kontak
         </h1>
 
-          
         {/* Form Create */}
         <form
           id="create-form"
