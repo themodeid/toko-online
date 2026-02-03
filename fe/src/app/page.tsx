@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Kontak } from "@/types/kontak";
-import { getKontak, createKontak } from "@/lib/api/kontak";
+import { getKontak, createKontak } from "@/features/kontak/api";
+import { link } from "fs";
 
 export default function HomePage() {
   const [kontak, setKontak] = useState<Kontak[]>([]);

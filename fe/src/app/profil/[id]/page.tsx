@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Kontak } from "@/types/kontak";
-import { getKontakById, updateKontak, deleteKontak } from "@/lib/api/kontak";
+import { getKontakById, updateKontak, deleteKontak } from "@/features/kontak/api";
 
 export default function ProfilPage() {
   const { id } = useParams<{ id: string }>();
