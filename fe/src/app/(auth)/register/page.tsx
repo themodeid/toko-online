@@ -5,18 +5,18 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { register } from "@/features/auth/api";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleRegister(formLogin: FormData) {
-    const username = formLogin.get("nama") as string;
-    const password = formLogin.get("password") as string;
-    const role = formLogin.get("role") as string;
+  async function handleRegister(formData: FormData) {
+    const username = formData.get("nama") as string;
+    const password = formData.get("password") as string;
+    const role = formData.get("role") as string;
 
-    if (!username || !password) {
-      setError("Username dan password wajib diisi");
+    if (!username || !password || !role) {
+      setError("Username, password, dan role wajib diisi");
       return;
     }
 
@@ -24,11 +24,11 @@ export default function LoginPage() {
       setLoading(true);
       setError(null);
 
-      await register({ username, password });
+      await register({ username, password, role });
 
-      router.push("/login"); // opsional
+      router.push("/login");
     } catch (err) {
-      setError("Username atau password salah");
+      setError("Gagal mendaftar. Username mungkin sudah digunakan");
     } finally {
       setLoading(false);
     }
@@ -42,15 +42,38 @@ export default function LoginPage() {
         {error && <p className="text-red-500">{error}</p>}
 
         <form action={handleRegister}>
-          <input type="text" name="nama" placeholder="Username" />
+        <input
+  type="text"
+  name="nama"
+  placeholder="Username"
+  className="text-black"
+/>
 
-          <input type="password" name="password" placeholder="Password" />
-          <input type="text" name="role" placeholder="Role" />
+<input
+  type="password"
+  name="password"
+  placeholder="Password"
+  className="text-black"
+/>
+
+<input
+  type="text"
+  name="role"
+  placeholder="Role"
+  className="text-black"
+/>
 
           <button type="submit" disabled={loading}>
             {loading ? "Loading..." : "Register"}
           </button>
         </form>
+
+        <Link
+                  href={`/login`}
+                
+                >
+                  ke halaman login
+                </Link>
       </div>
     </div>
   );

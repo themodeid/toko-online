@@ -18,7 +18,7 @@ export default function LoginPage() {
       setError("Username dan password wajib diisi");
       return;
     }
-    
+
 
     try {
       setLoading(true);
@@ -26,7 +26,7 @@ export default function LoginPage() {
 
       await login({ username, password });
 
-      router.push("/dashboard"); // opsional
+      router.push("/"); // opsional
     } catch (err) {
       setError("Username atau password salah");
     } finally {
@@ -42,14 +42,30 @@ export default function LoginPage() {
         {error && <p className="text-red-500">{error}</p>}
 
         <form action={handleLogin}>
-          <input type="text" name="nama" placeholder="Username" />
+        <input
+  type="text"
+  name="nama"
+  placeholder="Username"
+  className="text-black"
+/>
 
-          <input type="password" name="password" placeholder="Password" />
-
+<input
+  type="password"
+  name="password"
+  placeholder="Password"
+  className="text-black"
+/>
           <button type="submit" disabled={loading}>
             {loading ? "Loading..." : "Login"}
           </button>
         </form>
+
+        <Link
+                  href={`/register`}
+                
+                >
+                  ke halaman register
+                </Link>
       </div>
     </div>
   );
