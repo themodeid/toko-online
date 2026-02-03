@@ -42,38 +42,33 @@ export default function RegisterPage() {
         {error && <p className="text-red-500">{error}</p>}
 
         <form action={handleRegister}>
-        <input
-  type="text"
-  name="nama"
-  placeholder="Username"
-  className="text-black"
-/>
+          <input
+            type="text"
+            name="nama"
+            placeholder="Username"
+            className="text-black"
+          />
 
-<input
-  type="password"
-  name="password"
-  placeholder="Password"
-  className="text-black"
-/>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            className="text-black"
+          />
 
-<input
-  type="text"
-  name="role"
-  placeholder="Role"
-  className="text-black"
-/>
+          <input
+            type="text"
+            name="role"
+            placeholder="Role"
+            className="text-black"
+          />
 
           <button type="submit" disabled={loading}>
             {loading ? "Loading..." : "Register"}
           </button>
         </form>
 
-        <Link
-                  href={`/login`}
-                
-                >
-                  ke halaman login
-                </Link>
+        <Link href={`/login`}>ke halaman login</Link>
       </div>
     </div>
   );

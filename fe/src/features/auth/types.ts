@@ -6,7 +6,7 @@ export type login = {
 export type register = {
   username: string;
   password: string;
-  email: string;
+  role: string;
 };
 
 export interface AuthResponse {
