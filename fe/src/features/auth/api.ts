@@ -2,7 +2,7 @@ import {
   login as LoginType,
   register as RegisterType,
   AuthResponse,
-} from "@/types/login-regsiter";
+} from "@/features/auth/types";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000"}/api/auth`;
 
