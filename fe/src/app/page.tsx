@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Kontak } from "@/types/kontak";
+import { Kontak } from "@/features/kontak/types";
 import { getKontak, createKontak } from "@/features/kontak/api";
 import { link } from "fs";
 

@@ -1,55 +1,76 @@
-import api from "@/lib/axios"
-import {produk } from "@/features/produk/types"
+import api from "@/lib/axios";
+import {
+  Produk,
+  CreateProdukPayload,
+  UpdateProdukPayload,
+} from "@/features/produk/types";
 
-export async function createProduk(data: {
-    id:string;
-    nama:string;
-    harga:number;
-    stock:number;
-    status: boolean;    
-}): Promise<void> {
-    try{
-        throw api.post("/api/produk" , data)
-    }catch (error){
-        throw new Error("gagal membuat produk")
-    }
+/* =======================
+   CREATE
+======================= */
+export async function createProduk(data: CreateProdukPayload): Promise<Produk> {
+  try {
+    const formData = new FormData();
+
+    formData.append("image", data.image);
+    formData.append("nama", data.nama);
+    formData.append("harga", String(data.harga));
+    formData.append("stock", String(data.stock));
+    formData.append("status", String(data.status));
+
+    const res = await api.post("/api/produk", formData);
+    return res.data.data;
+  } catch (error) {
+    throw new Error("Gagal membuat produk");
+  }
 }
 
-export async function getAllProduk(): Promise<produk[]> {
-    try {
-        const res = await api.get("/api/produk")
-        return res.data.data ?? []
-    } catch (error) {
-        throw new Error("gagal mengambil kontak")
-    }
+/* =======================
+   GET ALL
+======================= */
+export async function getAllProduk(): Promise<Produk[]> {
+  try {
+    const res = await api.get("/api/produk");
+    return res.data.data ?? [];
+  } catch (error) {
+    throw new Error("Gagal mengambil produk");
+  }
 }
 
-export async function getProdukById(id:string):Promise<produk> {
-    try {
-        const res = await api.get("/api/produk/:id")
-        return res.data.data ?? []
-    }catch(error) {
-        throw new Error("gagal mengambil produk")
-    }
+/* =======================
+   GET BY ID
+======================= */
+export async function getProdukById(id: string): Promise<Produk> {
+  try {
+    const res = await api.get(`/api/produk/${id}`);
+    return res.data.data;
+  } catch (error) {
+    throw new Error("Gagal mengambil produk");
+  }
 }
 
-
-export async function updateProduk(id:string) (
-    id:String,
-    data:{nama:String; harga:number; status:boolean},):Promise<void> {
-        try {
-            await api.put(`/api/kontak/${id}`, data)
-        }catch (error) {
-
-            throw new Error("gagal memperbarui produk")
-        }
-    }
-
-export async function deleteProduk(id:string):Promise<void> {
-    try {
-        await api.delete(`/api/produk/${id}`)
-    } catch (error) {
-        throw new Error ("gagal menghapus kontak")
-    }
+/* =======================
+   UPDATE
+======================= */
+export async function updateProduk(
+  id: string,
+  data: UpdateProdukPayload,
+): Promise<Produk> {
+  try {
+    const res = await api.put(`/api/produk/${id}`, data);
+    return res.data.data;
+  } catch (error) {
+    throw new Error("Gagal memperbarui produk");
+  }
 }
 
+/* =======================
+   DELETE
+======================= */
+export async function deleteProduk(id: string): Promise<void> {
+  try {
+    await api.delete(`/api/produk/${id}`);
+  } catch (error) {
+    throw new Error("Gagal menghapus produk");
+  }
+}
