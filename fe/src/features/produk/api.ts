@@ -12,14 +12,19 @@ export async function createProduk(data: CreateProdukPayload): Promise<Produk> {
   try {
     const formData = new FormData();
 
-    formData.append("image", data.image);
+    formData.append("image", data.image); // HARUS sama dengan upload.single("image")
     formData.append("nama", data.nama);
     formData.append("harga", String(data.harga));
     formData.append("stock", String(data.stock));
     formData.append("status", String(data.status));
 
-    const res = await api.post("/api/produk", formData);
-    return res.data.data;
+    const res = await api.post("/api/produk", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return res.data.produk;
   } catch (error) {
     throw new Error("Gagal membuat produk");
   }

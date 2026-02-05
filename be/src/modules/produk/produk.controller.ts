@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {
   getAllProduk as getAllProdukService,
   getProdukById as getProdukByIdService,
-  createProduk as createProdukService,
+  createProdukService as createProdukService,
   updateProduk as updateProdukService,
   deleteProduk as deleteProdukService,
 } from "./produk.services";
@@ -38,12 +38,24 @@ export const getProdukById = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const createProduk = catchAsync(async (req: Request, res: Response) => {
-  const { nama, harga, stock } = req.body;
+  const { nama, harga, stock, status } = req.body;
 
-  const produk = await createProdukService(nama, harga, stock);
+  if (!req.file) {
+    throw new AppError("Gambar produk wajib diupload", 400);
+  }
+
+  const imagePath = `/uploads/${req.file.filename}`;
+
+  const produk = await createProdukService({
+    nama,
+    harga: Number(harga),
+    stock: Number(stock),
+    status: status === "true",
+    image: imagePath,
+  });
 
   res.status(201).json({
-    message: "berhasil membuat produk",
+    message: "Berhasil membuat produk",
     produk,
   });
 });

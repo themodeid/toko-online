@@ -4,7 +4,7 @@ import { validateBody } from "../../middlewares/validateBody";
 import { produkSchema, updateProdukSchema } from "./produk.schema";
 import { authGuard } from "../../middlewares/auth";
 import { roleGuard } from "../../middlewares/roleGuard";
-
+import  {upload}  from "../../middlewares/upload";
 const router = Router();
 
 // Public / user login
@@ -14,8 +14,9 @@ router.get("/:id", authGuard, controller.getProdukById);
 // Admin only
 router.post(
   "/",
-  authGuard,
-  roleGuard("admin"),
+  // authGuard,
+  // roleGuard("admin"),
+  upload.single("image"),
   validateBody(produkSchema),
   controller.createProduk,
 );
