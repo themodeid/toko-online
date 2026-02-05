@@ -3,5 +3,5 @@ export type produk = {
     nama:string;
     harga:number;
     stock:number;
-    is_active: boolean;
+    status: boolean;
 }

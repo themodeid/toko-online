@@ -6,7 +6,7 @@ export async function createProduk(data: {
     nama:string;
     harga:number;
     stock:number;
-    is_active: boolean;    
+    status: boolean;    
 }): Promise<void> {
     try{
         throw api.post("/api/produk" , data)
@@ -32,3 +32,24 @@ export async function getProdukById(id:string):Promise<produk> {
         throw new Error("gagal mengambil produk")
     }
 }
+
+
+export async function updateProduk(id:string) (
+    id:String,
+    data:{nama:String; harga:number; status:boolean},):Promise<void> {
+        try {
+            await api.put(`/api/kontak/${id}`, data)
+        }catch (error) {
+
+            throw new Error("gagal memperbarui produk")
+        }
+    }
+
+export async function deleteProduk(id:string):Promise<void> {
+    try {
+        await api.delete(`/api/produk/${id}`)
+    } catch (error) {
+        throw new Error ("gagal menghapus kontak")
+    }
+}
+
