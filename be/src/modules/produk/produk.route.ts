@@ -30,6 +30,13 @@ router.patch(
   controller.updateProduk,
 );
 
+router.delete(
+  "/:id",
+  // authGuard,
+  // roleGuard("admin"),
+  controller.deleteProduk,
+);
+
 router.delete("/:id", authGuard, roleGuard("admin"), controller.deleteProduk);
 
 export default router;

@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Produk } from "@/features/produk/types";
-import { getProdukById, updateProduk } from "@/features/produk/api";
+import {
+  deleteProduk,
+  getProdukById,
+  updateProduk,
+} from "@/features/produk/api";
 import type { UpdateProdukPayload } from "@/features/produk/types";
 
 export default function MenuPage() {
@@ -39,25 +43,25 @@ export default function MenuPage() {
 
     const formData = new FormData(e.currentTarget);
 
+    const hargaValue = formData.get("harga");
+    const stockValue = formData.get("stock");
+    const imageValue = formData.get("image");
+
     const payload: UpdateProdukPayload = {
-      nama: (formData.get("nama") as string) || undefined,
-      harga: Number(formData.get("harga")) || undefined,
-      stock: Number(formData.get("stock")) || undefined,
-      status: formData.get("status") === "true" ? true : undefined,
-      image: formData.get("image") as File | undefined,
+      nama: formData.get("nama")?.toString(),
+      harga: hargaValue !== null ? Number(hargaValue) : undefined,
+      stock: stockValue !== null ? Number(stockValue) : undefined,
+      status: formData.get("status") !== null,
     };
+
+    if (imageValue instanceof File && imageValue.size > 0) {
+      payload.image = imageValue;
+    }
 
     if (!payload.nama || payload.harga === undefined || isNaN(payload.harga)) {
       setError("Nama dan harga wajib diisi");
       setLoading(false);
       return;
-    }
-
-    if (
-      payload.image &&
-      (!(payload.image instanceof File) || payload.image.size === 0)
-    ) {
-      delete payload.image;
     }
 
     try {
@@ -67,6 +71,18 @@ export default function MenuPage() {
       setError("Gagal update produk");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm("Yakin ingin menghapus produk ini?")) return;
+
+    try {
+      setError(null);
+      await deleteProduk(id);
+      router.push("/menu/daftar_menu");
+    } catch (error) {
+      setError("gagal menghapus produk");
     }
   }
 
@@ -142,6 +158,14 @@ export default function MenuPage() {
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
         >
           {loading ? "Loading..." : "Update"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Delete
         </button>
       </form>
     </div>
