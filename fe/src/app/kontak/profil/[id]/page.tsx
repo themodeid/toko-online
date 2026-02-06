@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Kontak } from "@/types/kontak";
+import { Kontak } from "@/features/kontak/types";
 import { getKontakById, updateKontak, deleteKontak } from "@/features/kontak/api";
 
 export default function ProfilPage() {

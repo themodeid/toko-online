@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import { Kontak } from "@/types/kontak";
+import { Kontak } from "@/features/kontak/types";
 
 // GET ALL
 export async function getKontak(): Promise<Kontak[]> {

@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AppError } from "../errors/AppError";
-import { JwtPayloadUser } from "../types/express"; // optional, hanya untuk typing
 
 export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -12,11 +11,15 @@ export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
 
   const token = authHeader.split(" ")[1];
 
-  const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
-    id: string;
-    role: string;
-  };
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
+      id: string;
+      role: string;
+    };
 
-  req.user = payload;
-  next();
+    req.user = payload;
+    next();
+  } catch (error) {
+    throw new AppError("Invalid or expired token", 401);
+  }
 };

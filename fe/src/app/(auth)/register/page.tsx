@@ -13,10 +13,15 @@ export default function RegisterPage() {
   async function handleRegister(formData: FormData) {
     const username = formData.get("nama") as string;
     const password = formData.get("password") as string;
-    const role = formData.get("role") as string;
+    const role = (formData.get("role") as string) || "user";
 
-    if (!username || !password || !role) {
-      setError("Username, password, dan role wajib diisi");
+    if (!username || !password) {
+      setError("Username dan password");
+
+      setTimeout(() => {
+        setError(null);
+      }, 3000); // 3 detik
+
       return;
     }
 
@@ -28,7 +33,11 @@ export default function RegisterPage() {
 
       router.push("/login");
     } catch (err) {
-      setError("Gagal mendaftar. Username mungkin sudah digunakan");
+      setError("Gagal mendaftar.");
+
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -42,38 +51,33 @@ export default function RegisterPage() {
         {error && <p className="text-red-500">{error}</p>}
 
         <form action={handleRegister}>
-        <input
-  type="text"
-  name="nama"
-  placeholder="Username"
-  className="text-black"
-/>
+          <input
+            type="text"
+            name="nama"
+            placeholder="Username"
+            className="text-black"
+          />
 
-<input
-  type="password"
-  name="password"
-  placeholder="Password"
-  className="text-black"
-/>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            className="text-black"
+          />
 
-<input
-  type="text"
-  name="role"
-  placeholder="Role"
-  className="text-black"
-/>
+          <input
+            type="text"
+            name="role"
+            placeholder="Role"
+            className="text-black"
+          />
 
           <button type="submit" disabled={loading}>
             {loading ? "Loading..." : "Register"}
           </button>
         </form>
 
-        <Link
-                  href={`/login`}
-                
-                >
-                  ke halaman login
-                </Link>
+        <Link href={`/login`}>ke halaman login</Link>
       </div>
     </div>
   );
