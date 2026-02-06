@@ -5,7 +5,7 @@ export type Produk = {
   harga: number;
   stock: number;
   status: boolean;
-  image: string; // URL
+  image: string; 
 };
 
 /* Payload create */

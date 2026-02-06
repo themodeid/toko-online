@@ -33,10 +33,12 @@ export async function createProduk(data: CreateProdukPayload): Promise<Produk> {
 /* =======================
    GET ALL
 ======================= */
-export async function getAllProduk(): Promise<Produk[]> {
+export async function getAllProduk(): Promise<{ produk: Produk[] }> {
   try {
     const res = await api.get("/api/produk");
-    return res.data.data ?? [];
+    return {
+      produk: res.data.produk ?? [],
+    };
   } catch (error) {
     throw new Error("Gagal mengambil produk");
   }
@@ -45,10 +47,12 @@ export async function getAllProduk(): Promise<Produk[]> {
 /* =======================
    GET BY ID
 ======================= */
-export async function getProdukById(id: string): Promise<Produk> {
+export async function getProdukById(id: string): Promise<{ produk: Produk }> {
   try {
     const res = await api.get(`/api/produk/${id}`);
-    return res.data.data;
+    return {
+      produk: res.data.produk,
+    };
   } catch (error) {
     throw new Error("Gagal mengambil produk");
   }
@@ -63,7 +67,7 @@ export async function updateProduk(
 ): Promise<Produk> {
   try {
     const res = await api.put(`/api/produk/${id}`, data);
-    return res.data.data;
+    return res.data.produk;
   } catch (error) {
     throw new Error("Gagal memperbarui produk");
   }

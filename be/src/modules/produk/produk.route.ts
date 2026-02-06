@@ -4,12 +4,13 @@ import { validateBody } from "../../middlewares/validateBody";
 import { produkSchema, updateProdukSchema } from "./produk.schema";
 import { authGuard } from "../../middlewares/auth";
 import { roleGuard } from "../../middlewares/roleGuard";
-import  {upload}  from "../../middlewares/upload";
+import { upload } from "../../middlewares/upload";
+import { getAllProduk, getProdukById } from "./produk.controller";
 const router = Router();
 
 // Public / user login
-router.get("/", authGuard, controller.getAllProduk);
-router.get("/:id", authGuard, controller.getProdukById);
+router.get("/", getAllProduk);
+router.get("/:id", getProdukById);
 
 // Admin only
 router.post(
