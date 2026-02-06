@@ -36,7 +36,7 @@ export default function AddMenuPage() {
         status,
       });
 
-      router.push("/"); // redirect setelah sukses
+      router.push("/menu/daftar_menu"); // redirect setelah sukses
     } catch (err) {
       setError("Gagal membuat produk");
       setTimeout(() => setError(null), 3000);

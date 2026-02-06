@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Produk } from "@/features/produk/types";
 import { getProdukById, updateProduk } from "@/features/produk/api";
+import type { UpdateProdukPayload } from "@/features/produk/types";
 
 export default function MenuPage() {
   const { id } = useParams<{ id: string }>();
@@ -38,21 +39,24 @@ export default function MenuPage() {
 
     const formData = new FormData(e.currentTarget);
 
-    const payload: any = {
-      nama: formData.get("nama") as string,
-      harga: Number(formData.get("harga")),
-      stock: Number(formData.get("stock")),
-      status: formData.get("status") === "true",
-      image: formData.get("image") as File,
+    const payload: UpdateProdukPayload = {
+      nama: (formData.get("nama") as string) || undefined,
+      harga: Number(formData.get("harga")) || undefined,
+      stock: Number(formData.get("stock")) || undefined,
+      status: formData.get("status") === "true" ? true : undefined,
+      image: formData.get("image") as File | undefined,
     };
 
-    if (!payload.nama || isNaN(payload.harga)) {
+    if (!payload.nama || payload.harga === undefined || isNaN(payload.harga)) {
       setError("Nama dan harga wajib diisi");
       setLoading(false);
       return;
     }
 
-    if (!(payload.image instanceof File) || payload.image.size === 0) {
+    if (
+      payload.image &&
+      (!(payload.image instanceof File) || payload.image.size === 0)
+    ) {
       delete payload.image;
     }
 
