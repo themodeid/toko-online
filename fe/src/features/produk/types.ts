@@ -5,7 +5,7 @@ export type Produk = {
   harga: number;
   stock: number;
   status: boolean;
-  image: string; 
+  image: string;
 };
 
 /* Payload create */
@@ -23,4 +23,5 @@ export type UpdateProdukPayload = {
   harga?: number;
   stock?: number;
   status?: boolean;
+  image?: File;
 };

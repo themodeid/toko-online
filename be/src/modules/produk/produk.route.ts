@@ -24,9 +24,9 @@ router.post(
 
 router.patch(
   "/:id",
-  authGuard,
-  roleGuard("admin"),
-  validateBody(updateProdukSchema),
+  // authGuard,
+  // roleGuard("admin"),
+  upload.single("image"),
   controller.updateProduk,
 );
 

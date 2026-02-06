@@ -66,8 +66,27 @@ export async function updateProduk(
   data: UpdateProdukPayload,
 ): Promise<Produk> {
   try {
-    const res = await api.put(`/api/produk/${id}`, data);
-    return res.data.produk;
+    // Check if there's a file to upload
+    if (data.image instanceof File) {
+      const formData = new FormData();
+      formData.append("image", data.image);
+      formData.append("nama", data.nama || "");
+      formData.append("harga", String(data.harga || 0));
+      formData.append("stock", String(data.stock || 0));
+      formData.append("status", String(data.status || false));
+
+      const res = await api.patch(`/api/produk/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return res.data.produk;
+    } else {
+      // No file, send as JSON
+      const res = await api.patch(`/api/produk/${id}`, data);
+      return res.data.produk;
+    }
   } catch (error) {
     throw new Error("Gagal memperbarui produk");
   }
