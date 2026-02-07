@@ -9,7 +9,6 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  // Log error details to console for debugging
   console.error("Error occurred:", {
     message: err.message,
     name: err.name,

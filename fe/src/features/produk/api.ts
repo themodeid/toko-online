@@ -12,7 +12,7 @@ export async function createProduk(data: CreateProdukPayload): Promise<Produk> {
   try {
     const formData = new FormData();
 
-    formData.append("image", data.image); // HARUS sama dengan upload.single("image")
+    formData.append("image", data.image); 
     formData.append("nama", data.nama);
     formData.append("harga", String(data.harga));
     formData.append("stock", String(data.stock));
