@@ -5,13 +5,23 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Produk } from "@/features/produk/types";
 import { getAllProduk } from "@/features/produk/api";
+import FeatherIcon from "feather-icons-react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 export default function MenuPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [produk, setProduk] = useState<Produk[]>([]);
+
+  const navClass = (path: string) =>
+    `w-10 h-10 cursor-pointer transition-all ${
+      pathname === path
+        ? "bg-green-500 text-white p-2 rounded-lg"
+        : "text-gray-400 hover:text-green-400"
+    }`;
 
   async function getProduk() {
     try {
@@ -30,56 +40,150 @@ export default function MenuPage() {
   }, []);
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Menu Produk</h1>
+    <div className="min-h-screen flex bg-[#0F0F0F] text-white">
+      {/* ================= SIDEBAR ================= */}
+      <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
+        <div className={navClass("/")} onClick={() => router.push("/")}>
+          <FeatherIcon icon="home" className="w-6 h-6 text-white" />
+        </div>
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+        <div className={navClass("/menu")} onClick={() => router.push("/menu")}>
+          <FeatherIcon icon="grid" className="w-6 h-6 text-white" />
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {produk.map((item) => (
-          <div
-            key={item.id}
-            className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-          >
-            {/* Gambar Produk */}
-            <div className="relative w-full h-48 bg-gray-200 flex items-center justify-center">
-              {item.image ? (
-                <Image
-                  src={`http://localhost:3000${item.image}`}
-                  alt={item.nama}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              ) : (
-                <div className="text-gray-400 text-center">
-                  <p className="text-sm">Gambar tidak tersedia</p>
+        <div className={navClass("/cart")} onClick={() => router.push("/cart")}>
+          <FeatherIcon icon="shopping-cart" className="w-6 h-6 text-white" />
+        </div>
+
+        <div
+          className={navClass("/login")}
+          onClick={() => router.push("/login")}
+        >
+          <FeatherIcon icon="user" className="w-6 h-6 text-white" />
+        </div>
+
+        <div
+          className={navClass("/menu/add_menu")}
+          onClick={() => router.push("/menu/add_menu")}
+        >
+          <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
+        </div>
+      </aside>
+
+      {/* ================= MAIN MENU ================= */}
+      <main className="flex-1 p-6 overflow-y-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold">Menu Coffee</h1>
+          <p className="text-sm text-gray-400">
+            Pilih menu untuk ditambahkan ke pesanan
+          </p>
+        </div>
+
+        {/* State */}
+        {loading && <p className="text-gray-400">Loading...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+
+        {/* Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {produk.map((item) => (
+            <div
+              key={item.id}
+              className="bg-[#1A1A1A] rounded-2xl overflow-hidden hover:scale-[1.02] transition"
+            >
+              {/* Image */}
+              <div className="relative h-40 bg-[#222]">
+                {item.image ? (
+                  <Image
+                    src={`http://localhost:3000${item.image}`}
+                    alt={item.nama}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-gray-500 text-sm">
+                    No Image
+                  </div>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="p-4 space-y-2">
+                <p className="font-medium">{item.nama}</p>
+
+                <p className="text-green-400 font-semibold">
+                  Rp {Number(item.harga).toLocaleString("id-ID")}
+                  <span className="text-xs text-gray-400"> / pcs</span>
+                </p>
+
+                <div className="flex items-center justify-between text-xs text-gray-400">
+                  <span>Stock: {item.stock}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full ${
+                      item.status
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
+                    {item.status ? "Active" : "Inactive"}
+                  </span>
                 </div>
-              )}
-            </div>
 
-            {/* Info Produk */}
-            <div className="p-3">
-              <p className="font-semibold text-lg">{item.nama}</p>
-              <p className="text-red-600 font-bold mt-1">
-                Rp {Number(item.harga).toLocaleString("id-ID")}
-              </p>
-              <p className="text-sm text-gray-600">Stock: {item.stock}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                Status: {item.status ? "Aktif" : "Nonaktif"}
-              </p>
-
-              <Link
-                href={`/menu/profil_produk/${item.id}`}
-                className="inline-block mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-              >
-                Detail
-              </Link>
+                <Link
+                  href={`/menu/profil_produk/${item.id}`}
+                  className="block text-center bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded-xl transition"
+                >
+                  Detail
+                </Link>
+              </div>
             </div>
+          ))}
+        </div>
+      </main>
+
+      {/* ================= CART ================= */}
+      <aside className="w-[360px] bg-white text-black p-6">
+        <h2 className="text-lg font-semibold mb-4">Current Order</h2>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+            <div className="flex-1">
+              <p className="font-medium">Cappuccino</p>
+              <p className="text-sm text-gray-500">2x</p>
+            </div>
+            <p className="font-semibold text-green-600">$11.96</p>
           </div>
-        ))}
-      </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+            <div className="flex-1">
+              <p className="font-medium">Coffee Latte</p>
+              <p className="text-sm text-gray-500">1x</p>
+            </div>
+            <p className="font-semibold text-green-600">$4.98</p>
+          </div>
+        </div>
+
+        <div className="border-t mt-6 pt-4 space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>$22.74</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Discount</span>
+            <span>-$5.00</span>
+          </div>
+          <div className="flex justify-between font-semibold text-lg">
+            <span>Total</span>
+            <span>$19.99</span>
+          </div>
+        </div>
+
+        <button className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold">
+          Print Bills
+        </button>
+      </aside>
     </div>
   );
 }
