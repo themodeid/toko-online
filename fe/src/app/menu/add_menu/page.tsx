@@ -5,11 +5,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
+import { usePathname } from "next/navigation";
 
 export default function AddMenuPage() {
+  const pathname = usePathname();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const navClass = (path: string) =>
+    `w-10 h-10 cursor-pointer transition-all ${
+      pathname === path
+        ? "bg-green-500 text-white p-2 rounded-lg"
+        : "text-gray-400 hover:text-green-400"
+    }`;
 
   async function handleCreate(formData: FormData) {
     setLoading(true);
@@ -37,7 +46,7 @@ export default function AddMenuPage() {
         status,
       });
 
-      router.push("/menu/daftar_menu"); // redirect setelah sukses
+      router.push("/"); // redirect setelah sukses
     } catch (err) {
       setError("Gagal membuat produk");
       setTimeout(() => setError(null), 3000);
@@ -49,31 +58,38 @@ export default function AddMenuPage() {
   return (
     <>
       <div className="min-h-screen flex bg-[#0F0F0F] text-white">
-        <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-8 border-r border-white/5">
-          <FeatherIcon
-            icon="home"
-            className="w-6 h-6 cursor-pointer text-green-400"
-            onClick={() => router.push("/")}
-          />
-          <FeatherIcon
-            icon="grid"
-            className="w-6 h-6 cursor-pointer hover:text-green-400"
-          />
-          <FeatherIcon
-            icon="shopping-cart"
-            className="w-6 h-6 cursor-pointer hover:text-green-400"
-          />
-          <FeatherIcon
-            icon="user"
-            className="w-6 h-6 cursor-pointer hover:text-green-400"
-            onClick={() => router.push("/login")}
-          />
+        <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
+          <div className={navClass("/")} onClick={() => router.push("/")}>
+            <FeatherIcon icon="home" className="w-6 h-6 text-white" />
+          </div>
 
-          <FeatherIcon
-            icon="plus-circle"
-            className="w-6 h-6 cursor-pointer hover:text-green-400"
+          <div
+            className={navClass("/menu")}
+            onClick={() => router.push("/menu")}
+          >
+            <FeatherIcon icon="grid" className="w-6 h-6 text-white" />
+          </div>
+
+          <div
+            className={navClass("/cart")}
+            onClick={() => router.push("/cart")}
+          >
+            <FeatherIcon icon="shopping-cart" className="w-6 h-6 text-white" />
+          </div>
+
+          <div
+            className={navClass("/login")}
+            onClick={() => router.push("/login")}
+          >
+            <FeatherIcon icon="user" className="w-6 h-6 text-white" />
+          </div>
+
+          <div
+            className={navClass("/menu/add_menu")}
             onClick={() => router.push("/menu/add_menu")}
-          />
+          >
+            <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
+          </div>
         </aside>
 
         <main className="flex-1 p-6 overflow-y-auto">
