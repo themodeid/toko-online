@@ -31,15 +31,22 @@ export default function MenuPage() {
   }, []);
 
   return (
-    <>
-      {/* TOP ICON MENU */}
-      <div className="flex gap-6 mb-6 text-white">
+    <div className="min-h-screen flex bg-[#0F0F0F] text-white">
+      {/* ================= SIDEBAR ================= */}
+      <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-8 border-r border-white/5">
         <FeatherIcon
           icon="home"
-          className="w-6 h-6 cursor-pointer hover:text-green-400"
+          className="w-6 h-6 cursor-pointer text-green-400"
           onClick={() => router.push("/")}
         />
-
+        <FeatherIcon
+          icon="grid"
+          className="w-6 h-6 cursor-pointer hover:text-green-400"
+        />
+        <FeatherIcon
+          icon="shopping-cart"
+          className="w-6 h-6 cursor-pointer hover:text-green-400"
+        />
         <FeatherIcon
           icon="user"
           className="w-6 h-6 cursor-pointer hover:text-green-400"
@@ -47,19 +54,14 @@ export default function MenuPage() {
         />
 
         <FeatherIcon
-          icon="shopping-bag"
+          icon="plus-circle"
           className="w-6 h-6 cursor-pointer hover:text-green-400"
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/menu/add_menu")}
         />
+      </aside>
 
-        <FeatherIcon
-          icon="shopping-cart"
-          className="w-6 h-6 cursor-pointer hover:text-green-400"
-          onClick={() => router.push("/")}
-        />
-      </div>
-
-      <div className="min-h-screen bg-[#0F0F0F] text-white p-6">
+      {/* ================= MAIN MENU ================= */}
+      <main className="flex-1 p-6 overflow-y-auto">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold">Menu Coffee</h1>
@@ -72,15 +74,15 @@ export default function MenuPage() {
         {loading && <p className="text-gray-400">Loading...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
-        {/* Grid Menu */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {produk.map((item) => (
             <div
               key={item.id}
-              className="bg-[#1A1A1A] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition"
+              className="bg-[#1A1A1A] rounded-2xl overflow-hidden hover:scale-[1.02] transition"
             >
               {/* Image */}
-              <div className="relative h-48 w-full bg-[#222]">
+              <div className="relative h-40 bg-[#222]">
                 {item.image ? (
                   <Image
                     src={`http://localhost:3000${item.image}`}
@@ -97,11 +99,11 @@ export default function MenuPage() {
 
               {/* Content */}
               <div className="p-4 space-y-2">
-                <p className="text-lg font-medium">{item.nama}</p>
+                <p className="font-medium">{item.nama}</p>
 
                 <p className="text-green-400 font-semibold">
                   Rp {Number(item.harga).toLocaleString("id-ID")}
-                  <span className="text-xs text-gray-400 ml-1">/ pcs</span>
+                  <span className="text-xs text-gray-400"> / pcs</span>
                 </p>
 
                 <div className="flex items-center justify-between text-xs text-gray-400">
@@ -117,10 +119,9 @@ export default function MenuPage() {
                   </span>
                 </div>
 
-                {/* Action */}
                 <Link
                   href={`/menu/profil_produk/${item.id}`}
-                  className="mt-3 block text-center bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded-xl transition"
+                  className="block text-center bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded-xl transition"
                 >
                   Detail
                 </Link>
@@ -128,7 +129,51 @@ export default function MenuPage() {
             </div>
           ))}
         </div>
-      </div>
-    </>
+      </main>
+
+      {/* ================= CART ================= */}
+      <aside className="w-[360px] bg-white text-black p-6">
+        <h2 className="text-lg font-semibold mb-4">Current Order</h2>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+            <div className="flex-1">
+              <p className="font-medium">Cappuccino</p>
+              <p className="text-sm text-gray-500">2x</p>
+            </div>
+            <p className="font-semibold text-green-600">$11.96</p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+            <div className="flex-1">
+              <p className="font-medium">Coffee Latte</p>
+              <p className="text-sm text-gray-500">1x</p>
+            </div>
+            <p className="font-semibold text-green-600">$4.98</p>
+          </div>
+        </div>
+
+        <div className="border-t mt-6 pt-4 space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>$22.74</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Discount</span>
+            <span>-$5.00</span>
+          </div>
+          <div className="flex justify-between font-semibold text-lg">
+            <span>Total</span>
+            <span>$19.99</span>
+          </div>
+        </div>
+
+        <button className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold">
+          Print Bills
+        </button>
+      </aside>
+    </div>
   );
 }

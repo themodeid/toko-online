@@ -48,80 +48,84 @@ export default function AddMenuPage() {
 
   return (
     <>
-      <div className="flex gap-6 mb-6 text-white">
-        <FeatherIcon
-          icon="home"
-          className="w-6 h-6 cursor-pointer hover:text-green-400"
-          onClick={() => router.push("/")}
-        />
-
-        <FeatherIcon
-          icon="user"
-          className="w-6 h-6 cursor-pointer hover:text-green-400"
-          onClick={() => router.push("/login")}
-        />
-
-        <FeatherIcon
-          icon="shopping-bag"
-          className="w-6 h-6 cursor-pointer hover:text-green-400"
-          onClick={() => router.push("/")}
-        />
-
-        <FeatherIcon
-          icon="shopping-cart"
-          className="w-6 h-6 cursor-pointer hover:text-green-400"
-          onClick={() => router.push("/")}
-        />
-      </div>
-      <div className="max-w-md mx-auto">
-        <h1 className="text-xl font-bold mb-4">Create Menu</h1>
-
-        {error && <p className="text-red-500 mb-2">{error}</p>}
-
-        <form action={handleCreate} className="space-y-3">
-          <input type="file" name="image" required />
-
-          <input
-            type="text"
-            name="nama"
-            placeholder="Nama produk"
-            className="border p-2 w-full text-black"
-            required
+      <div className="min-h-screen flex bg-[#0F0F0F] text-white">
+        <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-8 border-r border-white/5">
+          <FeatherIcon
+            icon="home"
+            className="w-6 h-6 cursor-pointer text-green-400"
+            onClick={() => router.push("/")}
+          />
+          <FeatherIcon
+            icon="grid"
+            className="w-6 h-6 cursor-pointer hover:text-green-400"
+          />
+          <FeatherIcon
+            icon="shopping-cart"
+            className="w-6 h-6 cursor-pointer hover:text-green-400"
+          />
+          <FeatherIcon
+            icon="user"
+            className="w-6 h-6 cursor-pointer hover:text-green-400"
+            onClick={() => router.push("/login")}
           />
 
-          <input
-            type="number"
-            name="harga"
-            placeholder="Harga"
-            className="border p-2 w-full text-black"
-            required
+          <FeatherIcon
+            icon="plus-circle"
+            className="w-6 h-6 cursor-pointer hover:text-green-400"
+            onClick={() => router.push("/menu/add_menu")}
           />
+        </aside>
 
-          <input
-            type="number"
-            name="stock"
-            placeholder="Stock"
-            className="border p-2 w-full text-black"
-          />
+        <main className="flex-1 p-6 overflow-y-auto">
+          <h1 className="text-xl font-bold mb-4">Create Menu</h1>
 
-          <label className="flex items-center gap-2">
+          {error && <p className="text-red-500 mb-2">{error}</p>}
+
+          <form action={handleCreate} className="space-y-3">
+            <input type="file" name="image" required />
+
             <input
-              type="checkbox"
-              name="status"
-              value="true"
-              className="w-4 h-4"
+              type="text"
+              name="nama"
+              placeholder="Nama produk"
+              className="border p-2 w-full text-black"
+              required
             />
-            Active
-          </label>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-black text-white px-4 py-2"
-          >
-            {loading ? "Loading..." : "Create"}
-          </button>
-        </form>
+            <input
+              type="number"
+              name="harga"
+              placeholder="Harga"
+              className="border p-2 w-full text-black"
+              required
+            />
+
+            <input
+              type="number"
+              name="stock"
+              placeholder="Stock"
+              className="border p-2 w-full text-black"
+            />
+
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="status"
+                value="true"
+                className="w-4 h-4"
+              />
+              Active
+            </label>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-black text-white px-4 py-2"
+            >
+              {loading ? "Loading..." : "Create"}
+            </button>
+          </form>
+        </main>
       </div>
     </>
   );
