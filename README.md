@@ -1,4 +1,4 @@
-# Full-Stack App: MongoDB + Express + Next.js
+# Full-Stack App: PostgreSQL + Express + Next.js
 
 Aplikasi full-stack modern dengan MongoDB, Express API, dan Next.js frontend.
 
