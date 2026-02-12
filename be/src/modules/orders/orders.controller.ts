@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AppError } from "../../errors/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { pool } from "../../config/database";
+import { request } from "http";
 
 export const checkout = catchAsync(async (req: Request, res: Response) => {
   const { items } = req.body;
@@ -127,5 +128,152 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
     throw error;
   } finally {
     client.release();
+  }
+});
+
+// export const recalculateQueue = async (client: any) => {
+//   const maxProcessing = 3;
+
+//   // hitung yang sedang diproses
+//   const processingResult = await client.query(
+//     `SELECT COUNT(*) FROM orders WHERE status_pesanan = 'DIPROSES'`,
+//   );
+
+//   const currentProcessing = parseInt(processingResult.rows[0].count);
+//   const availableSlots = maxProcessing - currentProcessing;
+
+//   if (availableSlots <= 0) return;
+
+//   // ambil order dari antri
+//   const nextOrders = await client.query(
+//     `
+//     SELECT id FROM orders
+//     WHERE status_pesanan = 'ANTRI'
+//     ORDER BY created_at ASC
+//     LIMIT $1
+//     FOR UPDATE
+//     `,
+//     [availableSlots],
+//   );
+
+//   const ids = nextOrders.rows.map((row: any) => row.id);
+
+//   if (ids.length > 0) {
+//     await client.query(
+//       `UPDATE orders SET status_pesanan = 'DIPROSES' WHERE id = ANY($1::uuid[])`,
+//       [ids],
+//     );
+//   }
+// };
+
+export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // lock order yang mau dicancel
+    const orderResult = await client.query(
+      `SELECT * FROM orders WHERE id = $1 FOR UPDATE`,
+      [id],
+    );
+
+    const order = orderResult.rows[0];
+
+    if (!order) {
+      throw new AppError("Order tidak ditemukan", 404);
+    }
+
+    if (order.user_id !== userId) {
+      throw new AppError("Tidak boleh cancel order orang lain", 403);
+    }
+
+    if (order.status_pesanan !== "ANTRI") {
+      throw new AppError("Order tidak bisa dibatalkan", 400);
+    }
+
+    // ambil 3 antrian teratas (lock juga)
+    const topThree = await client.query(`
+      SELECT id
+      FROM orders
+      WHERE status_pesanan = 'ANTRI'
+      ORDER BY created_at ASC
+      LIMIT 3
+      FOR UPDATE
+    `);
+
+    const topThreeIds = topThree.rows.map((row) => row.id);
+
+    if (topThreeIds.includes(id)) {
+      throw new AppError(
+        "Order sedang diproses dan tidak bisa dibatalkan",
+        400,
+      );
+    }
+
+    // kembalikan stok
+    const items = await client.query(
+      `SELECT produk_id, qty FROM order_items WHERE order_id = $1`,
+      [id],
+    );
+
+    for (const item of items.rows) {
+      await client.query(`UPDATE produk SET stock = stock + $1 WHERE id = $2`, [
+        item.qty,
+        item.produk_id,
+      ]);
+    }
+
+    // update status
+    await client.query(
+      `UPDATE orders SET status_pesanan = 'DIBATALKAN' WHERE id = $1`,
+      [id],
+    );
+
+    await client.query("COMMIT");
+
+    res.json({ message: "Order berhasil dibatalkan" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+});
+
+export const getOrders = catchAsync(async (req: Request, res: Response) => {
+  console.log("Masuk getOrders");
+
+  const query = `SELECT * FROM orders ORDER BY created_at ASC`;
+
+  const result = await pool.query(query);
+
+  console.log("Query berhasil");
+
+  res.status(200).json({
+    message: "Berhasil mengambil semua orders",
+    data: result.rows,
+  });
+});
+
+export const deleteAll = catchAsync(async (req: Request, res: Response) => {
+  try {
+    const query = `
+      TRUNCATE TABLE order_items, orders RESTART IDENTITY CASCADE;
+    `;
+
+    await pool.query(query);
+
+    res.status(200).json({
+      message: "Berhasil hapus semua data",
+    });
+  } catch (err) {
+    console.error("ERROR DELETE ALL:", err);
+    res.status(500).json({
+      message: "Gagal hapus data",
+    });
   }
 });

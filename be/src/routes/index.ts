@@ -8,7 +8,9 @@ import { authGuard } from "../middlewares/auth";
 import { AppError } from "../errors/AppError";
 
 const router = Router();
-
+router.get("/test", (req, res) => {
+  res.send("Server hidup");
+});
 router.use("/auth", registerRoutes);
 router.use("/kontak", kontakRoutes);
 router.use("/produk", produkRoutes);

@@ -12,11 +12,11 @@ export const CheckoutSchema = z.object({
 });
 
 export const OrderResponseSchema = z.object({
-  order_id: z.string().regex(/^[0-9a-fA-F]{24}$/),
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  total_price: z.string().regex(/^\d+(\.\d{1,2})?$/),
   status_pesanan: z.enum(["ANTRI", "DIPROSES", "SELESAI", "DIBATALKAN"]),
-  username: z.string(),
-  total_harga: z.number().positive(),
-  created_at: z.string(),
+  created_at: z.string().datetime(),
 });
 
 export type CheckoutDTO = z.infer<typeof CheckoutSchema>;
