@@ -210,8 +210,6 @@ export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const getOrders = catchAsync(async (req: Request, res: Response) => {
-  console.log("Masuk getOrders");
-
   const query = `SELECT * FROM orders ORDER BY created_at ASC`;
 
   const result = await pool.query(query);
@@ -242,3 +240,22 @@ export const deleteAll = catchAsync(async (req: Request, res: Response) => {
     });
   }
 });
+
+export const getMyOrders = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  const query = `
+    SELECT *
+    FROM orders
+    WHERE user_id = $1
+    ORDER BY created_at DESC
+  `;
+
+  const result = await pool.query(query, [userId]);
+
+  res.status(200).json({
+    message: "Berhasil mengambil pesanan anda",
+    data: result.rows,
+  });
+});
+

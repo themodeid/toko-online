@@ -7,8 +7,8 @@ import { Produk } from "@/features/produk/types";
 import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
-import { CartItem } from "@/features/cart/types";
-import { createOrder } from "@/features/cart/api";
+import { CartItem, Order, OrderItem } from "@/features/cart/types";
+import { createOrder, getOrders } from "@/features/cart/api";
 import Image from "next/image";
 
 export default function MenuPage() {
@@ -18,6 +18,7 @@ export default function MenuPage() {
   const [loading, setLoading] = useState(false);
   const [produk, setProduk] = useState<Produk[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [pesanan, setPesanan] = useState<Order[]>([]);
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -38,8 +39,21 @@ export default function MenuPage() {
     }
   }
 
+  async function fetchPesanan() {
+    try {
+      setLoading(true);
+      const data = await getOrders();
+      setPesanan(data);
+    } catch (error) {
+      setError("Gagal mengambil data pesanan");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     getProduk();
+    fetchPesanan();
   }, []);
 
   const addToCart = (produk: Produk) => {
@@ -281,6 +295,62 @@ export default function MenuPage() {
         >
           Checkout
         </button>
+
+        {/* menampilkan seluruh pesanan anda */}
+        <h3>pesanan anda</h3>
+
+        <div className="space-y-6">
+          {pesanan.map((order) => (
+            <div
+              key={order.id}
+              className="bg-[#1A1A1A] p-5 rounded-2xl shadow-md border border-white/5"
+            >
+              {/* Header Order */}
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <p className="text-sm text-gray-400">Order ID</p>
+                  <p className="font-medium text-white">{order.id}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-400">Tanggal</p>
+                  <p className="text-white">
+                    {new Date(order.created_at).toLocaleDateString("id-ID")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Items */}
+              <div className="space-y-3">
+                {order.items.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center text-sm border-b border-white/5 pb-2"
+                  >
+                    <div>
+                      <p className="text-white">{item.nama}</p>
+                      <p className="text-gray-400">
+                        {item.quantity} x Rp{" "}
+                        {item.harga.toLocaleString("id-ID")}
+                      </p>
+                    </div>
+
+                    <p className="text-green-400 font-medium">
+                      Rp {(item.harga * item.quantity).toLocaleString("id-ID")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total */}
+              <div className="flex justify-between mt-4 pt-3 border-t border-white/5 font-semibold">
+                <span className="text-white">Total</span>
+                <span className="text-green-400">
+                  Rp {order.total_price.toLocaleString("id-ID")}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </aside>
     </div>
   );
