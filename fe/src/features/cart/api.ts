@@ -5,7 +5,7 @@ export async function createOrder(items: CartItem[]) {
   try {
     const payload = {
       items: items.map((item) => ({
-        produkId: item.produkId,
+        produk_id: item.produkId,
         quantity: item.quantity,
       })),
     };
