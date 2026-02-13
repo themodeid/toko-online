@@ -131,41 +131,6 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
-// export const recalculateQueue = async (client: any) => {
-//   const maxProcessing = 3;
-
-//   // hitung yang sedang diproses
-//   const processingResult = await client.query(
-//     `SELECT COUNT(*) FROM orders WHERE status_pesanan = 'DIPROSES'`,
-//   );
-
-//   const currentProcessing = parseInt(processingResult.rows[0].count);
-//   const availableSlots = maxProcessing - currentProcessing;
-
-//   if (availableSlots <= 0) return;
-
-//   // ambil order dari antri
-//   const nextOrders = await client.query(
-//     `
-//     SELECT id FROM orders
-//     WHERE status_pesanan = 'ANTRI'
-//     ORDER BY created_at ASC
-//     LIMIT $1
-//     FOR UPDATE
-//     `,
-//     [availableSlots],
-//   );
-
-//   const ids = nextOrders.rows.map((row: any) => row.id);
-
-//   if (ids.length > 0) {
-//     await client.query(
-//       `UPDATE orders SET status_pesanan = 'DIPROSES' WHERE id = ANY($1::uuid[])`,
-//       [ids],
-//     );
-//   }
-// };
-
 export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user.id;

@@ -7,6 +7,8 @@ import { Produk } from "@/features/produk/types";
 import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
+import { CartItem } from "@/features/cart/types";
+import { createOrder } from "@/features/cart/api";
 import Image from "next/image";
 
 export default function MenuPage() {
@@ -15,6 +17,7 @@ export default function MenuPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [produk, setProduk] = useState<Produk[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -38,6 +41,63 @@ export default function MenuPage() {
   useEffect(() => {
     getProduk();
   }, []);
+
+  const addToCart = (produk: Produk) => {
+    setCart((prev) => {
+      const exist = prev.find((item) => item.produkId === produk.id);
+      if (exist) {
+        return prev.map((item) =>
+          item.produkId === produk.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        );
+      } else {
+        return [
+          ...prev,
+          {
+            produkId: produk.id,
+            nama: produk.nama,
+            harga: produk.harga,
+            quantity: 1,
+            image: produk.image,
+          },
+        ];
+      }
+    });
+  };
+
+  const handleCheckout = async () => {
+    if (cart.length === 0) {
+      alert("Cart masih kosong!");
+      return;
+    }
+
+    try {
+      await createOrder(cart);
+      alert("Order berhasil!");
+
+      setCart([]); // kosongkan cart setelah berhasil
+    } catch (error) {
+      alert("Order gagal");
+    }
+  };
+
+  const updateQuantity = (produkId: string, quantity: number) => {
+    setCart((prev) =>
+      prev
+        .map((item) =>
+          item.produkId === produkId ? { ...item, quantity } : item,
+        )
+        .filter((item) => item.quantity > 0),
+    );
+  };
+
+  const subtotal = cart.reduce(
+    (acc, item) => acc + item.harga * item.quantity,
+    0,
+  );
+  const discount = 0;
+  const total = subtotal - discount;
 
   return (
     <div className="min-h-screen flex bg-[#0F0F0F] text-white">
@@ -129,6 +189,16 @@ export default function MenuPage() {
                   </span>
                 </div>
 
+                <button
+                  onClick={() => addToCart(item)}
+                  className="bg-green-500 hover:bg-green-600 p-2 rounded-lg transition"
+                >
+                  <FeatherIcon
+                    icon="shopping-cart"
+                    className="w-5 h-5 text-black"
+                  />
+                </button>
+
                 <Link
                   href={`/menu/profil_produk/${item.id}`}
                   className="block text-center bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded-xl transition"
@@ -142,46 +212,74 @@ export default function MenuPage() {
       </main>
 
       {/* ================= CART ================= */}
-      <aside className="w-[360px] bg-white text-black p-6">
+      <aside className="w-[360px] bg-white p-6 text-black">
         <h2 className="text-lg font-semibold mb-4">Current Order</h2>
-
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gray-200 rounded-lg" />
-            <div className="flex-1">
-              <p className="font-medium">Cappuccino</p>
-              <p className="text-sm text-gray-500">2x</p>
+          {cart.map((item) => (
+            <div key={item.produkId} className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gray-200 relative">
+                {item.image && (
+                  <Image
+                    src={item.image}
+                    alt={item.nama}
+                    fill
+                    className="object-cover"
+                  />
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">{item.nama}</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      updateQuantity(item.produkId, item.quantity - 1)
+                    }
+                    disabled={item.quantity <= 1}
+                  >
+                    -
+                  </button>
+                  <p>{item.quantity}x</p>
+                  <button
+                    onClick={() =>
+                      updateQuantity(item.produkId, item.quantity + 1)
+                    }
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <p className="font-semibold text-green-600">
+                Rp {(item.harga * item.quantity).toLocaleString("id-ID")}
+              </p>
             </div>
-            <p className="font-semibold text-green-600">$11.96</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gray-200 rounded-lg" />
-            <div className="flex-1">
-              <p className="font-medium">Coffee Latte</p>
-              <p className="text-sm text-gray-500">1x</p>
-            </div>
-            <p className="font-semibold text-green-600">$4.98</p>
-          </div>
+          ))}
         </div>
 
         <div className="border-t mt-6 pt-4 space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>$22.74</span>
+            <span>Rp {subtotal.toLocaleString("id-ID")}</span>
           </div>
           <div className="flex justify-between">
             <span>Discount</span>
-            <span>-$5.00</span>
+            <span>Rp {discount}</span>
           </div>
           <div className="flex justify-between font-semibold text-lg">
             <span>Total</span>
-            <span>$19.99</span>
+            <span>Rp {total.toLocaleString("id-ID")}</span>
           </div>
         </div>
 
-        <button className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold">
-          Print Bills
+        <button
+          onClick={handleCheckout}
+          disabled={cart.length === 0}
+          className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
+            cart.length === 0
+              ? "bg-gray-300 cursor-not-allowed"
+              : "bg-green-500 hover:bg-green-600 text-white"
+          }`}
+        >
+          Checkout
         </button>
       </aside>
     </div>

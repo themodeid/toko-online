@@ -3,6 +3,7 @@ import {
   Produk,
   CreateProdukPayload,
   UpdateProdukPayload,
+  ProdukResponse
 } from "@/features/produk/types";
 
 /* =======================
@@ -33,13 +34,15 @@ export async function createProduk(data: CreateProdukPayload): Promise<Produk> {
 /* =======================
    GET ALL
 ======================= */
+
 export async function getAllProduk(): Promise<{ produk: Produk[] }> {
   try {
     const res = await api.get("/api/produk");
     return {
-      produk: res.data.produk ?? [],
+      produk: res.data.produk ?? [], // pastikan response API punya property 'produk'
     };
   } catch (error) {
+    console.error(error); // optional, untuk debugging
     throw new Error("Gagal mengambil produk");
   }
 }
