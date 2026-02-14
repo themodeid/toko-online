@@ -30,8 +30,6 @@ interface OrderFromApi {
   created_at: string;
 }
 
-
-
 export interface GetOrdersResponse {
   message: string;
   data: OrderFromApi[];

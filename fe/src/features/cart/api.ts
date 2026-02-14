@@ -29,7 +29,7 @@ export async function getOrders(): Promise<Order[]> {
     return res.data.data.map((order) => ({
       id: order.id,
       user_id: order.user_id,
-      total_price: Number(order.total_price),
+      total_price: order.total_price,
       created_at: order.created_at,
       items: [], // sementara kosong kalau belum ada JOIN
     }));

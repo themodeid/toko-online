@@ -90,9 +90,9 @@ export default function MenuPage() {
       await createOrder(cart);
       alert("Order berhasil!");
 
-      setCart([]); // kosongkan cart setelah berhasil
+      setCart([]); 
     } catch (error) {
-      alert("Order gagal");
+      alert("Order gagal")
     }
   };
 
@@ -297,7 +297,7 @@ export default function MenuPage() {
         </button>
 
         {/* menampilkan seluruh pesanan anda */}
-        <h3>pesanan anda</h3>
+        <h1 className="h-12 w12  dflex align-middle">pesanan anda</h1>
 
         <div className="space-y-6">
           {pesanan.map((order) => (
@@ -321,7 +321,7 @@ export default function MenuPage() {
 
               {/* Items */}
               <div className="space-y-3">
-                {order.items.map((item, index) => (
+                {order.items?.map((item, index) => (
                   <div
                     key={index}
                     className="flex justify-between items-center text-sm border-b border-white/5 pb-2"
@@ -345,7 +345,7 @@ export default function MenuPage() {
               <div className="flex justify-between mt-4 pt-3 border-t border-white/5 font-semibold">
                 <span className="text-white">Total</span>
                 <span className="text-green-400">
-                  Rp {order.total_price.toLocaleString("id-ID")}
+                  Rp {Number(order.total_price ?? 0).toLocaleString("id-ID")}
                 </span>
               </div>
             </div>
