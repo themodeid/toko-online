@@ -25,3 +25,7 @@ export type UpdateProdukPayload = {
   status?: boolean;
   image?: File;
 };
+
+export interface ProdukResponse {
+  produk: Produk[];
+}

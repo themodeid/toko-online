@@ -29,53 +29,7 @@ export const createProdukService = async (data: CreateProdukInput) => {
   return result.rows[0];
 };
 
-export const updateProdukService = async (
-  id: string,
-  data: UpdateProdukInput,
-) => {
-  const fields = [];
-  const values = [];
-  let idx = 1;
 
-  if (data.nama !== undefined) {
-    fields.push(`nama = $${idx++}`);
-    values.push(data.nama);
-  }
-
-  if (data.harga !== undefined) {
-    fields.push(`harga = $${idx++}`);
-    values.push(data.harga);
-  }
-
-  if (data.stock !== undefined) {
-    fields.push(`stock = $${idx++}`);
-    values.push(data.stock);
-  }
-
-  if (data.status !== undefined) {
-    fields.push(`status = $${idx++}`);
-    values.push(data.status);
-  }
-
-  if (data.image !== undefined) {
-    fields.push(`image = $${idx++}`);
-    values.push(data.image);
-  }
-
-  if (fields.length === 0) return null;
-
-  const query = `
-    UPDATE produk
-    SET ${fields.join(", ")}
-    WHERE id = $${idx}
-    RETURNING *
-  `;
-
-  values.push(id);
-
-  const result = await pool.query(query, values);
-  return result.rows[0];
-};
 
 export const deleteProduk = async (id: number) => {
   const result = await pool.query(

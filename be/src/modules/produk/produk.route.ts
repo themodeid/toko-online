@@ -15,27 +15,23 @@ router.get("/:id", getProdukById);
 // Admin only
 router.post(
   "/",
-  // authGuard,
-  // roleGuard("admin"),
+  authGuard,
+  roleGuard("admin"),
   upload.single("image"),
   validateBody(produkSchema),
   controller.createProduk,
 );
 
+// mengirim foto
 router.patch(
   "/:id",
-  // authGuard,
-  // roleGuard("admin"),
+  authGuard,
+  roleGuard("admin"),
   upload.single("image"),
   controller.updateProduk,
 );
 
-router.delete(
-  "/:id",
-  // authGuard,
-  // roleGuard("admin"),
-  controller.deleteProduk,
-);
+router.put("/:id", authGuard, roleGuard("admin"), controller.updateProduk);
 
 router.delete("/:id", authGuard, roleGuard("admin"), controller.deleteProduk);
 

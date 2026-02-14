@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
+import { pool } from "../../config/database";
 import {
   getAllProduk as getAllProdukService,
   getProdukById as getProdukByIdService,
   createProdukService as createProdukService,
-  updateProdukService as updateProdukService,
   deleteProduk as deleteProdukService,
 } from "./produk.services";
 import { AppError } from "../../errors/AppError";
@@ -67,25 +67,65 @@ export const updateProduk = catchAsync(async (req: Request, res: Response) => {
 
   if (!id) throw new AppError("ID tidak valid", 400);
 
-  const existing = await getProdukByIdService(id);
-  if (!existing) throw new AppError("Produk tidak ditemukan", 404);
+  // Cek apakah produk ada
+  const existing = await pool.query("SELECT * FROM produk WHERE id = $1", [id]);
+
+  if (existing.rowCount === 0) {
+    throw new AppError("Produk tidak ditemukan", 404);
+  }
+
+  const fields: string[] = [];
+  const values: any[] = [];
+  let idx = 1;
+
+  if (nama !== undefined) {
+    fields.push(`nama = $${idx++}`);
+    values.push(nama);
+  }
+
+  if (harga !== undefined) {
+    fields.push(`harga = $${idx++}`);
+    values.push(Number(harga));
+  }
+
+  if (stock !== undefined) {
+    fields.push(`stock = $${idx++}`);
+    values.push(Number(stock));
+  }
+
+  if (typeof status === "boolean") {
+    fields.push(`status = $${idx++}`);
+    values.push(status);
+  }
 
   let image;
   if (req.file) {
     image = `/uploads/${req.file.filename}`;
+    fields.push(`image = $${idx++}`);
+    values.push(image);
   }
 
-  const produk = await updateProdukService(id, {
-    nama,
-    harga: harga ? Number(harga) : undefined,
-    stock: stock ? Number(stock) : undefined,
-    status: status !== undefined ? status === "true" : undefined,
-    image,
-  });
+  // Optional: update timestamp
+  fields.push(`updated_at = NOW()`);
+
+  if (fields.length === 0) {
+    throw new AppError("Tidak ada data yang diupdate", 400);
+  }
+
+  const query = `
+    UPDATE produk
+    SET ${fields.join(", ")}
+    WHERE id = $${idx}
+    RETURNING *
+  `;
+
+  values.push(id);
+
+  const result = await pool.query(query, values);
 
   res.status(200).json({
     message: "berhasil mengupdate produk",
-    produk,
+    produk: result.rows[0],
   });
 });
 
