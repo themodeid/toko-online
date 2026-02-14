@@ -25,7 +25,8 @@ export interface Order {
 interface OrderFromApi {
   id: string;
   user_id: string;
-  total_price: string; // masih string dari DB
+  nama_user: string;
+  total_price: string;
   status_pesanan: string;
   created_at: string;
 }
@@ -34,3 +35,4 @@ export interface GetOrdersResponse {
   message: string;
   data: OrderFromApi[];
 }
+

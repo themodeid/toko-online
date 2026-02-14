@@ -31,9 +31,37 @@ export async function getOrders(): Promise<Order[]> {
       user_id: order.user_id,
       total_price: order.total_price,
       created_at: order.created_at,
-      items: [], // sementara kosong kalau belum ada JOIN
+      items: [],
     }));
   } catch (error) {
     throw error;
   }
+}
+
+export async function getActiveOrders(): Promise<Order[]> {
+  try {
+    const res = await api.get<GetOrdersResponse>("/api/orders/Active");
+    return res.data.data.map((order) => ({
+      id: order.id,
+      user_id: order.user_id,
+      nama: order.nama_user,
+      total_price: order.total_price,
+      created_at: order.created_at,
+      items: [],
+    }));
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getMyOrders(): Promise<Order[]> {
+  const res = await api.get<GetOrdersResponse>("/api/orders/me");
+
+  return res.data.data.map((order) => ({
+    id: order.id,
+    user_id: order.user_id,
+    total_price: order.total_price,
+    created_at: order.created_at,
+    items: [],
+  }));
 }

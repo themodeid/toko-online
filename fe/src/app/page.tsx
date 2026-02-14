@@ -8,7 +8,7 @@ import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
 import { CartItem, Order, OrderItem } from "@/features/cart/types";
-import { createOrder, getOrders } from "@/features/cart/api";
+import { createOrder, getOrders, getMyOrders } from "@/features/cart/api";
 import Image from "next/image";
 
 export default function MenuPage() {
@@ -42,7 +42,7 @@ export default function MenuPage() {
   async function fetchPesanan() {
     try {
       setLoading(true);
-      const data = await getOrders();
+      const data = await getMyOrders();
       setPesanan(data);
     } catch (error) {
       setError("Gagal mengambil data pesanan");
@@ -89,10 +89,9 @@ export default function MenuPage() {
     try {
       await createOrder(cart);
       alert("Order berhasil!");
-
-      setCart([]); 
+      setCart([]);
     } catch (error) {
-      alert("Order gagal")
+      alert("Order gagal");
     }
   };
 
@@ -141,6 +140,13 @@ export default function MenuPage() {
           onClick={() => router.push("/menu/add_menu")}
         >
           <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
+        </div>
+
+        <div
+          className={navClass("/pesanan")}
+          onClick={() => router.push("/pesanan")}
+        >
+          <FeatherIcon icon="list" className="w-6 h-6 text-white" />
         </div>
       </aside>
 
