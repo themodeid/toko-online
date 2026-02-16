@@ -8,7 +8,12 @@ import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
 import { CartItem, Order, OrderItem } from "@/features/cart/types";
-import { createOrder, getMyOrders, cancelOrder } from "@/features/cart/api";
+import {
+  createOrder,
+  getMyOrders,
+  cancelOrder,
+  getMyOrdersActiveWithItems,
+} from "@/features/cart/api";
 import Image from "next/image";
 
 export default function MenuPage() {
@@ -42,7 +47,7 @@ export default function MenuPage() {
   async function fetchPesanan() {
     try {
       setLoading(true);
-      const data = await getMyOrders();
+      const data = await getMyOrdersActiveWithItems();
       setPesanan(data);
     } catch (error) {
       setError("Gagal mengambil data pesanan");
@@ -225,7 +230,7 @@ export default function MenuPage() {
                 <p className="font-medium">{item.nama}</p>
 
                 <p className="text-green-400 font-semibold">
-                  Rp {Number(item.harga).toLocaleString("id-ID")}
+                  Rp {item.harga.toLocaleString()}
                   <span className="text-xs text-gray-400"> / pcs</span>
                 </p>
 

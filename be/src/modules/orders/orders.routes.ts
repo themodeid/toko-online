@@ -12,6 +12,7 @@ import {
   getOrdersItems,
   getOrdersActiveWithItems,
   doneOrders,
+  getMyOrdersActiveWithItems,
 } from "./orders.controller";
 import { validateBody } from "../../middlewares/validateBody";
 import { CheckoutSchema, OrderResponseSchema } from "./orders.schema";
@@ -26,6 +27,8 @@ router.get("/", authGuard, controller.getOrders);
 router.get("/activeItems", authGuard, controller.getOrdersActiveWithItems);
 // mengambil my orderan yang aktive
 router.get("/myActive", authGuard, controller.getMyOrdersActive);
+// mengambil semua orderan aktif saya beserta item didalamnya
+router.get("/myActiveItems", authGuard, controller.getMyOrdersActiveWithItems);
 // mengambil items dari orderan
 router.get("/:id/items", authGuard, controller.getOrdersItems);
 router.get("/:id", authGuard, controller.getMyOrders);

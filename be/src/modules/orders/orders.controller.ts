@@ -356,6 +356,7 @@ export const getOrdersItems = catchAsync(
   },
 );
 
+// mengambil semua orderan aktif beserta item didalm=amnya
 export const getOrdersActiveWithItems = catchAsync(
   async (req: Request, res: Response) => {
     const query = `
@@ -393,6 +394,50 @@ export const getOrdersActiveWithItems = catchAsync(
 
     res.status(200).json({
       message: "Berhasil mengambil seluruh pesanan aktif beserta itemnya",
+      total: result.rows.length,
+      data: result.rows,
+    });
+  },
+);
+
+// mengambil semua pesanan saya yang aktif beserta item didalamnya
+export const getMyOrdersActiveWithItems = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user.id;
+
+    const query = `
+      SELECT 
+        o.id,
+        o.user_id,
+        o.total_price,
+        o.status_pesanan,
+        o.created_at,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'produk_id', oi.produk_id,
+              'nama_produk', p.nama,
+              'harga_barang', oi.harga_barang,
+              'qty', oi.qty
+            )
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'
+        ) AS items
+      FROM orders o
+      LEFT JOIN order_items oi 
+        ON o.id = oi.order_id
+      LEFT JOIN produk p 
+        ON oi.produk_id = p.id
+      WHERE o.user_id = $1
+      AND o.status_pesanan IN ('ANTRI', 'DIPROSES')
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+    `;
+
+    const result = await pool.query(query, [userId]);
+
+    res.status(200).json({
+      message: "Berhasil mengambil pesanan aktif anda beserta itemnya",
       total: result.rows.length,
       data: result.rows,
     });

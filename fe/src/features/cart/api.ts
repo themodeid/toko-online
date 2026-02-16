@@ -100,3 +100,18 @@ export async function getAllOrderActiveItems(): Promise<
 
   return res.data.data;
 }
+
+export async function getMyOrdersActiveWithItems(): Promise<
+  OrderActiveWithItems[]
+> {
+  try {
+    const res = await api.get<GetActiveOrdersWithItemsResponse>(
+      "/api/orders/MyActiveItems",
+    );
+
+    return res.data.data;
+  } catch (error) {
+    console.error("Gagal mengambil pesanan aktif milik user:", error);
+    throw error;
+  }
+}
