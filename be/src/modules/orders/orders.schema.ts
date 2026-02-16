@@ -19,4 +19,15 @@ export const OrderResponseSchema = z.object({
   created_at: z.string().datetime(),
 });
 
+export const OrderDetailSchema = OrderResponseSchema.extend({
+  items: z.array(
+    z.object({
+      produk_id: z.string().uuid(),
+      nama: z.string(),
+      harga: z.number(),
+      quantity: z.number(),
+    }),
+  ),
+});
+
 export type CheckoutDTO = z.infer<typeof CheckoutSchema>;

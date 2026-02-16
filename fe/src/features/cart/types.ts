@@ -24,6 +24,8 @@ export interface Order {
   status_pesanan: string;
 }
 
+// ========================== api kshusu ==============
+
 interface OrderFromApi {
   id: string;
   user_id: string;
@@ -37,3 +39,28 @@ export interface GetOrdersResponse {
   message: string;
   data: OrderFromApi[];
 }
+
+
+export interface OrderItemFromApi {
+  produk_id: string;
+  nama_produk: string;
+  harga_barang: number;
+  qty: number;
+}
+
+export interface OrderActiveWithItems {
+  id: string;
+  user_id: string;
+  username: string;
+  total_price: string;
+  status_pesanan: string;
+  created_at: string;
+  items: OrderItemFromApi[];
+}
+
+export interface GetActiveOrdersWithItemsResponse {
+  message: string;
+  total: number;
+  data: OrderActiveWithItems[];
+}
+

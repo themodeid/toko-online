@@ -1,5 +1,11 @@
 import api from "@/lib/axios";
-import { CartItem, Order, GetOrdersResponse } from "@/features/cart/types";
+import {
+  CartItem,
+  Order,
+  GetOrdersResponse,
+  GetActiveOrdersWithItemsResponse,
+  OrderActiveWithItems
+} from "@/features/cart/types";
 
 export async function createOrder(items: CartItem[]) {
   try {
@@ -74,4 +80,14 @@ export async function cancelOrder(orderId: string) {
     console.error("Gagal cancel order:", error);
     throw error;
   }
+}
+
+export async function getAllOrderActiveItems(): Promise<
+  OrderActiveWithItems[]
+> {
+  const res = await api.get<GetActiveOrdersWithItemsResponse>(
+    "/api/orders/ActiveItems",
+  );
+
+  return res.data.data;
 }
