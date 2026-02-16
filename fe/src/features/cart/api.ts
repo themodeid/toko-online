@@ -101,15 +101,26 @@ export async function getAllOrderActiveItems(): Promise<
   return res.data.data;
 }
 
-export async function getMyOrdersActiveWithItems(): Promise<
-  OrderActiveWithItems[]
-> {
+export async function getMyOrdersActiveWithItems(): Promise<Order[]> {
   try {
     const res = await api.get<GetActiveOrdersWithItemsResponse>(
       "/api/orders/MyActiveItems",
     );
 
-    return res.data.data;
+    return res.data.data.map((order) => ({
+      id: order.id,
+      user_id: order.user_id,
+      nama_user: order.username,
+      total_price: order.total_price,
+      status_pesanan: order.status_pesanan,
+      created_at: order.created_at,
+      items: order.items.map((item) => ({
+        produk_id: item.produk_id,
+        nama: item.nama_produk, // 🔥 mapping
+        harga: item.harga_barang, // 🔥 mapping
+        quantity: item.qty, // 🔥 mapping
+      })),
+    }));
   } catch (error) {
     console.error("Gagal mengambil pesanan aktif milik user:", error);
     throw error;

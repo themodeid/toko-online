@@ -20,7 +20,7 @@ export interface Order {
   nama_user: string;
   total_price: string;
   created_at: string;
-  items?: OrderItem[];
+  items: OrderItem[];
   status_pesanan: string;
 }
 
@@ -39,7 +39,6 @@ export interface GetOrdersResponse {
   message: string;
   data: OrderFromApi[];
 }
-
 
 export interface OrderItemFromApi {
   produk_id: string;
@@ -63,4 +62,3 @@ export interface GetActiveOrdersWithItemsResponse {
   total: number;
   data: OrderActiveWithItems[];
 }
-
