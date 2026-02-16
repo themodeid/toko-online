@@ -17,15 +17,17 @@ export interface OrderItem {
 export interface Order {
   id: string;
   user_id: string;
+  nama_user: string;
   total_price: string;
   created_at: string;
   items?: OrderItem[];
+  status_pesanan: string;
 }
 
 interface OrderFromApi {
   id: string;
   user_id: string;
-  nama_user: string;
+  username: string; // ini sesuai API
   total_price: string;
   status_pesanan: string;
   created_at: string;
@@ -35,4 +37,3 @@ export interface GetOrdersResponse {
   message: string;
   data: OrderFromApi[];
 }
-

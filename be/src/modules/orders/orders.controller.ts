@@ -209,6 +209,7 @@ export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+// ambil semua orders
 export const getOrders = catchAsync(async (req: Request, res: Response) => {
   const query = `
     SELECT 
@@ -267,6 +268,27 @@ export const getMyOrders = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+export const getMyOrdersActive = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user.id;
+
+    const query = `
+    SELECT *
+    FROM orders
+    WHERE user_id = $1
+    AND status_pesanan IN ('ANTRI', 'DIPROSES', 'SELESAI')
+    ORDER BY created_at DESC
+  `;
+
+    const result = await pool.query(query, [userId]);
+
+    res.status(200).json({
+      message: "Berhasil mengambil pesanan anda",
+      data: result.rows,
+    });
+  },
+);
+
 // mengambil semua pesanan yang aktif
 export const getOrdersActive = catchAsync(
   async (req: Request, res: Response) => {
@@ -294,11 +316,3 @@ export const getOrdersActive = catchAsync(
     });
   },
 );
-
-// export const getOrdersUser = catchAsync(
-//   async (req: Request, res: Response) => {
-
-
-//     const 
-//   },
-// );

@@ -9,6 +9,7 @@ import {
   cancelOrder,
   getMyOrders,
   getOrdersActive,
+  getMyOrdersActive,
 } from "./orders.controller";
 import { validateBody } from "../../middlewares/validateBody";
 import { CheckoutSchema, OrderResponseSchema } from "./orders.schema";
@@ -17,10 +18,12 @@ const router = Router();
 
 // membuat pesanan
 router.post("/", authGuard, validateBody(CheckoutSchema), controller.checkout);
-// get data
+// ambil semua orderan
 router.get("/", authGuard, controller.getOrders);
+// ambil semua orderan yang active
 router.get("/Active", authGuard, controller.getOrdersActive);
-
+// mengambil my orderan yang aktive
+router.get("MyActive", authGuard, controller.getMyOrdersActive);
 router.get("/:id", authGuard, controller.getMyOrders);
 // update and delete
 router.patch("/:id/cancel", authGuard, controller.cancelOrder);

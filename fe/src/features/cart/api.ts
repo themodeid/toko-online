@@ -1,10 +1,5 @@
 import api from "@/lib/axios";
-import {
-  CartItem,
-  OrderItem,
-  Order,
-  GetOrdersResponse,
-} from "@/features/cart/types";
+import { CartItem, Order, GetOrdersResponse } from "@/features/cart/types";
 
 export async function createOrder(items: CartItem[]) {
   try {
@@ -29,7 +24,9 @@ export async function getOrders(): Promise<Order[]> {
     return res.data.data.map((order) => ({
       id: order.id,
       user_id: order.user_id,
+      nama_user: order.username,
       total_price: order.total_price,
+      status_pesanan: order.status_pesanan,
       created_at: order.created_at,
       items: [],
     }));
@@ -44,7 +41,8 @@ export async function getActiveOrders(): Promise<Order[]> {
     return res.data.data.map((order) => ({
       id: order.id,
       user_id: order.user_id,
-      nama: order.nama_user,
+      nama_user: order.username, // mapping ke nama_user
+      status_pesanan: order.status_pesanan,
       total_price: order.total_price,
       created_at: order.created_at,
       items: [],
@@ -55,13 +53,25 @@ export async function getActiveOrders(): Promise<Order[]> {
 }
 
 export async function getMyOrders(): Promise<Order[]> {
-  const res = await api.get<GetOrdersResponse>("/api/orders/me");
+  const res = await api.get<GetOrdersResponse>("/api/orders/MyActive");
 
   return res.data.data.map((order) => ({
     id: order.id,
     user_id: order.user_id,
+    nama_user: order.username, // mapping username dari API ke nama_user
+    status_pesanan: order.status_pesanan, // wajib karena Order interface memerlukannya
     total_price: order.total_price,
     created_at: order.created_at,
-    items: [],
+    items: [], // sementara kosong, bisa diisi nanti jika ingin detail items
   }));
+}
+
+export async function cancelOrder(orderId: string) {
+  try {
+    const res = await api.patch(`/api/orders/${orderId}/cancel`);
+    return res.data;
+  } catch (error) {
+    console.error("Gagal cancel order:", error);
+    throw error;
+  }
 }

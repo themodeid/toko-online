@@ -87,7 +87,7 @@ export default function Antrian() {
               >
                 {/* Header */}
                 <div className="flex justify-between items-center mb-3">
-                  <h2 className="font-semibold text-lg">{order.username}</h2>
+                  <h2 className="font-semibold text-lg">{order.nama_user}</h2>
 
                   <span className="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-700">
                     {order.status_pesanan}
