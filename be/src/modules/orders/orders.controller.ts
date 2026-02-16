@@ -4,6 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { pool } from "../../config/database";
 import { request } from "http";
 
+// checkout penting
 export const checkout = catchAsync(async (req: Request, res: Response) => {
   const { items } = req.body;
   const userId = req.user.id;
@@ -131,6 +132,7 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+// cancel order penting
 export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user.id;
@@ -201,6 +203,43 @@ export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
     await client.query("COMMIT");
 
     res.json({ message: "Order berhasil dibatalkan" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+});
+
+// menyelesaikan order
+export const doneOrders = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // lock order yang mau dicancel
+    const orderResult = await client.query(
+      `SELECT * FROM orders WHERE id = $1 FOR UPDATE`,
+      [id],
+    );
+
+    const order = orderResult.rows[0];
+
+    if (!order) {
+      throw new AppError("order tidak ditemukan", 404);
+    }
+
+    await client.query(
+      `UPDATE orders SET status_pesanan = 'SELESAI' WHERE id = $1  `,
+      [id],
+    );
+
+    await client.query("COMMIT");
+
+    res.json({ message: "Order berhasil diselesaikan" });
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -289,34 +328,6 @@ export const getMyOrdersActive = catchAsync(
   },
 );
 
-// mengambil semua pesanan yang aktif
-export const getOrdersActive = catchAsync(
-  async (req: Request, res: Response) => {
-    const query = `
-      SELECT 
-        o.id,
-        o.user_id,
-        u.username,
-        o.total_price,
-        o.status_pesanan,
-        o.created_at
-      FROM orders o
-      INNER JOIN users u
-        ON o.user_id = u.id
-      WHERE o.status_pesanan IN ('ANTRI', 'DIPROSES')
-      ORDER BY o.created_at ASC
-    `;
-
-    const result = await pool.query(query);
-
-    res.status(200).json({
-      message: "Berhasil mengambil seluruh pesanan aktif",
-      total: result.rows.length,
-      data: result.rows,
-    });
-  },
-);
-
 // mengambil item dari orderan
 export const getOrdersItems = catchAsync(
   async (req: Request, res: Response) => {
@@ -385,6 +396,5 @@ export const getOrdersActiveWithItems = catchAsync(
       total: result.rows.length,
       data: result.rows,
     });
-  }
+  },
 );
-

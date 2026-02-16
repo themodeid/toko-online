@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import FeatherIcon from "feather-icons-react";
 import { OrderActiveWithItems } from "@/features/cart/types";
-import { getAllOrderActiveItems } from "@/features/cart/api";
+import {
+  getAllOrderActiveItems,
+  selesaiOrder,
+  cancelOrder,
+} from "@/features/cart/api";
 
 export default function Antrian() {
   const router = useRouter();
@@ -13,6 +17,7 @@ export default function Antrian() {
   const [orders, setOrders] = useState<OrderActiveWithItems[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -39,6 +44,30 @@ export default function Antrian() {
       setLoading(false);
     }
   }
+
+  const handleDone = async (orderId: string) => {
+    try {
+      setActionLoading(orderId);
+      await selesaiOrder(orderId);
+      await fetchOrders();
+    } catch (error) {
+      setError("Gagal menyelesaikan order");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancel = async (orderId: string) => {
+    try {
+      setActionLoading(orderId);
+      await cancelOrder(orderId);
+      await fetchOrders();
+    } catch (error) {
+      setError("Gagal membatalkan order");
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -90,71 +119,109 @@ export default function Antrian() {
         {error && <p className="text-red-500">{error}</p>}
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all duration-300"
-            >
-              {/* Header */}
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h2 className="font-bold text-lg text-gray-800">
-                    {order.username}
-                  </h2>
-                  <p className="text-xs text-gray-400">
-                    {new Date(order.created_at).toLocaleString("id-ID")}
+          {orders.map((order) => {
+            const isFinished =
+              order.status_pesanan === "SELESAI" ||
+              order.status_pesanan === "DIBATALKAN";
+
+            return (
+              <div
+                key={order.id}
+                className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all duration-300"
+              >
+                {/* Header */}
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h2 className="font-bold text-lg text-gray-800">
+                      {order.username}
+                    </h2>
+                    <p className="text-xs text-gray-400">
+                      {new Date(order.created_at).toLocaleString("id-ID")}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`px-3 py-1 text-xs rounded-full font-semibold ${
+                      statusColor[order.status_pesanan]
+                    }`}
+                  >
+                    {order.status_pesanan}
+                  </span>
+                </div>
+
+                {/* Items */}
+                <div className="space-y-3 border-t pt-3">
+                  {order.items.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between text-sm text-gray-700"
+                    >
+                      <div>
+                        <p className="font-medium">{item.nama_produk}</p>
+                        <p className="text-xs text-gray-400">
+                          {item.qty} x Rp{" "}
+                          {item.harga_barang.toLocaleString("id-ID")}
+                        </p>
+                      </div>
+
+                      <p className="font-semibold">
+                        Rp{" "}
+                        {(item.harga_barang * item.qty).toLocaleString("id-ID")}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className="border-t mt-4 pt-3 flex justify-between items-center">
+                  <p className="text-sm text-gray-500">
+                    Total Item:{" "}
+                    {order.items.reduce((acc, item) => acc + item.qty, 0)}
+                  </p>
+
+                  <p className="font-bold text-lg text-green-600">
+                    Rp {Number(order.total_price).toLocaleString("id-ID")}
                   </p>
                 </div>
 
-                <span
-                  className={`px-3 py-1 text-xs rounded-full font-semibold ${
-                    statusColor[order.status_pesanan]
-                  }`}
-                >
-                  {order.status_pesanan}
-                </span>
-              </div>
+                {/* Detail Button */}
+                <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition font-medium">
+                  Detail Pesanan
+                </button>
 
-              {/* Items */}
-              <div className="space-y-3 border-t pt-3">
-                {order.items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between text-sm text-gray-700"
+                {/* Action Buttons */}
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => handleCancel(order.id)}
+                    disabled={isFinished || actionLoading === order.id}
+                    className={`flex-1 py-2 rounded-xl font-medium transition ${
+                      isFinished
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-red-500 text-white hover:bg-red-600"
+                    }`}
                   >
-                    <div>
-                      <p className="font-medium">{item.nama_produk}</p>
-                      <p className="text-xs text-gray-400">
-                        {item.qty} x Rp{" "}
-                        {item.harga_barang.toLocaleString("id-ID")}
-                      </p>
-                    </div>
+                    {actionLoading === order.id
+                      ? "Processing..."
+                      : "Cancel Order"}
+                  </button>
 
-                    <p className="font-semibold">
-                      Rp{" "}
-                      {(item.harga_barang * item.qty).toLocaleString("id-ID")}
-                    </p>
-                  </div>
-                ))}
+                  <button
+                    onClick={() => handleDone(order.id)}
+                    disabled={isFinished || actionLoading === order.id}
+                    className={`flex-1 py-2 rounded-xl font-medium transition ${
+                      isFinished
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-green-600 text-white hover:bg-green-700"
+                    }`}
+                  >
+                    {actionLoading === order.id
+                      ? "Processing..."
+                      : "Selesai Order"}
+                  </button>
+                </div>
               </div>
-
-              {/* Footer */}
-              <div className="border-t mt-4 pt-3 flex justify-between items-center">
-                <p className="text-sm text-gray-500">
-                  Total Item:{" "}
-                  {order.items.reduce((acc, item) => acc + item.qty, 0)}
-                </p>
-
-                <p className="font-bold text-lg text-green-600">
-                  Rp {Number(order.total_price).toLocaleString("id-ID")}
-                </p>
-              </div>
-
-              <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition font-medium">
-                Detail Pesanan
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
     </div>

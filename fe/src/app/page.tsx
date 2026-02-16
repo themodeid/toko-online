@@ -110,6 +110,7 @@ export default function MenuPage() {
       await createOrder(cart);
       alert("Order berhasil!");
       setCart([]);
+      fetchPesanan();
     } catch (error) {
       alert("Order gagal");
     }

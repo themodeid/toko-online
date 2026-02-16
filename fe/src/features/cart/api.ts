@@ -4,7 +4,7 @@ import {
   Order,
   GetOrdersResponse,
   GetActiveOrdersWithItemsResponse,
-  OrderActiveWithItems
+  OrderActiveWithItems,
 } from "@/features/cart/types";
 
 export async function createOrder(items: CartItem[]) {
@@ -70,6 +70,15 @@ export async function getMyOrders(): Promise<Order[]> {
     created_at: order.created_at,
     items: [], // sementara kosong, bisa diisi nanti jika ingin detail items
   }));
+}
+
+export async function selesaiOrder(orderId: string) {
+  try {
+    const res = await api.patch(`/api/orders/${orderId}/selesai`);
+  } catch (error) {
+    console.error("Gagal cancel order:", error);
+    throw error;
+  }
 }
 
 export async function cancelOrder(orderId: string) {
