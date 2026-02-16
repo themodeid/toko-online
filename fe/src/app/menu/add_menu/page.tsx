@@ -90,6 +90,13 @@ export default function AddMenuPage() {
           >
             <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
           </div>
+
+          <div
+            className={navClass("/pesanan")}
+            onClick={() => router.push("/pesanan")}
+          >
+            <FeatherIcon icon="list" className="w-6 h-6 text-white" />
+          </div>
         </aside>
 
         <main className="flex-1 p-6 overflow-y-auto">

@@ -8,7 +8,12 @@ import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
 import { CartItem, Order, OrderItem } from "@/features/cart/types";
-import { createOrder, getOrders } from "@/features/cart/api";
+import {
+  createOrder,
+  getMyOrders,
+  cancelOrder,
+  getMyOrdersActiveWithItems,
+} from "@/features/cart/api";
 import Image from "next/image";
 
 export default function MenuPage() {
@@ -42,7 +47,7 @@ export default function MenuPage() {
   async function fetchPesanan() {
     try {
       setLoading(true);
-      const data = await getOrders();
+      const data = await getMyOrdersActiveWithItems();
       setPesanan(data);
     } catch (error) {
       setError("Gagal mengambil data pesanan");
@@ -52,9 +57,29 @@ export default function MenuPage() {
   }
 
   useEffect(() => {
-    getProduk();
-    fetchPesanan();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([getProduk(), fetchPesanan()]);
+      } catch {
+        setError("Gagal memuat data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
+
+  useEffect(() => {
+    if (!error) return;
+
+    const timer = setTimeout(() => {
+      setError(null);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [error]);
 
   const addToCart = (produk: Produk) => {
     setCart((prev) => {
@@ -89,10 +114,10 @@ export default function MenuPage() {
     try {
       await createOrder(cart);
       alert("Order berhasil!");
-
-      setCart([]); 
+      setCart([]);
+      fetchPesanan();
     } catch (error) {
-      alert("Order gagal")
+      alert("Order gagal");
     }
   };
 
@@ -104,6 +129,17 @@ export default function MenuPage() {
         )
         .filter((item) => item.quantity > 0),
     );
+  };
+
+  const handleCancel = async (orderId: string) => {
+    try {
+      await cancelOrder(orderId);
+      alert("order berhasil dibatalkan");
+
+      fetchPesanan();
+    } catch (error) {
+      setError("gagal menghapus pesanan");
+    }
   };
 
   const subtotal = cart.reduce(
@@ -142,6 +178,13 @@ export default function MenuPage() {
         >
           <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
         </div>
+
+        <div
+          className={navClass("/pesanan")}
+          onClick={() => router.push("/pesanan")}
+        >
+          <FeatherIcon icon="list" className="w-6 h-6 text-white" />
+        </div>
       </aside>
 
       {/* ================= MAIN MENU ================= */}
@@ -156,6 +199,7 @@ export default function MenuPage() {
 
         {/* State */}
         {loading && <p className="text-gray-400">Loading...</p>}
+
         {error && <p className="text-red-500">{error}</p>}
 
         {/* Grid */}
@@ -186,7 +230,7 @@ export default function MenuPage() {
                 <p className="font-medium">{item.nama}</p>
 
                 <p className="text-green-400 font-semibold">
-                  Rp {Number(item.harga).toLocaleString("id-ID")}
+                  Rp {Number(item.harga ?? 0).toLocaleString("id-ID")}
                   <span className="text-xs text-gray-400"> / pcs</span>
                 </p>
 
@@ -263,7 +307,10 @@ export default function MenuPage() {
                 </div>
               </div>
               <p className="font-semibold text-green-600">
-                Rp {(item.harga * item.quantity).toLocaleString("id-ID")}
+                Rp{" "}
+                {(Number(item.harga ?? 0) * item.quantity).toLocaleString(
+                  "id-ID",
+                )}
               </p>
             </div>
           ))}
@@ -330,7 +377,8 @@ export default function MenuPage() {
                       <p className="text-white">{item.nama}</p>
                       <p className="text-gray-400">
                         {item.quantity} x Rp{" "}
-                        {item.harga.toLocaleString("id-ID")}
+                        {Number(item.harga ?? 0).toLocaleString("id-ID")}
+
                       </p>
                     </div>
 
@@ -347,6 +395,15 @@ export default function MenuPage() {
                 <span className="text-green-400">
                   Rp {Number(order.total_price ?? 0).toLocaleString("id-ID")}
                 </span>
+
+                {order.status_pesanan === "ANTRI" && (
+                  <button
+                    onClick={() => handleCancel(order.id)}
+                    className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-xs text-white"
+                  >
+                    Cancel
+                  </button>
+                )}
               </div>
             </div>
           ))}

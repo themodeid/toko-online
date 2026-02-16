@@ -58,29 +58,36 @@ export default function AuthPage() {
       {/* Sidebar */}
       <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
         <div className={navClass("/")} onClick={() => router.push("/")}>
-          <FeatherIcon icon="home" className="w-6 h-6" />
+          <FeatherIcon icon="home" className="w-6 h-6 text-white" />
         </div>
 
         <div className={navClass("/menu")} onClick={() => router.push("/menu")}>
-          <FeatherIcon icon="grid" className="w-6 h-6" />
+          <FeatherIcon icon="grid" className="w-6 h-6 text-white" />
         </div>
 
         <div className={navClass("/cart")} onClick={() => router.push("/cart")}>
-          <FeatherIcon icon="shopping-cart" className="w-6 h-6" />
+          <FeatherIcon icon="shopping-cart" className="w-6 h-6 text-white" />
         </div>
 
         <div
           className={navClass("/login")}
           onClick={() => router.push("/login")}
         >
-          <FeatherIcon icon="user" className="w-6 h-6" />
+          <FeatherIcon icon="user" className="w-6 h-6 text-white" />
         </div>
 
         <div
           className={navClass("/menu/add_menu")}
           onClick={() => router.push("/menu/add_menu")}
         >
-          <FeatherIcon icon="plus-circle" className="w-6 h-6" />
+          <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
+        </div>
+
+        <div
+          className={navClass("/pesanan")}
+          onClick={() => router.push("/pesanan")}
+        >
+          <FeatherIcon icon="list" className="w-6 h-6 text-white" />
         </div>
       </aside>
 
