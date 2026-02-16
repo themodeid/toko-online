@@ -230,7 +230,7 @@ export default function MenuPage() {
                 <p className="font-medium">{item.nama}</p>
 
                 <p className="text-green-400 font-semibold">
-                  Rp {item.harga.toLocaleString()}
+                  Rp {Number(item.harga ?? 0).toLocaleString("id-ID")}
                   <span className="text-xs text-gray-400"> / pcs</span>
                 </p>
 
@@ -307,7 +307,10 @@ export default function MenuPage() {
                 </div>
               </div>
               <p className="font-semibold text-green-600">
-                Rp {(item.harga * item.quantity).toLocaleString("id-ID")}
+                Rp{" "}
+                {(Number(item.harga ?? 0) * item.quantity).toLocaleString(
+                  "id-ID",
+                )}
               </p>
             </div>
           ))}
@@ -374,7 +377,8 @@ export default function MenuPage() {
                       <p className="text-white">{item.nama}</p>
                       <p className="text-gray-400">
                         {item.quantity} x Rp{" "}
-                        {item.harga.toLocaleString("id-ID")}
+                        {Number(item.harga ?? 0).toLocaleString("id-ID")}
+
                       </p>
                     </div>
 
