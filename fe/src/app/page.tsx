@@ -95,16 +95,22 @@ export default function MenuPage() {
     return () => clearTimeout(timer);
   }, [error]);
 
-  const addToCart = (produk: Produk) => {
+  const updateCart = (produk: Produk) => {
     setCart((prev) => {
       const exist = prev.find((item) => item.produkId === produk.id);
+
       if (exist) {
-        return prev.map((item) =>
-          item.produkId === produk.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        );
+        // jika sudah ada, kurangi 1
+        const updated = prev
+          .map((item) =>
+            item.produkId === produk.id
+              ? { ...item, quantity: item.quantity - 1 }
+              : item,
+          )
+          .filter((item) => item.quantity > 0); // remove jika quantity 0
+        return updated;
       } else {
+        // jika belum ada, tambah 1
         return [
           ...prev,
           {
@@ -127,7 +133,6 @@ export default function MenuPage() {
 
     try {
       await createOrder(cart);
-      alert("Order berhasil!");
       setCart([]);
       fetchPesanan();
     } catch (error) {
@@ -249,7 +254,7 @@ export default function MenuPage() {
                 </div>
 
                 <button
-                  onClick={() => addToCart(item)}
+                  onClick={() => updateCart(item)}
                   className="bg-green-500 hover:bg-green-600 p-2 rounded-lg transition"
                 >
                   <FeatherIcon
@@ -302,7 +307,6 @@ export default function MenuPage() {
                     onClick={() =>
                       updateQuantity(item.produkId, item.quantity - 1)
                     }
-                    disabled={item.quantity <= 1}
                   >
                     -
                   </button>
