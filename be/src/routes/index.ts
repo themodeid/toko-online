@@ -16,7 +16,7 @@ router.use("/auth", AuthRoutes);
 router.use("/kontak", kontakRoutes);
 router.use("/produk", produkRoutes);
 router.use("/orders", ordersRoutes);
-router.use("/users", userRoutes);
+router.use("/user", userRoutes);
 
 router.post("/upload-avatar", authGuard, upload.single("photo"), (req, res) => {
   if (!req.file) {
