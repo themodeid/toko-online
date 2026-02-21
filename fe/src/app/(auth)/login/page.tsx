@@ -38,11 +38,14 @@ export default function AuthPage() {
       setError(null);
 
       if (mode === "login") {
-        await login({ username, password });
-        router.push("/");
+        const user = await login({ username, password });
+
+        console.log("ROLE DARI BACKEND:", user.role);
+
+        router.replace(user.role === "admin" ? "/pesanan" : "/");
       } else {
         await register({ username, password, role });
-        router.push("/login"); // atau setMode("login")
+        router.push("/login");
       }
     } catch (err) {
       setError(
