@@ -77,32 +77,41 @@ export default function Antrian() {
     <div className="min-h-screen flex bg-[#0F0F0F] text-white">
       {/* Sidebar */}
       <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
-        {/* router admin */}
-        <div className="border-b border-white">
-          {" "}
-          <div
-            className={navClass("/pesanan")}
-            onClick={() => router.push("/pesanan")}
-          >
-            <FeatherIcon icon="list" className="w-6 h-6 text-white" />
-          </div>
-          <div
-            className={navClass("/menu/add_menu")}
-            onClick={() => router.push("/menu/add_menu")}
-          >
-            <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
-          </div>
-        </div>
-        <div className={navClass("/")} onClick={() => router.push("/")}>
-          <FeatherIcon icon="home" className="w-6 h-6 text-white" />
+        {/* ================= MENU ADMIN ================= */}
+        <div className="border-b border-white w-full flex flex-col items-center gap-4 pb-4">
+          {[
+            { path: "/pesanan", icon: "list", label: "Pesanan" },
+            {
+              path: "/menu/add_menu",
+              icon: "plus-circle",
+              label: "Tambah Menu",
+            },
+          ].map((menu) => (
+            <div
+              key={menu.path}
+              className={navClass(menu.path)}
+              onClick={() => router.push(menu.path)}
+              title={menu.label} // tooltip saat hover
+            >
+              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+            </div>
+          ))}
         </div>
 
-        <div
-          className={navClass("/login")}
-          onClick={() => router.push("/login")}
-        >
-          <FeatherIcon icon="user" className="w-6 h-6 text-white" />
-        </div>
+        {/* ================= MENU UMUM ================= */}
+        {[
+          { path: "/", icon: "home", label: "Home" },
+          { path: "/login", icon: "user", label: "Login" },
+        ].map((menu) => (
+          <div
+            key={menu.path}
+            className={navClass(menu.path)}
+            onClick={() => router.push(menu.path)}
+            title={menu.label}
+          >
+            <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+          </div>
+        ))}
       </aside>
 
       {/* Main Content */}

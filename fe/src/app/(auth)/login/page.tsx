@@ -64,26 +64,11 @@ export default function AuthPage() {
           <FeatherIcon icon="home" className="w-6 h-6 text-white" />
         </div>
 
-        <div className={navClass("/menu")} onClick={() => router.push("/menu")}>
-          <FeatherIcon icon="grid" className="w-6 h-6 text-white" />
-        </div>
-
-        <div className={navClass("/cart")} onClick={() => router.push("/cart")}>
-          <FeatherIcon icon="shopping-cart" className="w-6 h-6 text-white" />
-        </div>
-
         <div
           className={navClass("/login")}
           onClick={() => router.push("/login")}
         >
           <FeatherIcon icon="user" className="w-6 h-6 text-white" />
-        </div>
-
-        <div
-          className={navClass("/menu/add_menu")}
-          onClick={() => router.push("/menu/add_menu")}
-        >
-          <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
         </div>
 
         <div

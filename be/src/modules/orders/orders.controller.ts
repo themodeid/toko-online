@@ -133,9 +133,11 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
 });
 
 // cancel order penting
+
 export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user.id;
+  const userRole = req.user.role.toUpperCase(); // normalize ke uppercase
 
   const client = await pool.connect();
 
@@ -154,31 +156,35 @@ export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
       throw new AppError("Order tidak ditemukan", 404);
     }
 
-    if (order.user_id !== userId) {
+    // cek hak akses: admin bisa cancel semua, user hanya order sendiri
+    if (order.user_id !== userId && userRole !== "ADMIN") {
       throw new AppError("Tidak boleh cancel order orang lain", 403);
     }
 
-    if (order.status_pesanan !== "ANTRI") {
-      throw new AppError("Order tidak bisa dibatalkan", 400);
-    }
+    // hanya user biasa yang dibatasi status ANTRI & top 3
+    if (userRole !== "ADMIN") {
+      if (order.status_pesanan !== "ANTRI") {
+        throw new AppError("Order tidak bisa dibatalkan", 400);
+      }
 
-    // ambil 3 antrian teratas (lock juga)
-    const topThree = await client.query(`
-      SELECT id
-      FROM orders
-      WHERE status_pesanan = 'ANTRI'
-      ORDER BY created_at ASC
-      LIMIT 3
-      FOR UPDATE
-    `);
+      // ambil 3 antrian teratas (lock juga)
+      const topThree = await client.query(`
+        SELECT id
+        FROM orders
+        WHERE status_pesanan = 'ANTRI'
+        ORDER BY created_at ASC
+        LIMIT 3
+        FOR UPDATE
+      `);
 
-    const topThreeIds = topThree.rows.map((row) => row.id);
+      const topThreeIds = topThree.rows.map((row) => row.id);
 
-    if (topThreeIds.includes(id)) {
-      throw new AppError(
-        "Order sedang diproses dan tidak bisa dibatalkan",
-        400,
-      );
+      if (topThreeIds.includes(id)) {
+        throw new AppError(
+          "Order sedang diproses dan tidak bisa dibatalkan",
+          400,
+        );
+      }
     }
 
     // kembalikan stok

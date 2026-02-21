@@ -1,40 +1,57 @@
 import { Router } from "express";
 import { authGuard } from "../../middlewares/auth";
 import { roleGuard } from "../../middlewares/roleGuard";
-import * as controller from "./orders.controller";
-import {
-  checkout,
-  getOrders,
-  deleteAll,
-  cancelOrder,
-  getMyOrders,
-  getMyOrdersActive,
-  getOrdersItems,
-  getOrdersActiveWithItems,
-  doneOrders,
-  getMyOrdersActiveWithItems,
-} from "./orders.controller";
 import { validateBody } from "../../middlewares/validateBody";
+import * as controller from "./orders.controller";
 import { CheckoutSchema, OrderResponseSchema } from "./orders.schema";
 
 const router = Router();
 
-// membuat pesanan
+/**
+ * ================================
+ * CREATE
+ * ================================
+ */
+// Membuat pesanan baru
 router.post("/", authGuard, validateBody(CheckoutSchema), controller.checkout);
-// ambil semua orderan
+
+/**
+ * ================================
+ * READ
+ * ================================
+ */
+// Ambil semua order
 router.get("/", authGuard, controller.getOrders);
-// mengambil semua orderan active beserta pesanannya
+
+// Ambil semua order aktif beserta item
 router.get("/activeItems", authGuard, controller.getOrdersActiveWithItems);
-// mengambil my orderan yang aktive
-router.get("/myActive", authGuard, controller.getMyOrdersActive);
-// mengambil semua orderan aktif saya beserta item didalamnya
+
+// Ambil order saya yang aktif beserta item
 router.get("/myActiveItems", authGuard, controller.getMyOrdersActiveWithItems);
-// mengambil items dari orderan
+
+// Ambil items dari order tertentu
 router.get("/:id/items", authGuard, controller.getOrdersItems);
+
+// Ambil detail order tertentu (saya)
 router.get("/:id", authGuard, controller.getMyOrders);
-// update selesai
+
+/**
+ * ================================
+ * UPDATE
+ * ================================
+ */
+// Tandai order selesai
 router.patch("/:id/selesai", authGuard, controller.doneOrders);
-// update and delete
+
+// Cancel order
 router.patch("/:id/cancel", authGuard, controller.cancelOrder);
+
+/**
+ * ================================
+ * DELETE
+ * ================================
+ */
+// Hapus semua order
 router.delete("/", authGuard, controller.deleteAll);
+
 export default router;
