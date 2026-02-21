@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import FeatherIcon from "feather-icons-react";
 import { OrderActiveWithItems } from "@/features/cart/types";
+import { getAllProduk } from "@/features/produk/api";
+import { Produk } from "@/features/produk/types";
+import Image from "next/image";
+
 import {
   getAllOrderActiveItems,
   selesaiOrder,
@@ -18,7 +22,7 @@ export default function Antrian() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-
+  const [produk, setProduk] = useState<Produk[]>([]);
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
       pathname === path
@@ -40,6 +44,18 @@ export default function Antrian() {
       setOrders(data);
     } catch (err) {
       setError("Gagal mengambil pesanan");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function getProduk() {
+    try {
+      setLoading(true);
+      const data = await getAllProduk();
+      setProduk(data.produk);
+    } catch (err) {
+      setError("Gagal mengambil produk");
     } finally {
       setLoading(false);
     }
@@ -70,7 +86,17 @@ export default function Antrian() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([fetchOrders(), getProduk()]);
+      } catch {
+        setError("Gagal memuat data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   return (
@@ -154,25 +180,53 @@ export default function Antrian() {
 
                 {/* Items */}
                 <div className="space-y-3 border-t pt-3">
-                  {order.items.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between text-sm text-gray-700"
-                    >
-                      <div>
-                        <p className="font-medium">{item.nama_produk}</p>
-                        <p className="text-xs text-gray-400">
-                          {item.qty} x Rp{" "}
-                          {item.harga_barang.toLocaleString("id-ID")}
+                  {order.items.map((item, index) => {
+                    const produkItem = produk.find(
+                      (p) => p.id === item.produk_id,
+                    ); // cari image
+
+                    return (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        {/* Image + info */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gray-200 relative">
+                            {produkItem?.image ? (
+                              <Image
+                                src={`http://localhost:3000${produkItem.image}`}
+                                alt={item.nama_produk}
+                                fill
+                                className="object-cover rounded"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full text-gray-500 text-xs">
+                                No Image
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-black">
+                              {item.nama_produk}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {item.qty} x Rp{" "}
+                              {item.harga_barang.toLocaleString("id-ID")}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Total harga item */}
+                        <p className="font-semibold text-black">
+                          Rp{" "}
+                          {(item.harga_barang * item.qty).toLocaleString(
+                            "id-ID",
+                          )}
                         </p>
                       </div>
-
-                      <p className="font-semibold">
-                        Rp{" "}
-                        {(item.harga_barang * item.qty).toLocaleString("id-ID")}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Footer */}
