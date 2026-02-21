@@ -8,12 +8,14 @@ import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
 import { CartItem, Order, OrderItem } from "@/features/cart/types";
+import { user } from "@/features/user/type";
 import {
   createOrder,
   getMyOrders,
   cancelOrder,
   getMyOrdersActiveWithItems,
 } from "@/features/cart/api";
+import { getUser } from "@/features/user/api";
 import Image from "next/image";
 
 export default function MenuPage() {
@@ -24,7 +26,7 @@ export default function MenuPage() {
   const [produk, setProduk] = useState<Produk[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pesanan, setPesanan] = useState<Order[]>([]);
-
+  const [user, setUser] = useState<user | null>(null);
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
       pathname === path
@@ -56,11 +58,23 @@ export default function MenuPage() {
     }
   }
 
+  async function getProfil() {
+    try {
+      setLoading(true);
+      const data = await getUser();
+      setUser(data); // ✅ object sesuai state
+    } catch (error) {
+      setError("gagal mengambil data pribadi");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        await Promise.all([getProduk(), fetchPesanan()]);
+        await Promise.all([getProduk(), fetchPesanan(), getProfil()]);
       } catch {
         setError("Gagal memuat data");
       } finally {
@@ -177,7 +191,7 @@ export default function MenuPage() {
         {/* Header */}
         <div className="mb-6">
           {/* <h1>selamat datang {username}</h1> */}
-
+          <h1>selamat datang {user?.username}</h1>{" "}
           <h1 className="text-2xl font-semibold">Menu dari cafe kami</h1>
           <p className="text-sm text-gray-400">
             Pilih menu untuk ditambahkan ke pesanan
