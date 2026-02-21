@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { registerServices, loginServices } from "./register.services";
+import { registerServices, loginServices } from "./auth.services";
 import bcrypt from "bcrypt";
 import { catchAsync } from "../../utils/catchAsync";
 import { AppError } from "../../errors/AppError";
 import jwt from "jsonwebtoken";
+import { LoginSchema, LoginResponseSchema } from "./auth.schema";
 
 export const register = catchAsync(async (req: Request, res: Response) => {
   const { username, password, role } = req.body;
@@ -19,7 +20,9 @@ export const register = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const login = catchAsync(async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const parsed = LoginSchema.parse(req.body);
+
+  const { username, password } = parsed;
 
   const user = await loginServices(username);
   if (!user) {
@@ -31,7 +34,6 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     throw new AppError("username atau password salah", 401);
   }
 
-  // 🔑 Generate JWT
   const token = jwt.sign(
     {
       id: user.id,
@@ -43,7 +45,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     },
   );
 
-  res.json({
+  const responseData = {
     message: "login berhasil",
     token,
     user: {
@@ -51,5 +53,10 @@ export const login = catchAsync(async (req: Request, res: Response) => {
       username: user.username,
       role: user.role,
     },
-  });
+  };
+
+  // ✅ VALIDASI RESPONSE (opsional tapi sangat profesional)
+  const validatedResponse = LoginResponseSchema.parse(responseData);
+
+  res.json(validatedResponse);
 });

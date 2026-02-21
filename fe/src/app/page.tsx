@@ -157,26 +157,11 @@ export default function MenuPage() {
           <FeatherIcon icon="home" className="w-6 h-6 text-white" />
         </div>
 
-        <div className={navClass("/menu")} onClick={() => router.push("/menu")}>
-          <FeatherIcon icon="grid" className="w-6 h-6 text-white" />
-        </div>
-
-        <div className={navClass("/cart")} onClick={() => router.push("/cart")}>
-          <FeatherIcon icon="shopping-cart" className="w-6 h-6 text-white" />
-        </div>
-
         <div
           className={navClass("/login")}
           onClick={() => router.push("/login")}
         >
           <FeatherIcon icon="user" className="w-6 h-6 text-white" />
-        </div>
-
-        <div
-          className={navClass("/menu/add_menu")}
-          onClick={() => router.push("/menu/add_menu")}
-        >
-          <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
         </div>
 
         <div
@@ -191,7 +176,9 @@ export default function MenuPage() {
       <main className="flex-1 p-6 overflow-y-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold">Menu Coffee</h1>
+          {/* <h1>selamat datang {username}</h1> */}
+
+          <h1 className="text-2xl font-semibold">Menu dari cafe kami</h1>
           <p className="text-sm text-gray-400">
             Pilih menu untuk ditambahkan ke pesanan
           </p>
@@ -256,13 +243,6 @@ export default function MenuPage() {
                     className="w-5 h-5 text-black"
                   />
                 </button>
-
-                <Link
-                  href={`/menu/profil_produk/${item.id}`}
-                  className="block text-center bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded-xl transition"
-                >
-                  Detail
-                </Link>
               </div>
             </div>
           ))}
@@ -378,7 +358,6 @@ export default function MenuPage() {
                       <p className="text-gray-400">
                         {item.quantity} x Rp{" "}
                         {Number(item.harga ?? 0).toLocaleString("id-ID")}
-
                       </p>
                     </div>
 
