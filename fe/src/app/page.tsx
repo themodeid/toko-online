@@ -269,15 +269,31 @@ export default function MenuPage() {
         <div className="space-y-4">
           {cart.map((item) => (
             <div key={item.produkId} className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gray-200 relative">
-                {item.image && (
-                  <Image
-                    src={item.image}
-                    alt={item.nama}
-                    fill
-                    className="object-cover"
-                  />
-                )}
+              {/* Image + Info */}
+              <div className="flex items-center gap-3">
+                {/** Cari produk sesuai produkId dari item pesanan */}
+                <div className="w-12 h-12 bg-gray-200 relative">
+                  {produk.find((p) => p.id === item.produkId)?.image ? (
+                    <Image
+                      src={`http://localhost:3000${produk.find((p) => p.id === item.produkId)?.image}`}
+                      alt={item.nama}
+                      fill
+                      className="object-cover rounded"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500 text-xs">
+                      No Image
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <p className="text-white">{item.nama}</p>
+                  <p className="text-gray-400">
+                    {item.quantity} x Rp{" "}
+                    {Number(item.harga ?? 0).toLocaleString("id-ID")}
+                  </p>
+                </div>
               </div>
               <div className="flex-1">
                 <p className="font-medium">{item.nama}</p>
@@ -340,6 +356,7 @@ export default function MenuPage() {
         {/* menampilkan seluruh pesanan anda */}
         <h1 className="h-12 w12  dflex align-middle">pesanan anda</h1>
 
+        {/* Items */}
         <div className="space-y-6">
           {pesanan.map((order) => (
             <div
@@ -362,24 +379,51 @@ export default function MenuPage() {
 
               {/* Items */}
               <div className="space-y-3">
-                {order.items?.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center text-sm border-b border-white/5 pb-2"
-                  >
-                    <div>
-                      <p className="text-white">{item.nama}</p>
-                      <p className="text-gray-400">
-                        {item.quantity} x Rp{" "}
-                        {Number(item.harga ?? 0).toLocaleString("id-ID")}
+                {order.items?.map((item, index) => {
+                  // Cari produk sesuai produk_id dari order item
+                  const produkItem = produk.find(
+                    (p) => p.id === item.produk_id,
+                  );
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center text-sm border-b border-white/5 pb-2"
+                    >
+                      {/* Image + Info */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gray-200 relative">
+                          {produkItem?.image ? (
+                            <Image
+                              src={`http://localhost:3000${produkItem.image}`}
+                              alt={item.nama}
+                              fill
+                              className="object-cover rounded"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-gray-500 text-xs">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <p className="text-white">{item.nama}</p>
+                          <p className="text-gray-400">
+                            {item.quantity} x Rp{" "}
+                            {Number(item.harga ?? 0).toLocaleString("id-ID")}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Harga Total */}
+                      <p className="text-green-400 font-medium">
+                        Rp{" "}
+                        {(item.harga * item.quantity).toLocaleString("id-ID")}
                       </p>
                     </div>
-
-                    <p className="text-green-400 font-medium">
-                      Rp {(item.harga * item.quantity).toLocaleString("id-ID")}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Total */}
