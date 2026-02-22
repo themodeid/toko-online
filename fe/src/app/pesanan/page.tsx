@@ -101,10 +101,10 @@ export default function Antrian() {
 
   return (
     <div className="min-h-screen flex bg-[#0F0F0F] text-white">
-      {/* Sidebar */}
+      {/* ================= SIDEBAR ================= */}
       <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
-        {/* ================= MENU ADMIN ================= */}
-        <div className="border-b border-white w-full flex flex-col items-center gap-4 pb-4">
+        {/* Admin Menu */}
+        <div className="w-full flex flex-col items-center gap-4 pb-6 border-b border-white/10">
           {[
             { path: "/pesanan", icon: "list", label: "Pesanan" },
             {
@@ -117,14 +117,14 @@ export default function Antrian() {
               key={menu.path}
               className={navClass(menu.path)}
               onClick={() => router.push(menu.path)}
-              title={menu.label} // tooltip saat hover
+              title={menu.label}
             >
               <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
             </div>
           ))}
         </div>
 
-        {/* ================= MENU UMUM ================= */}
+        {/* General Menu */}
         {[
           { path: "/", icon: "home", label: "Home" },
           { path: "/login", icon: "user", label: "Login" },
@@ -140,12 +140,15 @@ export default function Antrian() {
         ))}
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 bg-gray-100 p-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Pesanan Aktif</h1>
+      {/* ================= MAIN ================= */}
+      <main className="flex-1 p-8 overflow-y-auto">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold">Pesanan Aktif</h1>
+          <p className="text-sm text-gray-400">Kelola pesanan pelanggan cafe</p>
+        </div>
 
-        {loading && <p className="text-gray-600">Loading...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {loading && <p className="text-gray-400">Loading...</p>}
+        {error && <p className="text-red-400">{error}</p>}
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {orders.map((order) => {
@@ -156,14 +159,12 @@ export default function Antrian() {
             return (
               <div
                 key={order.id}
-                className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all duration-300"
+                className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 hover:scale-[1.02] transition"
               >
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h2 className="font-bold text-lg text-gray-800">
-                      {order.username}
-                    </h2>
+                    <h2 className="font-semibold text-lg">{order.username}</h2>
                     <p className="text-xs text-gray-400">
                       {new Date(order.created_at).toLocaleString("id-ID")}
                     </p>
@@ -179,20 +180,19 @@ export default function Antrian() {
                 </div>
 
                 {/* Items */}
-                <div className="space-y-3 border-t pt-3">
+                <div className="space-y-3 border-t border-white/5 pt-4">
                   {order.items.map((item, index) => {
                     const produkItem = produk.find(
                       (p) => p.id === item.produk_id,
-                    ); // cari image
+                    );
 
                     return (
                       <div
                         key={index}
                         className="flex justify-between items-center text-sm"
                       >
-                        {/* Image + info */}
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gray-200 relative">
+                          <div className="w-12 h-12 bg-[#222] relative rounded">
                             {produkItem?.image ? (
                               <Image
                                 src={`http://localhost:3000${produkItem.image}`}
@@ -206,19 +206,17 @@ export default function Antrian() {
                               </div>
                             )}
                           </div>
+
                           <div>
-                            <p className="font-medium text-black">
-                              {item.nama_produk}
-                            </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="font-medium">{item.nama_produk}</p>
+                            <p className="text-xs text-gray-400">
                               {item.qty} x Rp{" "}
                               {item.harga_barang.toLocaleString("id-ID")}
                             </p>
                           </div>
                         </div>
 
-                        {/* Total harga item */}
-                        <p className="font-semibold text-black">
+                        <p className="font-semibold text-green-400">
                           Rp{" "}
                           {(item.harga_barang * item.qty).toLocaleString(
                             "id-ID",
@@ -230,36 +228,29 @@ export default function Antrian() {
                 </div>
 
                 {/* Footer */}
-                <div className="border-t mt-4 pt-3 flex justify-between items-center">
-                  <p className="text-sm text-gray-500">
+                <div className="border-t border-white/5 mt-4 pt-4 flex justify-between items-center">
+                  <p className="text-sm text-gray-400">
                     Total Item:{" "}
                     {order.items.reduce((acc, item) => acc + item.qty, 0)}
                   </p>
 
-                  <p className="font-bold text-lg text-green-600">
+                  <p className="font-bold text-lg text-green-400">
                     Rp {Number(order.total_price).toLocaleString("id-ID")}
                   </p>
                 </div>
 
-                {/* Detail Button */}
-                <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition font-medium">
-                  Detail Pesanan
-                </button>
-
                 {/* Action Buttons */}
-                <div className="mt-3 flex gap-2">
+                <div className="mt-5 flex gap-3">
                   <button
                     onClick={() => handleCancel(order.id)}
                     disabled={isFinished || actionLoading === order.id}
                     className={`flex-1 py-2 rounded-xl font-medium transition ${
                       isFinished
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-red-500 text-white hover:bg-red-600"
+                        ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                        : "bg-red-500 hover:bg-red-600"
                     }`}
                   >
-                    {actionLoading === order.id
-                      ? "Processing..."
-                      : "Cancel Order"}
+                    {actionLoading === order.id ? "Processing..." : "Cancel"}
                   </button>
 
                   <button
@@ -267,13 +258,11 @@ export default function Antrian() {
                     disabled={isFinished || actionLoading === order.id}
                     className={`flex-1 py-2 rounded-xl font-medium transition ${
                       isFinished
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-green-600 text-white hover:bg-green-700"
+                        ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                        : "bg-green-500 hover:bg-green-600 text-black"
                     }`}
                   >
-                    {actionLoading === order.id
-                      ? "Processing..."
-                      : "Selesai Order"}
+                    {actionLoading === order.id ? "Processing..." : "Selesai"}
                   </button>
                 </div>
               </div>

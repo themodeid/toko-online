@@ -58,7 +58,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex bg-[#0F0F0F] text-white">
-      {/* Sidebar */}
+      {/* ================= SIDEBAR ================= */}
       <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
         <div className={navClass("/")} onClick={() => router.push("/")}>
           <FeatherIcon icon="home" className="w-6 h-6 text-white" />
@@ -79,41 +79,74 @@ export default function AuthPage() {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
-        <div className="w-full max-w-md bg-[#1A1A1A] p-8 rounded-2xl shadow-lg">
-          <h1 className="text-2xl font-semibold mb-6 text-center">
-            {mode === "login" ? "Login" : "Register"}
-          </h1>
+      {/* ================= MAIN ================= */}
+      <main className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-md bg-[#1A1A1A] p-8 rounded-2xl border border-white/5 shadow-xl">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-semibold">
+              {mode === "login" ? "Welcome Back 👋" : "Create Account"}
+            </h1>
+            <p className="text-sm text-gray-400 mt-2">
+              {mode === "login"
+                ? "Login untuk melanjutkan"
+                : "Daftar untuk mulai memesan"}
+            </p>
+          </div>
 
+          {/* Error */}
           {error && (
-            <p className="mb-4 text-sm text-red-500 text-center">{error}</p>
+            <div className="mb-4 bg-red-500/20 text-red-400 text-sm px-4 py-2 rounded-lg text-center">
+              {error}
+            </div>
           )}
 
-          <form action={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              name="nama"
-              placeholder="Username"
-              className="w-full px-4 py-2 rounded bg-white text-black outline-none"
-            />
+          {/* Form */}
+          <form action={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm mb-2 text-gray-300">
+                Username
+              </label>
+              <input
+                type="text"
+                name="nama"
+                placeholder="Masukkan username"
+                className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+                required
+              />
+            </div>
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="w-full px-4 py-2 rounded bg-white text-black outline-none"
-            />
+            <div>
+              <label className="block text-sm mb-2 text-gray-300">
+                Password
+              </label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Masukkan password"
+                className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+                required
+              />
+            </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded transition disabled:opacity-50"
+              className={`w-full py-3 rounded-xl font-semibold transition ${
+                loading
+                  ? "bg-gray-600 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600 text-black"
+              }`}
             >
-              {loading ? "Loading..." : mode === "login" ? "Login" : "Register"}
+              {loading
+                ? "Processing..."
+                : mode === "login"
+                  ? "Login"
+                  : "Register"}
             </button>
           </form>
 
+          {/* Switch Mode */}
           <div className="mt-6 text-center text-sm text-gray-400">
             {mode === "login" ? (
               <>
@@ -123,7 +156,7 @@ export default function AuthPage() {
                     setMode("register");
                     setError(null);
                   }}
-                  className="text-green-400 hover:underline"
+                  className="text-green-400 hover:text-green-300 transition"
                 >
                   Register
                 </button>
@@ -136,7 +169,7 @@ export default function AuthPage() {
                     setMode("login");
                     setError(null);
                   }}
-                  className="text-green-400 hover:underline"
+                  className="text-green-400 hover:text-green-300 transition"
                 >
                   Login
                 </button>

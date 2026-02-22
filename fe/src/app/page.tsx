@@ -194,12 +194,21 @@ export default function MenuPage() {
       {/* ================= MAIN MENU ================= */}
       <main className="flex-1 p-6 overflow-y-auto">
         {/* Header */}
-        <div className="mb-6">
-          {/* <h1>selamat datang {username}</h1> */}
-          <h1>selamat datang {user?.username}</h1>{" "}
-          <h1 className="text-2xl font-semibold">Menu dari cafe kami</h1>
-          <p className="text-sm text-gray-400">
-            Pilih menu untuk ditambahkan ke pesanan
+        <div className="mb-10">
+          {/* Greeting */}
+          <p className="text-sm text-gray-400">Selamat datang kembali,</p>
+
+          <h2 className="text-lg font-medium text-green-400 mb-2">
+            {user?.username}
+          </h2>
+
+          {/* Main Title */}
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Menu dari Cafe Kami ☕
+          </h1>
+
+          <p className="text-sm text-gray-400 mt-2 max-w-md">
+            Pilih menu favoritmu dan tambahkan ke pesanan dengan mudah.
           </p>
         </div>
 
