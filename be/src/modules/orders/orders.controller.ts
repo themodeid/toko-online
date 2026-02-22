@@ -25,7 +25,7 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
   const produksIds = items.map((i: any) => i.produk_id);
 
   const produksQuery = `
-    SELECT id, nama, harga, stock 
+    SELECT id, nama, harga, stock , status
     FROM produk 
     WHERE id = ANY($1::uuid[])
   `;
@@ -35,6 +35,15 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
 
   if (products.length !== items.length) {
     throw new AppError("Ada produk yang tidak ditemukan", 400);
+  }
+
+  const unavailableProduct = products.find((p) => p.status === false);
+
+  if (unavailableProduct) {
+    throw new AppError(
+      `Produk ${unavailableProduct.nama} tidak tersedia untuk dipesan`,
+      400,
+    );
   }
 
   const orderItems = items.map((item: any) => {

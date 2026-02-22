@@ -262,15 +262,17 @@ export default function MenuPage() {
                   </span>
                 </div>
 
-                <button
-                  onClick={() => updateCart(item)}
-                  className="bg-green-500 hover:bg-green-600 p-2 rounded-lg transition"
-                >
-                  <FeatherIcon
-                    icon="shopping-cart"
-                    className="w-5 h-5 text-black"
-                  />
-                </button>
+                {item.status && item.stock > 0 && (
+                  <button
+                    onClick={() => updateCart(item)}
+                    className="bg-green-500 hover:bg-green-600 p-2 rounded-lg transition"
+                  >
+                    <FeatherIcon
+                      icon="shopping-cart"
+                      className="w-5 h-5 text-black"
+                    />
+                  </button>
+                )}
               </div>
             </div>
           ))}
