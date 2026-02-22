@@ -105,15 +105,6 @@ export default function AuthPage() {
               className="w-full px-4 py-2 rounded bg-white text-black outline-none"
             />
 
-            {mode === "register" && (
-              <input
-                type="text"
-                name="role"
-                placeholder="Role (default: user)"
-                className="w-full px-4 py-2 rounded bg-white text-black outline-none"
-              />
-            )}
-
             <button
               type="submit"
               disabled={loading}
