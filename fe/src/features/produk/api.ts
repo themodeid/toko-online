@@ -94,14 +94,3 @@ export async function updateProduk(
     throw new Error("Gagal memperbarui produk");
   }
 }
-
-/* =======================
-   DELETE
-======================= */
-export async function deleteProduk(id: string): Promise<void> {
-  try {
-    await api.delete(`/api/produk/${id}`);
-  } catch (error) {
-    throw new Error("Gagal menghapus produk");
-  }
-}

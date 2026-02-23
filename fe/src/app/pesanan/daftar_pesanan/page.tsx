@@ -99,6 +99,7 @@ export default function Antrian() {
         <div className="w-full flex flex-col items-center gap-4 pb-6 border-b border-white/10">
           {[
             { path: "/pesanan/daftar_pesanan", icon: "list", label: "Pesanan" },
+
             { path: "/menu/add_menu", icon: "plus", label: "Tambah Menu" },
           ].map((menu) => (
             <div
@@ -112,21 +113,19 @@ export default function Antrian() {
           ))}
         </div>
 
-        {[
-          { path: "/", icon: "home", label: "Home" },
-          { path: "/login", icon: "user", label: "Login" },
-        ].map((menu) => (
-          <div
-            key={menu.path}
-            className={navClass(menu.path)}
-            onClick={() => router.push(menu.path)}
-            title={menu.label}
-          >
-            <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
-          </div>
-        ))}
+        {[{ path: "/login_admin", icon: "user", label: "Login" }].map(
+          (menu) => (
+            <div
+              key={menu.path}
+              className={navClass(menu.path)}
+              onClick={() => router.push(menu.path)}
+              title={menu.label}
+            >
+              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+            </div>
+          ),
+        )}
       </aside>
-
       {/* MAIN */}
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="mb-8">

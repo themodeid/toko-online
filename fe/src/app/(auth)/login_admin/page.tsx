@@ -60,23 +60,35 @@ export default function AuthPage() {
     <div className="min-h-screen flex bg-[#0F0F0F] text-white">
       {/* ================= SIDEBAR ================= */}
       <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
-        <div className={navClass("/")} onClick={() => router.push("/")}>
-          <FeatherIcon icon="home" className="w-6 h-6 text-white" />
+        <div className="w-full flex flex-col items-center gap-4 pb-6 border-b border-white/10">
+          {[
+            { path: "/pesanan/daftar_pesanan", icon: "list", label: "Pesanan" },
+
+            { path: "/menu/add_menu", icon: "plus", label: "Tambah Menu" },
+          ].map((menu) => (
+            <div
+              key={menu.path}
+              className={navClass(menu.path)}
+              onClick={() => router.push(menu.path)}
+              title={menu.label}
+            >
+              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+            </div>
+          ))}
         </div>
 
-        <div
-          className={navClass("/login")}
-          onClick={() => router.push("/login")}
-        >
-          <FeatherIcon icon="user" className="w-6 h-6 text-white" />
-        </div>
-
-        <div
-          className={navClass("/pesanan/history_pesanan")}
-          onClick={() => router.push("/pesanan/history_pesanan")}
-        >
-          <FeatherIcon icon="align-justify" className="w-6 h-6 text-white" />
-        </div>
+        {[{ path: "/login_admin", icon: "user", label: "Login" }].map(
+          (menu) => (
+            <div
+              key={menu.path}
+              className={navClass(menu.path)}
+              onClick={() => router.push(menu.path)}
+              title={menu.label}
+            >
+              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+            </div>
+          ),
+        )}
       </aside>
 
       {/* ================= MAIN ================= */}

@@ -6,11 +6,7 @@ import { Produk } from "@/features/produk/types";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
 
-import {
-  deleteProduk,
-  getProdukById,
-  updateProduk,
-} from "@/features/produk/api";
+import { getProdukById, updateProduk } from "@/features/produk/api";
 import type { UpdateProdukPayload } from "@/features/produk/types";
 
 export default function MenuPage() {
@@ -84,18 +80,6 @@ export default function MenuPage() {
     }
   }
 
-  async function handleDelete() {
-    if (!confirm("Yakin ingin menghapus produk ini?")) return;
-
-    try {
-      setError(null);
-      await deleteProduk(id);
-      router.push("/menu/daftar_menu");
-    } catch (error) {
-      setError("gagal menghapus produk");
-    }
-  }
-
   if (loading && !produk) return <p>Loading...</p>;
   if (!produk) return null;
 
@@ -103,30 +87,35 @@ export default function MenuPage() {
     <div className="min-h-screen flex bg-[#0F0F0F] text-white">
       {/* ================= SIDEBAR ================= */}
       <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
-        <div className={navClass("/")} onClick={() => router.push("/")}>
-          <FeatherIcon icon="home" className="w-6 h-6 text-white" />
+        <div className="w-full flex flex-col items-center gap-4 pb-6 border-b border-white/10">
+          {[
+            { path: "/pesanan/daftar_pesanan", icon: "list", label: "Pesanan" },
+
+            { path: "/menu/add_menu", icon: "plus", label: "Tambah Menu" },
+          ].map((menu) => (
+            <div
+              key={menu.path}
+              className={navClass(menu.path)}
+              onClick={() => router.push(menu.path)}
+              title={menu.label}
+            >
+              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+            </div>
+          ))}
         </div>
 
-        <div
-          className={navClass("/login")}
-          onClick={() => router.push("/login")}
-        >
-          <FeatherIcon icon="user" className="w-6 h-6 text-white" />
-        </div>
-
-        <div
-          className={navClass("/menu/add_menu")}
-          onClick={() => router.push("/menu/add_menu")}
-        >
-          <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
-        </div>
-
-        <div
-          className={navClass("/pesanan")}
-          onClick={() => router.push("/pesanan")}
-        >
-          <FeatherIcon icon="list" className="w-6 h-6 text-white" />
-        </div>
+        {[
+          { path: "/login", icon: "user", label: "Login" },
+        ].map((menu) => (
+          <div
+            key={menu.path}
+            className={navClass(menu.path)}
+            onClick={() => router.push(menu.path)}
+            title={menu.label}
+          >
+            <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+          </div>
+        ))}
       </aside>
 
       {/* ================= MAIN ================= */}
@@ -226,14 +215,6 @@ export default function MenuPage() {
                 }`}
               >
                 {loading ? "Updating..." : "Update Produk"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="flex-1 py-3 rounded-xl font-semibold bg-red-500 hover:bg-red-600 transition"
-              >
-                Delete
               </button>
             </div>
           </form>

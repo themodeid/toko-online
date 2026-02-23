@@ -62,8 +62,30 @@ export default function HistoryPesanan() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] text-white p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen flex bg-[#0F0F0F] text-white">
+      {/* ================= SIDEBAR ================= */}
+      <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
+        <div className={navClass("/")} onClick={() => router.push("/")}>
+          <FeatherIcon icon="home" className="w-6 h-6 text-white" />
+        </div>
+
+        <div
+          className={navClass("/login")}
+          onClick={() => router.push("/login")}
+        >
+          <FeatherIcon icon="user" className="w-6 h-6 text-white" />
+        </div>
+
+        <div
+          className={navClass("/pesanan/history_pesanan")}
+          onClick={() => router.push("/pesanan/history_pesanan")}
+        >
+          <FeatherIcon icon="align-justify" className="w-6 h-6 text-white" />
+        </div>
+      </aside>
+
+      {/* ================= MAIN CONTENT ================= */}
+      <main className="flex-1 p-8 overflow-y-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold">Riwayat Pesanan</h1>
@@ -162,7 +184,7 @@ export default function HistoryPesanan() {
             </div>
           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
