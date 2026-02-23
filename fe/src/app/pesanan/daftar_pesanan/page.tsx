@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import FeatherIcon from "feather-icons-react";
-import { OrderActiveWithItems } from "@/features/cart/types";
-import { getAllProduk } from "@/features/produk/api";
-import { Produk } from "@/features/produk/types";
 import Image from "next/image";
 
 import {
@@ -13,16 +10,21 @@ import {
   selesaiOrder,
   cancelOrder,
 } from "@/features/cart/api";
+import { getAllProduk } from "@/features/produk/api";
+import { Produk } from "@/features/produk/types";
+import { Order } from "@/features/cart/types";
 
 export default function Antrian() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [orders, setOrders] = useState<OrderActiveWithItems[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [produk, setProduk] = useState<Produk[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [loadingProduk, setLoadingProduk] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [produk, setProduk] = useState<Produk[]>([]);
+
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
       pathname === path
@@ -37,27 +39,28 @@ export default function Antrian() {
     DIBATALKAN: "bg-red-100 text-red-700",
   };
 
+  // ================= FETCH ORDERS =================
   async function fetchOrders() {
     try {
-      setLoading(true);
-      const data = await getAllOrderActiveItems();
-      setOrders(data);
-    } catch (err) {
-      setError("Gagal mengambil pesanan");
+      setLoadingOrders(true);
+      const ordersData = await getAllOrderActiveItems();
+      setOrders(ordersData);
+    } catch {
+      setError("Gagal memuat orders");
     } finally {
-      setLoading(false);
+      setLoadingOrders(false);
     }
   }
 
-  async function getProduk() {
+  async function fetchProduk() {
     try {
-      setLoading(true);
-      const data = await getAllProduk();
-      setProduk(data.produk);
-    } catch (err) {
-      setError("Gagal mengambil produk");
+      setLoadingProduk(true);
+      const res = await getAllProduk();
+      setProduk(res.produk);
+    } catch {
+      setError("Gagal memuat produk");
     } finally {
-      setLoading(false);
+      setLoadingProduk(false);
     }
   }
 
@@ -66,8 +69,6 @@ export default function Antrian() {
       setActionLoading(orderId);
       await selesaiOrder(orderId);
       await fetchOrders();
-    } catch (error) {
-      setError("Gagal menyelesaikan order");
     } finally {
       setActionLoading(null);
     }
@@ -78,40 +79,27 @@ export default function Antrian() {
       setActionLoading(orderId);
       await cancelOrder(orderId);
       await fetchOrders();
-    } catch (error) {
-      setError("Gagal membatalkan order");
     } finally {
       setActionLoading(null);
     }
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        await Promise.all([fetchOrders(), getProduk()]);
-      } catch {
-        setError("Gagal memuat data");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
+    fetchOrders();
+    fetchProduk();
   }, []);
 
+  const isLoading = loadingOrders || loadingProduk;
+
+  // ================= RENDER =================
   return (
     <div className="min-h-screen flex bg-[#0F0F0F] text-white">
-      {/* ================= SIDEBAR ================= */}
+      {/* SIDEBAR */}
       <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
-        {/* Admin Menu */}
         <div className="w-full flex flex-col items-center gap-4 pb-6 border-b border-white/10">
           {[
-            { path: "/pesanan", icon: "list", label: "Pesanan" },
-            {
-              path: "/menu/add_menu",
-              icon: "plus-circle",
-              label: "Tambah Menu",
-            },
+            { path: "/pesanan/daftar_pesanan", icon: "list", label: "Pesanan" },
+            { path: "/menu/add_menu", icon: "plus", label: "Tambah Menu" },
           ].map((menu) => (
             <div
               key={menu.path}
@@ -124,7 +112,6 @@ export default function Antrian() {
           ))}
         </div>
 
-        {/* General Menu */}
         {[
           { path: "/", icon: "home", label: "Home" },
           { path: "/login", icon: "user", label: "Login" },
@@ -140,21 +127,21 @@ export default function Antrian() {
         ))}
       </aside>
 
-      {/* ================= MAIN ================= */}
+      {/* MAIN */}
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold">Pesanan Aktif</h1>
           <p className="text-sm text-gray-400">Kelola pesanan pelanggan cafe</p>
         </div>
 
-        {loading && <p className="text-gray-400">Loading...</p>}
+        {isLoading && <p className="text-gray-400">Loading...</p>}
         {error && <p className="text-red-400">{error}</p>}
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {orders.map((order) => {
             const isFinished =
-              order.status_pesanan === "SELESAI" ||
-              order.status_pesanan === "DIBATALKAN";
+              order.statusPesanan === "SELESAI" ||
+              order.statusPesanan === "DIBATALKAN";
 
             return (
               <div
@@ -164,31 +151,27 @@ export default function Antrian() {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h2 className="font-semibold text-lg">{order.username}</h2>
+                    <h2 className="font-semibold text-lg">{order.namaUser}</h2>
                     <p className="text-xs text-gray-400">
-                      {new Date(order.created_at).toLocaleString("id-ID")}
+                      {new Date(order.createdAt).toLocaleString("id-ID")}
                     </p>
                   </div>
-
                   <span
-                    className={`px-3 py-1 text-xs rounded-full font-semibold ${
-                      statusColor[order.status_pesanan]
-                    }`}
+                    className={`px-3 py-1 text-xs rounded-full font-semibold ${statusColor[order.statusPesanan]}`}
                   >
-                    {order.status_pesanan}
+                    {order.statusPesanan}
                   </span>
                 </div>
 
                 {/* Items */}
                 <div className="space-y-3 border-t border-white/5 pt-4">
-                  {order.items.map((item, index) => {
+                  {order.items.map((item) => {
                     const produkItem = produk.find(
-                      (p) => p.id === item.produk_id,
+                      (p) => p.id === item.produkId,
                     );
-
                     return (
                       <div
-                        key={index}
+                        key={item.produkId}
                         className="flex justify-between items-center text-sm"
                       >
                         <div className="flex items-center gap-3">
@@ -196,7 +179,7 @@ export default function Antrian() {
                             {produkItem?.image ? (
                               <Image
                                 src={`http://localhost:3000${produkItem.image}`}
-                                alt={item.nama_produk}
+                                alt={item.nama}
                                 fill
                                 className="object-cover rounded"
                               />
@@ -206,21 +189,17 @@ export default function Antrian() {
                               </div>
                             )}
                           </div>
-
                           <div>
-                            <p className="font-medium">{item.nama_produk}</p>
+                            <p className="font-medium">{item.nama}</p>
                             <p className="text-xs text-gray-400">
-                              {item.qty} x Rp{" "}
-                              {item.harga_barang.toLocaleString("id-ID")}
+                              {item.quantity} x Rp{" "}
+                              {item.harga.toLocaleString("id-ID")}
                             </p>
                           </div>
                         </div>
-
                         <p className="font-semibold text-green-400">
                           Rp{" "}
-                          {(item.harga_barang * item.qty).toLocaleString(
-                            "id-ID",
-                          )}
+                          {(item.harga * item.quantity).toLocaleString("id-ID")}
                         </p>
                       </div>
                     );
@@ -231,36 +210,26 @@ export default function Antrian() {
                 <div className="border-t border-white/5 mt-4 pt-4 flex justify-between items-center">
                   <p className="text-sm text-gray-400">
                     Total Item:{" "}
-                    {order.items.reduce((acc, item) => acc + item.qty, 0)}
+                    {order.items.reduce((acc, item) => acc + item.quantity, 0)}
                   </p>
-
                   <p className="font-bold text-lg text-green-400">
-                    Rp {Number(order.total_price).toLocaleString("id-ID")}
+                    Rp {Number(order.totalPrice).toLocaleString("id-ID")}
                   </p>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Actions */}
                 <div className="mt-5 flex gap-3">
                   <button
                     onClick={() => handleCancel(order.id)}
                     disabled={isFinished || actionLoading === order.id}
-                    className={`flex-1 py-2 rounded-xl font-medium transition ${
-                      isFinished
-                        ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                        : "bg-red-500 hover:bg-red-600"
-                    }`}
+                    className={`flex-1 py-2 rounded-xl font-medium transition ${isFinished ? "bg-gray-700 text-gray-500 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"}`}
                   >
                     {actionLoading === order.id ? "Processing..." : "Cancel"}
                   </button>
-
                   <button
                     onClick={() => handleDone(order.id)}
                     disabled={isFinished || actionLoading === order.id}
-                    className={`flex-1 py-2 rounded-xl font-medium transition ${
-                      isFinished
-                        ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                        : "bg-green-500 hover:bg-green-600 text-black"
-                    }`}
+                    className={`flex-1 py-2 rounded-xl font-medium transition ${isFinished ? "bg-gray-700 text-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-600 text-black"}`}
                   >
                     {actionLoading === order.id ? "Processing..." : "Selesai"}
                   </button>

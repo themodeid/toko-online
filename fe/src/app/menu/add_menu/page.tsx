@@ -83,8 +83,8 @@ export default function AddMenuPage() {
         {/* Admin Section */}
         <div className="flex flex-col items-center gap-6 pb-6 border-b border-white/10">
           <div
-            className={navClass("/pesanan")}
-            onClick={() => router.push("/pesanan")}
+            className={navClass("/pesanan/daftar_pesanan")}
+            onClick={() => router.push("/pesanan/daftar_pesanan")}
           >
             <FeatherIcon icon="list" className="w-6 h-6 text-white" />
           </div>
@@ -93,7 +93,7 @@ export default function AddMenuPage() {
             className={navClass("/menu/add_menu")}
             onClick={() => router.push("/menu/add_menu")}
           >
-            <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
+            <FeatherIcon icon="plus" className="w-6 h-6 text-white" />
           </div>
         </div>
 

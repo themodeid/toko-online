@@ -72,8 +72,8 @@ export default function AuthPage() {
         </div>
 
         <div
-          className={navClass("/pesanan")}
-          onClick={() => router.push("/pesanan")}
+          className={navClass("/pesanan/daftar_pesanan")}
+          onClick={() => router.push("/pesanan/daftar_pesanan")}
         >
           <FeatherIcon icon="list" className="w-6 h-6 text-white" />
         </div>

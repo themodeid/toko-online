@@ -74,6 +74,16 @@ export default function MenuPage() {
     const loadData = async () => {
       try {
         setLoading(true);
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          // hanya ambil produk saja
+          await getProduk();
+          return;
+        }
+
+        // kalau ada token ambil semua
         await Promise.all([getProduk(), fetchPesanan(), getProfil()]);
       } catch {
         setError("Gagal memuat data");
@@ -184,8 +194,8 @@ export default function MenuPage() {
         </div>
 
         <div
-          className={navClass("/pesanan")}
-          onClick={() => router.push("/pesanan")}
+          className={navClass("/pesanan/daftar_pesanan")}
+          onClick={() => router.push("/pesanan/daftar_pesanan")}
         >
           <FeatherIcon icon="list" className="w-6 h-6 text-white" />
         </div>
@@ -387,7 +397,7 @@ export default function MenuPage() {
                 <div className="text-right">
                   <p className="text-sm text-gray-400">Tanggal</p>
                   <p className="text-white">
-                    {new Date(order.created_at).toLocaleDateString("id-ID")}
+                    {new Date(order.createdAt).toLocaleDateString("id-ID")}
                   </p>
                 </div>
               </div>
@@ -397,7 +407,7 @@ export default function MenuPage() {
                 {order.items?.map((item, index) => {
                   // Cari produk sesuai produk_id dari order item
                   const produkItem = produk.find(
-                    (p) => p.id === item.produk_id,
+                    (p) => p.id === item.produkId,
                   );
 
                   return (
@@ -445,10 +455,10 @@ export default function MenuPage() {
               <div className="flex justify-between mt-4 pt-3 border-t border-white/5 font-semibold">
                 <span className="text-white">Total</span>
                 <span className="text-green-400">
-                  Rp {Number(order.total_price ?? 0).toLocaleString("id-ID")}
+                  Rp {Number(order.totalPrice ?? 0).toLocaleString("id-ID")}
                 </span>
 
-                {order.status_pesanan === "ANTRI" && (
+                {order.statusPesanan === "ANTRI" && (
                   <button
                     onClick={() => handleCancel(order.id)}
                     className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-xs text-white"

@@ -1,4 +1,7 @@
-// features/cart/types.ts
+// ==============================================
+// DOMAIN TYPES (Digunakan di Frontend / UI)
+// ==============================================
+
 export interface CartItem {
   produkId: string;
   nama: string;
@@ -8,7 +11,7 @@ export interface CartItem {
 }
 
 export interface OrderItem {
-  produk_id: string;
+  produkId: string;
   nama: string;
   harga: number;
   quantity: number;
@@ -16,28 +19,25 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
-  user_id: string;
-  nama_user: string;
-  total_price: string;
-  created_at: string;
+  userId: string;
+  namaUser: string;
+  totalPrice: string;
+  statusPesanan: string;
+  createdAt: string;
   items: OrderItem[];
-  status_pesanan: string;
 }
 
-// ========================== api kshusu ==============
+// ==============================================
+// API RESPONSE TYPES (Sesuai Response Backend)
+// ==============================================
 
-interface OrderFromApi {
+interface BaseOrderFromApi {
   id: string;
   user_id: string;
   username: string;
   total_price: string;
   status_pesanan: string;
   created_at: string;
-}
-
-export interface GetOrdersResponse {
-  message: string;
-  data: OrderFromApi[];
 }
 
 export interface OrderItemFromApi {
@@ -47,18 +47,26 @@ export interface OrderItemFromApi {
   qty: number;
 }
 
-export interface OrderActiveWithItems {
-  id: string;
-  user_id: string;
-  username: string;
-  total_price: string;
-  status_pesanan: string;
-  created_at: string;
+export interface OrderWithItemsFromApi extends BaseOrderFromApi {
   items: OrderItemFromApi[];
+}
+
+// ==============================================
+// API RESPONSE WRAPPERS
+// ==============================================
+
+export interface GetOrdersResponse {
+  message: string;
+  data: BaseOrderFromApi[];
 }
 
 export interface GetActiveOrdersWithItemsResponse {
   message: string;
   total: number;
-  data: OrderActiveWithItems[];
+  data: OrderWithItemsFromApi[];
+}
+
+export interface GetAllMyOrdersResponse {
+  message: string;
+  data: OrderWithItemsFromApi[];
 }
