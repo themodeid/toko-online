@@ -126,7 +126,7 @@ export default function Antrian() {
           ),
         )}
       </aside>
-      {/* MAIN */}
+      {/* MAIN1 */}
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold">Pesanan Aktif</h1>
