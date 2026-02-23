@@ -25,7 +25,7 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
   const produksIds = items.map((i: any) => i.produk_id);
 
   const produksQuery = `
-    SELECT id, nama, harga, stock 
+    SELECT id, nama, harga, stock , status
     FROM produk 
     WHERE id = ANY($1::uuid[])
   `;
@@ -35,6 +35,15 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
 
   if (products.length !== items.length) {
     throw new AppError("Ada produk yang tidak ditemukan", 400);
+  }
+
+  const unavailableProduct = products.find((p) => p.status === false);
+
+  if (unavailableProduct) {
+    throw new AppError(
+      `Produk ${unavailableProduct.nama} tidak tersedia untuk dipesan`,
+      400,
+    );
   }
 
   const orderItems = items.map((item: any) => {
@@ -133,9 +142,11 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
 });
 
 // cancel order penting
+
 export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user.id;
+  const userRole = req.user.role.toUpperCase(); // normalize ke uppercase
 
   const client = await pool.connect();
 
@@ -154,31 +165,35 @@ export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
       throw new AppError("Order tidak ditemukan", 404);
     }
 
-    if (order.user_id !== userId) {
+    // cek hak akses: admin bisa cancel semua, user hanya order sendiri
+    if (order.user_id !== userId && userRole !== "ADMIN") {
       throw new AppError("Tidak boleh cancel order orang lain", 403);
     }
 
-    if (order.status_pesanan !== "ANTRI") {
-      throw new AppError("Order tidak bisa dibatalkan", 400);
-    }
+    // hanya user biasa yang dibatasi status ANTRI & top 3
+    if (userRole !== "ADMIN") {
+      if (order.status_pesanan !== "ANTRI") {
+        throw new AppError("Order tidak bisa dibatalkan", 400);
+      }
 
-    // ambil 3 antrian teratas (lock juga)
-    const topThree = await client.query(`
-      SELECT id
-      FROM orders
-      WHERE status_pesanan = 'ANTRI'
-      ORDER BY created_at ASC
-      LIMIT 3
-      FOR UPDATE
-    `);
+      // ambil 3 antrian teratas (lock juga)
+      const topThree = await client.query(`
+        SELECT id
+        FROM orders
+        WHERE status_pesanan = 'ANTRI'
+        ORDER BY created_at ASC
+        LIMIT 3
+        FOR UPDATE
+      `);
 
-    const topThreeIds = topThree.rows.map((row) => row.id);
+      const topThreeIds = topThree.rows.map((row) => row.id);
 
-    if (topThreeIds.includes(id)) {
-      throw new AppError(
-        "Order sedang diproses dan tidak bisa dibatalkan",
-        400,
-      );
+      if (topThreeIds.includes(id)) {
+        throw new AppError(
+          "Order sedang diproses dan tidak bisa dibatalkan",
+          400,
+        );
+      }
     }
 
     // kembalikan stok
@@ -442,4 +457,47 @@ export const getMyOrdersActiveWithItems = catchAsync(
       data: result.rows,
     });
   },
+);
+
+// mengambil seluruh pesanan saya beserta item didalamnya
+export const getMyAllOrdersWithItems = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user.id;
+
+    const query = `
+      SELECT 
+        o.id,
+        o.user_id,
+        o.total_price,
+        o.status_pesanan,
+        o.created_at,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'produk_id', oi.produk_id,
+              'nama_produk', p.nama,
+              'harga_barang', oi.harga_barang,
+              'qty', oi.qty
+            )
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'
+        ) AS items
+      FROM orders o
+      LEFT JOIN order_items oi 
+        ON o.id = oi.order_id
+      LEFT JOIN produk p 
+        ON oi.produk_id = p.id
+      WHERE o.user_id = $1
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+    `;
+
+    const result = await pool.query(query, [userId]);
+
+    res.status(200).json({
+      message: "Berhasil mengambil semua pesanan anda",
+      total: result.rows.length,
+      data: result.rows,
+    });
+  }
 );

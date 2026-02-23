@@ -12,10 +12,11 @@ export async function login(data: LoginType): Promise<AuthResponse> {
   const res = await api.post("/api/auth/login", data);
 
   const token = res.data.token;
+  const role = res.data.user.role;
 
-  // 🔥 WAJIB SIMPAN TOKEN
   localStorage.setItem("token", token);
-  return res.data;
+  localStorage.setItem("role", role);
+  return { token, role };
 }
 
 export async function register(data: RegisterType): Promise<AuthResponse> {

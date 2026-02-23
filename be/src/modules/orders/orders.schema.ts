@@ -12,17 +12,17 @@ export const CheckoutSchema = z.object({
 });
 
 export const OrderResponseSchema = z.object({
-  id: z.string().uuid(),
-  user_id: z.string().uuid(),
-  total_price: z.string().regex(/^\d+(\.\d{1,2})?$/),
-  status_pesanan: z.enum(["ANTRI", "DIPROSES", "SELESAI", "DIBATALKAN"]),
-  created_at: z.string().datetime(),
+  id: z.string(),
+  userId: z.string(),
+  totalPrice: z.string().regex(/^\d+(\.\d{1,2})?$/),
+  statusPesanan: z.enum(["ANTRI", "DIPROSES", "SELESAI", "DIBATALKAN"]),
+  createdAt: z.string(),
 });
 
 export const OrderDetailSchema = OrderResponseSchema.extend({
   items: z.array(
     z.object({
-      produk_id: z.string().uuid(),
+      produk_id: z.string(),
       nama: z.string(),
       harga: z.number(),
       quantity: z.number(),

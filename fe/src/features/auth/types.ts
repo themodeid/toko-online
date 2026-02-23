@@ -11,4 +11,5 @@ export type register = {
 
 export interface AuthResponse {
   token: string;
+  role: string;
 }

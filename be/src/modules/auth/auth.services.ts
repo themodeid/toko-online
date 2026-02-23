@@ -3,13 +3,12 @@ import { pool } from "../../config/database";
 export const registerServices = async (
   username: string,
   hashedPassword: string,
-  role: string,
 ) => {
   const result = await pool.query(
     `INSERT INTO users (username, password, role)
-     VALUES ($1, $2, $3)
+     VALUES ($1, $2, 'user')
      RETURNING id, username, role, created_at`,
-    [username, hashedPassword, role],
+    [username, hashedPassword],
   );
 
   return result.rows[0];

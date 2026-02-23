@@ -1,17 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createProduk } from "@/features/produk/api";
+import { createProduk, getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
+import { Produk } from "@/features/produk/types";
+import { imageConfigDefault } from "next/dist/shared/lib/image-config";
+import Image from "next/image";
 
 export default function AddMenuPage() {
   const pathname = usePathname();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [produk, setProduk] = useState<Produk[]>([]);
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -19,6 +23,23 @@ export default function AddMenuPage() {
         ? "bg-green-500 text-white p-2 rounded-lg"
         : "text-gray-400 hover:text-green-400"
     }`;
+
+  async function getProduk() {
+    try {
+      setLoading(true);
+
+      const data = await getAllProduk();
+      setProduk(data.produk);
+    } catch (error) {
+      setError("gagal mengambil produk");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getProduk();
+  }, []);
 
   async function handleCreate(formData: FormData) {
     setLoading(true);
@@ -56,100 +77,184 @@ export default function AddMenuPage() {
   }
 
   return (
-    <>
-      <div className="min-h-screen flex bg-[#0F0F0F] text-white">
-        <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
-          <div className={navClass("/")} onClick={() => router.push("/")}>
-            <FeatherIcon icon="home" className="w-6 h-6 text-white" />
-          </div>
+    <div className="min-h-screen flex bg-[#0F0F0F] text-white">
+      {/* ================= SIDEBAR ================= */}
+      <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
+        <div className="w-full flex flex-col items-center gap-4 pb-6 border-b border-white/10">
+          {[
+            { path: "/pesanan/daftar_pesanan", icon: "list", label: "Pesanan" },
 
+            { path: "/menu/add_menu", icon: "plus", label: "Tambah Menu" },
+          ].map((menu) => (
+            <div
+              key={menu.path}
+              className={navClass(menu.path)}
+              onClick={() => router.push(menu.path)}
+              title={menu.label}
+            >
+              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+            </div>
+          ))}
+        </div>
+
+        {[{ path: "/login_admin", icon: "user", label: "Login" }].map((menu) => (
           <div
-            className={navClass("/menu")}
-            onClick={() => router.push("/menu")}
+            key={menu.path}
+            className={navClass(menu.path)}
+            onClick={() => router.push(menu.path)}
+            title={menu.label}
           >
-            <FeatherIcon icon="grid" className="w-6 h-6 text-white" />
+            <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+          </div>
+        ))}
+      </aside>
+
+      {/* ================= MAIN ================= */}
+      <main className="flex-1 p-8 overflow-y-auto space-y-10">
+        {/* ===== CREATE FORM CARD ===== */}
+        <div className="max-w-xl bg-[#1A1A1A] p-8 rounded-2xl border border-white/5 shadow-lg">
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold">Create Menu</h1>
+            <p className="text-sm text-gray-400">
+              Tambahkan produk baru ke cafe
+            </p>
           </div>
 
-          <div
-            className={navClass("/cart")}
-            onClick={() => router.push("/cart")}
-          >
-            <FeatherIcon icon="shopping-cart" className="w-6 h-6 text-white" />
-          </div>
+          {error && (
+            <div className="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg mb-4 text-sm">
+              {error}
+            </div>
+          )}
 
-          <div
-            className={navClass("/login")}
-            onClick={() => router.push("/login")}
-          >
-            <FeatherIcon icon="user" className="w-6 h-6 text-white" />
-          </div>
+          <form action={handleCreate} className="space-y-5">
+            {/* Image */}
+            <div>
+              <label className="block text-sm mb-2 text-gray-300">
+                Gambar Produk
+              </label>
+              <input
+                type="file"
+                name="image"
+                required
+                className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm file:bg-green-500 file:border-0 file:px-4 file:py-2 file:rounded file:text-black hover:file:bg-green-600"
+              />
+            </div>
 
-          <div
-            className={navClass("/menu/add_menu")}
-            onClick={() => router.push("/menu/add_menu")}
-          >
-            <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
-          </div>
-
-          <div
-            className={navClass("/pesanan")}
-            onClick={() => router.push("/pesanan")}
-          >
-            <FeatherIcon icon="list" className="w-6 h-6 text-white" />
-          </div>
-        </aside>
-
-        <main className="flex-1 p-6 overflow-y-auto">
-          <h1 className="text-xl font-bold mb-4">Create Menu</h1>
-
-          {error && <p className="text-red-500 mb-2">{error}</p>}
-
-          <form action={handleCreate} className="space-y-3">
-            <input type="file" name="image" required />
-
+            {/* Nama */}
             <input
               type="text"
               name="nama"
               placeholder="Nama produk"
-              className="border p-2 w-full text-black"
+              className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
 
+            {/* Harga */}
             <input
               type="number"
               name="harga"
               placeholder="Harga"
-              className="border p-2 w-full text-black"
+              className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
 
+            {/* Stock */}
             <input
               type="number"
               name="stock"
               placeholder="Stock"
-              className="border p-2 w-full text-black"
+              className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
             />
 
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="status"
-                value="true"
-                className="w-4 h-4"
-              />
-              Active
-            </label>
+            {/* Status */}
+            <div className="flex items-center justify-between bg-[#222] p-3 rounded-lg border border-white/10">
+              <span className="text-sm text-gray-300">Status Produk</span>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="status"
+                  value="true"
+                  className="accent-green-500"
+                />
+                <span className="text-sm">Active</span>
+              </label>
+            </div>
 
+            {/* Button */}
             <button
               type="submit"
               disabled={loading}
-              className="bg-black text-white px-4 py-2"
+              className={`w-full py-3 rounded-xl font-semibold transition ${
+                loading
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600 text-black"
+              }`}
             >
-              {loading ? "Loading..." : "Create"}
+              {loading ? "Creating..." : "Create Menu"}
             </button>
           </form>
-        </main>
-      </div>
-    </>
+        </div>
+
+        {/* ===== LIST MENU GRID ===== */}
+        <div>
+          <h2 className="text-xl font-semibold mb-6">Daftar Menu</h2>
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {produk.map((item) => (
+              <div
+                key={item.id}
+                className="bg-[#1A1A1A] rounded-2xl overflow-hidden border border-white/5 hover:scale-[1.02] transition"
+              >
+                {/* Image */}
+                <div className="relative h-40 bg-[#222]">
+                  {item.image ? (
+                    <Image
+                      src={`http://localhost:3000${item.image}`}
+                      alt={item.nama}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-gray-500 text-sm">
+                      No Image
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="p-4 space-y-2">
+                  <p className="font-medium">{item.nama}</p>
+
+                  <p className="text-green-400 font-semibold">
+                    Rp {Number(item.harga ?? 0).toLocaleString("id-ID")}
+                    <span className="text-xs text-gray-400"> / pcs</span>
+                  </p>
+
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Stock: {item.stock}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full ${
+                        item.status
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-red-500/20 text-red-400"
+                      }`}
+                    >
+                      {item.status ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+
+                  <Link
+                    href={`/menu/profil_produk/${item.id}`}
+                    className="block text-center bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded-xl transition"
+                  >
+                    Detail
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

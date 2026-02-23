@@ -1,19 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Produk } from "@/features/produk/types";
 import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
-import { CartItem, Order, OrderItem } from "@/features/cart/types";
+import { CartItem, Order,  } from "@/features/cart/types";
+import { user } from "@/features/user/type";
 import {
   createOrder,
-  getMyOrders,
   cancelOrder,
   getMyOrdersActiveWithItems,
 } from "@/features/cart/api";
+import { getUser } from "@/features/user/api";
 import Image from "next/image";
 
 export default function MenuPage() {
@@ -24,7 +24,7 @@ export default function MenuPage() {
   const [produk, setProduk] = useState<Produk[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pesanan, setPesanan] = useState<Order[]>([]);
-
+  const [user, setUser] = useState<user | null>(null);
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
       pathname === path
@@ -56,11 +56,33 @@ export default function MenuPage() {
     }
   }
 
+  async function getProfil() {
+    try {
+      setLoading(true);
+      const data = await getUser();
+      setUser(data); // ✅ object sesuai state
+    } catch (error) {
+      setError("gagal mengambil data pribadi");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        await Promise.all([getProduk(), fetchPesanan()]);
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          // hanya ambil produk saja
+          await getProduk();
+          return;
+        }
+
+        // kalau ada token ambil semua
+        await Promise.all([getProduk(), fetchPesanan(), getProfil()]);
       } catch {
         setError("Gagal memuat data");
       } finally {
@@ -81,16 +103,22 @@ export default function MenuPage() {
     return () => clearTimeout(timer);
   }, [error]);
 
-  const addToCart = (produk: Produk) => {
+  const updateCart = (produk: Produk) => {
     setCart((prev) => {
       const exist = prev.find((item) => item.produkId === produk.id);
+
       if (exist) {
-        return prev.map((item) =>
-          item.produkId === produk.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        );
+        // jika sudah ada, kurangi 1
+        const updated = prev
+          .map((item) =>
+            item.produkId === produk.id
+              ? { ...item, quantity: item.quantity - 1 }
+              : item,
+          )
+          .filter((item) => item.quantity > 0); // remove jika quantity 0
+        return updated;
       } else {
+        // jika belum ada, tambah 1
         return [
           ...prev,
           {
@@ -113,7 +141,6 @@ export default function MenuPage() {
 
     try {
       await createOrder(cart);
-      alert("Order berhasil!");
       setCart([]);
       fetchPesanan();
     } catch (error) {
@@ -157,14 +184,6 @@ export default function MenuPage() {
           <FeatherIcon icon="home" className="w-6 h-6 text-white" />
         </div>
 
-        <div className={navClass("/menu")} onClick={() => router.push("/menu")}>
-          <FeatherIcon icon="grid" className="w-6 h-6 text-white" />
-        </div>
-
-        <div className={navClass("/cart")} onClick={() => router.push("/cart")}>
-          <FeatherIcon icon="shopping-cart" className="w-6 h-6 text-white" />
-        </div>
-
         <div
           className={navClass("/login")}
           onClick={() => router.push("/login")}
@@ -173,27 +192,31 @@ export default function MenuPage() {
         </div>
 
         <div
-          className={navClass("/menu/add_menu")}
-          onClick={() => router.push("/menu/add_menu")}
+          className={navClass("/pesanan/history_pesanan")}
+          onClick={() => router.push("/pesanan/history_pesanan")}
         >
-          <FeatherIcon icon="plus-circle" className="w-6 h-6 text-white" />
-        </div>
-
-        <div
-          className={navClass("/pesanan")}
-          onClick={() => router.push("/pesanan")}
-        >
-          <FeatherIcon icon="list" className="w-6 h-6 text-white" />
+          <FeatherIcon icon="align-justify" className="w-6 h-6 text-white" />
         </div>
       </aside>
 
       {/* ================= MAIN MENU ================= */}
       <main className="flex-1 p-6 overflow-y-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold">Menu Coffee</h1>
-          <p className="text-sm text-gray-400">
-            Pilih menu untuk ditambahkan ke pesanan
+        <div className="mb-10">
+          {/* Greeting */}
+          <p className="text-sm text-gray-400">Selamat datang kembali,</p>
+
+          <h2 className="text-lg font-medium text-green-400 mb-2">
+            {user?.username}
+          </h2>
+
+          {/* Main Title */}
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Menu dari Cafe Kami ☕
+          </h1>
+
+          <p className="text-sm text-gray-400 mt-2 max-w-md">
+            Pilih menu favoritmu dan tambahkan ke pesanan dengan mudah.
           </p>
         </div>
 
@@ -247,22 +270,17 @@ export default function MenuPage() {
                   </span>
                 </div>
 
-                <button
-                  onClick={() => addToCart(item)}
-                  className="bg-green-500 hover:bg-green-600 p-2 rounded-lg transition"
-                >
-                  <FeatherIcon
-                    icon="shopping-cart"
-                    className="w-5 h-5 text-black"
-                  />
-                </button>
-
-                <Link
-                  href={`/menu/profil_produk/${item.id}`}
-                  className="block text-center bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded-xl transition"
-                >
-                  Detail
-                </Link>
+                {item.status && item.stock > 0 && (
+                  <button
+                    onClick={() => updateCart(item)}
+                    className="bg-green-500 hover:bg-green-600 p-2 rounded-lg transition"
+                  >
+                    <FeatherIcon
+                      icon="shopping-cart"
+                      className="w-5 h-5 text-black"
+                    />
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -275,15 +293,31 @@ export default function MenuPage() {
         <div className="space-y-4">
           {cart.map((item) => (
             <div key={item.produkId} className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gray-200 relative">
-                {item.image && (
-                  <Image
-                    src={item.image}
-                    alt={item.nama}
-                    fill
-                    className="object-cover"
-                  />
-                )}
+              {/* Image + Info */}
+              <div className="flex items-center gap-3">
+                {/** Cari produk sesuai produkId dari item pesanan */}
+                <div className="w-12 h-12 bg-gray-200 relative">
+                  {produk.find((p) => p.id === item.produkId)?.image ? (
+                    <Image
+                      src={`http://localhost:3000${produk.find((p) => p.id === item.produkId)?.image}`}
+                      alt={item.nama}
+                      fill
+                      className="object-cover rounded"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500 text-xs">
+                      No Image
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <p className="text-white">{item.nama}</p>
+                  <p className="text-gray-400">
+                    {item.quantity} x Rp{" "}
+                    {Number(item.harga ?? 0).toLocaleString("id-ID")}
+                  </p>
+                </div>
               </div>
               <div className="flex-1">
                 <p className="font-medium">{item.nama}</p>
@@ -292,7 +326,6 @@ export default function MenuPage() {
                     onClick={() =>
                       updateQuantity(item.produkId, item.quantity - 1)
                     }
-                    disabled={item.quantity <= 1}
                   >
                     -
                   </button>
@@ -346,6 +379,7 @@ export default function MenuPage() {
         {/* menampilkan seluruh pesanan anda */}
         <h1 className="h-12 w12  dflex align-middle">pesanan anda</h1>
 
+        {/* Items */}
         <div className="space-y-6">
           {pesanan.map((order) => (
             <div
@@ -361,42 +395,68 @@ export default function MenuPage() {
                 <div className="text-right">
                   <p className="text-sm text-gray-400">Tanggal</p>
                   <p className="text-white">
-                    {new Date(order.created_at).toLocaleDateString("id-ID")}
+                    {new Date(order.createdAt).toLocaleDateString("id-ID")}
                   </p>
                 </div>
               </div>
 
               {/* Items */}
               <div className="space-y-3">
-                {order.items?.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center text-sm border-b border-white/5 pb-2"
-                  >
-                    <div>
-                      <p className="text-white">{item.nama}</p>
-                      <p className="text-gray-400">
-                        {item.quantity} x Rp{" "}
-                        {Number(item.harga ?? 0).toLocaleString("id-ID")}
+                {order.items?.map((item, index) => {
+                  // Cari produk sesuai produk_id dari order item
+                  const produkItem = produk.find(
+                    (p) => p.id === item.produkId,
+                  );
 
+                  return (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center text-sm border-b border-white/5 pb-2"
+                    >
+                      {/* Image + Info */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gray-200 relative">
+                          {produkItem?.image ? (
+                            <Image
+                              src={`http://localhost:3000${produkItem.image}`}
+                              alt={item.nama}
+                              fill
+                              className="object-cover rounded"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-gray-500 text-xs">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <p className="text-white">{item.nama}</p>
+                          <p className="text-gray-400">
+                            {item.quantity} x Rp{" "}
+                            {Number(item.harga ?? 0).toLocaleString("id-ID")}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Harga Total */}
+                      <p className="text-green-400 font-medium">
+                        Rp{" "}
+                        {(item.harga * item.quantity).toLocaleString("id-ID")}
                       </p>
                     </div>
-
-                    <p className="text-green-400 font-medium">
-                      Rp {(item.harga * item.quantity).toLocaleString("id-ID")}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Total */}
               <div className="flex justify-between mt-4 pt-3 border-t border-white/5 font-semibold">
                 <span className="text-white">Total</span>
                 <span className="text-green-400">
-                  Rp {Number(order.total_price ?? 0).toLocaleString("id-ID")}
+                  Rp {Number(order.totalPrice ?? 0).toLocaleString("id-ID")}
                 </span>
 
-                {order.status_pesanan === "ANTRI" && (
+                {order.statusPesanan === "ANTRI" && (
                   <button
                     onClick={() => handleCancel(order.id)}
                     className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-xs text-white"
