@@ -59,15 +59,23 @@ export async function getMyOrders(): Promise<Order[]> {
 }
 
 export async function getAllMyOrders(): Promise<Order[]> {
-  const res = await api.get<GetOrdersResponse>("/api/orders/MyAllOrders");
+  const res = await api.get<GetActiveOrdersWithItemsResponse>(
+    "/api/orders/MyAllOrders",
+  );
+
   return res.data.data.map((o) => ({
     id: o.id,
     userId: o.user_id,
-    namaUser: o.username,
+    namaUser: "", // karena endpoint ini tidak kirim username
     totalPrice: o.total_price,
     statusPesanan: o.status_pesanan,
     createdAt: o.created_at,
-    items: [],
+    items: o.items.map((i) => ({
+      produkId: i.produk_id,
+      nama: i.nama_produk,
+      harga: i.harga_barang,
+      quantity: i.qty,
+    })),
   }));
 }
 

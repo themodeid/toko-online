@@ -192,10 +192,10 @@ export default function MenuPage() {
         </div>
 
         <div
-          className={navClass("/pesanan/daftar_pesanan")}
-          onClick={() => router.push("/pesanan/daftar_pesanan")}
+          className={navClass("/pesanan/history_pesanan")}
+          onClick={() => router.push("/pesanan/history_pesanan")}
         >
-          <FeatherIcon icon="list" className="w-6 h-6 text-white" />
+          <FeatherIcon icon="align-justify" className="w-6 h-6 text-white" />
         </div>
       </aside>
 

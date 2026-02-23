@@ -5,14 +5,18 @@ import { useRouter, usePathname } from "next/navigation";
 import FeatherIcon from "feather-icons-react";
 import Image from "next/image";
 import { Order } from "@/features/cart/types";
+import { Produk } from "@/features/produk/types";
 import { getAllMyOrders } from "@/features/cart/api";
+import { getAllProduk } from "@/features/produk/api";
 
 export default function HistoryPesanan() {
   const router = useRouter();
   const pathname = usePathname();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingProduk, setLoadingProduk] = useState(false);
   const [history, setHistory] = useState<Order[]>([]);
+  const [produk, setProduk] = useState<Produk[]>([]);
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -40,80 +44,124 @@ export default function HistoryPesanan() {
     }
   }
 
+  async function fetchProduk() {
+    try {
+      setLoadingProduk(true);
+      const res = await getAllProduk();
+      setProduk(res.produk);
+    } catch {
+      setError("Gagal memuat produk");
+    } finally {
+      setLoadingProduk(false);
+    }
+  }
+
   useEffect(() => {
     fetchHistory();
+    fetchProduk();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold text-gray-800">Riwayat Pesanan</h1>
+    <div className="min-h-screen bg-[#0F0F0F] text-white p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold">Riwayat Pesanan</h1>
+          <p className="text-sm text-gray-400">
+            Daftar seluruh pesanan yang pernah dibuat
+          </p>
+        </div>
 
-        {loading && <p className="text-gray-500">Memuat riwayat pesanan...</p>}
-
-        {error && <p className="text-red-500">{error}</p>}
+        {loading && <p className="text-gray-400">Loading...</p>}
+        {error && <p className="text-red-400">{error}</p>}
 
         {!loading && history.length === 0 && (
-          <div className="text-center text-gray-400 py-10">
+          <div className="text-center text-gray-500 py-16">
             Belum ada riwayat pesanan
           </div>
         )}
 
-        {history.map((order) => (
-          <div
-            key={order.id}
-            className="bg-white shadow-sm rounded-xl p-5 border border-gray-100 space-y-4"
-          >
-            {/* Header */}
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-semibold text-gray-800">
-                  Order ID: {order.id.slice(0, 8)}
-                </p>
-                <p className="text-sm text-gray-400">
-                  {new Date(order.createdAt).toLocaleString("id-ID")}
-                </p>
-              </div>
-
-              <span
-                className={`px-3 py-1 text-xs rounded-full font-medium ${
-                  statusColor[order.statusPesanan]
-                }`}
-              >
-                {order.statusPesanan}
-              </span>
-            </div>
-
-            {/* Items */}
-            <div className="space-y-2 border-t pt-3">
-              {order.items.map((item, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <div>
-                    <p className="font-medium text-gray-700">
-                      {item.nama}
-                    </p>
-                    <p className="text-gray-400">
-                      {item.quantity} x Rp{" "}
-                      {item.harga.toLocaleString("id-ID")}
-                    </p>
-                  </div>
-
-                  <p className="font-semibold text-gray-700">
-                    Rp {(item.quantity * item.harga).toLocaleString("id-ID")}
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {history.map((order) => (
+            <div
+              key={order.id}
+              className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 hover:scale-[1.02] transition"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <p className="font-semibold text-lg">
+                    Order #{order.id.slice(0, 6)}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(order.createdAt).toLocaleString("id-ID")}
                   </p>
                 </div>
-              ))}
-            </div>
 
-            {/* Footer */}
-            <div className="flex justify-between items-center border-t pt-3">
-              <p className="text-sm text-gray-500">Total Pembayaran</p>
-              <p className="font-bold text-green-600">
-                Rp {Number(order.totalPrice).toLocaleString("id-ID")}
-              </p>
+                <span
+                  className={`px-3 py-1 text-xs rounded-full font-semibold ${statusColor[order.statusPesanan]}`}
+                >
+                  {order.statusPesanan}
+                </span>
+              </div>
+
+              {/* Items */}
+              <div className="space-y-3 border-t border-white/5 pt-4">
+                {order.items.map((item) => {
+                  const produkItem = produk.find((p) => p.id === item.produkId);
+
+                  return (
+                    <div
+                      key={item.produkId}
+                      className="flex justify-between items-center text-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-[#222] relative rounded">
+                          {produkItem?.image ? (
+                            <Image
+                              src={`http://localhost:3000${produkItem.image}`}
+                              alt={item.nama}
+                              fill
+                              className="object-cover rounded"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-gray-500 text-xs">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <p className="font-medium">{item.nama}</p>
+                          <p className="text-xs text-gray-400">
+                            {item.quantity} x Rp{" "}
+                            {item.harga.toLocaleString("id-ID")}
+                          </p>
+                        </div>
+                      </div>
+
+                      <p className="font-semibold text-green-400">
+                        Rp{" "}
+                        {(item.harga * item.quantity).toLocaleString("id-ID")}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Footer */}
+              <div className="border-t border-white/5 mt-4 pt-4 flex justify-between items-center">
+                <p className="text-sm text-gray-400">
+                  Total Item:{" "}
+                  {order.items.reduce((acc, item) => acc + item.quantity, 0)}
+                </p>
+                <p className="font-bold text-lg text-green-400">
+                  Rp {Number(order.totalPrice).toLocaleString("id-ID")}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
