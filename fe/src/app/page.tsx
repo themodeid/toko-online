@@ -1,17 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Produk } from "@/features/produk/types";
 import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
-import { CartItem, Order, OrderItem } from "@/features/cart/types";
+import { CartItem, Order,  } from "@/features/cart/types";
 import { user } from "@/features/user/type";
 import {
   createOrder,
-  getMyOrders,
   cancelOrder,
   getMyOrdersActiveWithItems,
 } from "@/features/cart/api";

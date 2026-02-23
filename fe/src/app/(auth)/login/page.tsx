@@ -42,7 +42,7 @@ export default function AuthPage() {
 
         console.log("ROLE DARI BACKEND:", user.role);
 
-        router.replace(user.role === "admin" ? "/pesanan" : "/");
+        router.replace(user.role === "admin" ? "/pesanan/daftar_pesanan" : "/");
       } else {
         await register({ username, password, role });
         router.push("/login");

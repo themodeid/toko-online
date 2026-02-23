@@ -58,6 +58,19 @@ export async function getMyOrders(): Promise<Order[]> {
   }));
 }
 
+export async function getAllMyOrders(): Promise<Order[]> {
+  const res = await api.get<GetOrdersResponse>("/api/orders/MyAllOrders");
+  return res.data.data.map((o) => ({
+    id: o.id,
+    userId: o.user_id,
+    namaUser: o.username,
+    totalPrice: o.total_price,
+    statusPesanan: o.status_pesanan,
+    createdAt: o.created_at,
+    items: [],
+  }));
+}
+
 // ================= GET ORDERS WITH ITEMS =================
 export async function getAllOrderActiveItems(): Promise<Order[]> {
   const res = await api.get<GetActiveOrdersWithItemsResponse>(
