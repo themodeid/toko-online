@@ -18,6 +18,17 @@ export const getAllProduk = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// mengambil semua data produk fersi ringan
+
+export const getImageProduk = catchAsync(
+  async (req: Request, res: Response) => {
+    const query = "SELECT id, image FROM produk";
+    const result = await pool.query(query);
+
+    res.status(200).json(result.rows);
+  },
+);
+
 export const getProdukById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params; // ✅ STRING UUID
 
@@ -126,24 +137,5 @@ export const updateProduk = catchAsync(async (req: Request, res: Response) => {
   res.status(200).json({
     message: "berhasil mengupdate produk",
     produk: result.rows[0],
-  });
-});
-
-export const deleteProduk = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params; // ✅ STRING UUID
-
-  if (!id) {
-    throw new AppError("ID tidak valid", 400);
-  }
-
-  const existing = await getProdukByIdService(id);
-  if (!existing) {
-    throw new AppError("Produk tidak ditemukan", 404);
-  }
-
-  await deleteProdukService(id);
-
-  res.status(200).json({
-    message: "berhasil menghapus produk",
   });
 });

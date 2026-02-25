@@ -1,30 +1,40 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Produk } from "@/features/produk/types";
-import { getAllProduk } from "@/features/produk/api";
+import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import FeatherIcon from "feather-icons-react";
-import { usePathname } from "next/navigation";
-import { CartItem, Order,  } from "@/features/cart/types";
+
+// Types
+import { Produk } from "@/features/produk/types";
+import { CartItem, Order } from "@/features/cart/types";
 import { user } from "@/features/user/type";
+
+// API
+import { getAllProduk } from "@/features/produk/api";
 import {
   createOrder,
   cancelOrder,
   getMyOrdersActiveWithItems,
 } from "@/features/cart/api";
 import { getUser } from "@/features/user/api";
-import Image from "next/image";
 
 export default function MenuPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const [error, setError] = useState<string | null>(null);
+
+  // UI state
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Data state
+  const [user, setUser] = useState<user | null>(null);
   const [produk, setProduk] = useState<Produk[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pesanan, setPesanan] = useState<Order[]>([]);
-  const [user, setUser] = useState<user | null>(null);
+
+  // useEffect, functions, etc. bisa ditambahkan di sini
+
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
       pathname === path
@@ -236,7 +246,7 @@ export default function MenuPage() {
               <div className="relative h-40 bg-[#222]">
                 {item.image ? (
                   <Image
-                    src={`http://localhost:3000${item.image}`}
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
                     alt={item.nama}
                     fill
                     className="object-cover"
@@ -299,7 +309,7 @@ export default function MenuPage() {
                 <div className="w-12 h-12 bg-gray-200 relative">
                   {produk.find((p) => p.id === item.produkId)?.image ? (
                     <Image
-                      src={`http://localhost:3000${produk.find((p) => p.id === item.produkId)?.image}`}
+                      src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${produk.find((p) => p.id === item.produkId)?.image}`}
                       alt={item.nama}
                       fill
                       className="object-cover rounded"
@@ -404,9 +414,7 @@ export default function MenuPage() {
               <div className="space-y-3">
                 {order.items?.map((item, index) => {
                   // Cari produk sesuai produk_id dari order item
-                  const produkItem = produk.find(
-                    (p) => p.id === item.produkId,
-                  );
+                  const produkItem = produk.find((p) => p.id === item.produkId);
 
                   return (
                     <div

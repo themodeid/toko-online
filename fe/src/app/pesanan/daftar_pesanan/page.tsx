@@ -2,28 +2,37 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import FeatherIcon from "feather-icons-react";
 import Image from "next/image";
+import FeatherIcon from "feather-icons-react";
 
+// Types
+import { Order } from "@/features/cart/types";
+import { Produk } from "@/features/produk/types";
+
+// API
 import {
   getAllOrderActiveItems,
   selesaiOrder,
   cancelOrder,
 } from "@/features/cart/api";
 import { getAllProduk } from "@/features/produk/api";
-import { Produk } from "@/features/produk/types";
-import { Order } from "@/features/cart/types";
 
 export default function Antrian() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Data state
   const [orders, setOrders] = useState<Order[]>([]);
   const [produk, setProduk] = useState<Produk[]>([]);
+  const [images, setImages] = useState<{ id: string; image: string }[]>([]);
+
+  // Loading / UI state
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingProduk, setLoadingProduk] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // useEffect, functions, handlers bisa ditambahkan di sini
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -52,13 +61,13 @@ export default function Antrian() {
     }
   }
 
-  async function fetchProduk() {
+  async function fetchImageProduk() {
     try {
       setLoadingProduk(true);
       const res = await getAllProduk();
-      setProduk(res.produk);
+      setImages(res.produk.map((p) => ({ id: p.id, image: p.image })));
     } catch {
-      setError("Gagal memuat produk");
+      setError("Gagal memuat gambar produk");
     } finally {
       setLoadingProduk(false);
     }
@@ -86,7 +95,7 @@ export default function Antrian() {
 
   useEffect(() => {
     fetchOrders();
-    fetchProduk();
+    fetchImageProduk();
   }, []);
 
   const isLoading = loadingOrders || loadingProduk;
@@ -165,7 +174,7 @@ export default function Antrian() {
                 {/* Items */}
                 <div className="space-y-3 border-t border-white/5 pt-4">
                   {order.items.map((item) => {
-                    const produkItem = produk.find(
+                    const produkItem = images.find(
                       (p) => p.id === item.produkId,
                     );
                     return (

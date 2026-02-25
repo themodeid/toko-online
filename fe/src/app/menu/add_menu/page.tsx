@@ -1,21 +1,28 @@
 "use client";
-
-import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { createProduk, getAllProduk } from "@/features/produk/api";
-import FeatherIcon from "feather-icons-react";
-import { usePathname } from "next/navigation";
-import { Produk } from "@/features/produk/types";
-import { imageConfigDefault } from "next/dist/shared/lib/image-config";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
+import FeatherIcon from "feather-icons-react";
+
+// Types
+import { Produk } from "@/features/produk/types";
+
+// API
+import { createProduk, getAllProduk } from "@/features/produk/api";
 
 export default function AddMenuPage() {
   const pathname = usePathname();
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+
+  // UI / state
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Data state
   const [produk, setProduk] = useState<Produk[]>([]);
+
+  // useEffect, functions, handlers bisa ditambahkan di sini
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -97,16 +104,18 @@ export default function AddMenuPage() {
           ))}
         </div>
 
-        {[{ path: "/login_admin", icon: "user", label: "Login" }].map((menu) => (
-          <div
-            key={menu.path}
-            className={navClass(menu.path)}
-            onClick={() => router.push(menu.path)}
-            title={menu.label}
-          >
-            <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
-          </div>
-        ))}
+        {[{ path: "/login_admin", icon: "user", label: "Login" }].map(
+          (menu) => (
+            <div
+              key={menu.path}
+              className={navClass(menu.path)}
+              onClick={() => router.push(menu.path)}
+              title={menu.label}
+            >
+              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+            </div>
+          ),
+        )}
       </aside>
 
       {/* ================= MAIN ================= */}
