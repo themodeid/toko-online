@@ -1,30 +1,40 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Produk } from "@/features/produk/types";
-import { getAllProduk } from "@/features/produk/api";
+import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import FeatherIcon from "feather-icons-react";
-import { usePathname } from "next/navigation";
+
+// Types
+import { Produk } from "@/features/produk/types";
 import { CartItem, Order } from "@/features/cart/types";
 import { user } from "@/features/user/type";
+
+// API
+import { getAllProduk } from "@/features/produk/api";
 import {
   createOrder,
   cancelOrder,
   getMyOrdersActiveWithItems,
 } from "@/features/cart/api";
 import { getUser } from "@/features/user/api";
-import Image from "next/image";
 
 export default function MenuPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const [error, setError] = useState<string | null>(null);
+
+  // UI state
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Data state
+  const [user, setUser] = useState<user | null>(null);
   const [produk, setProduk] = useState<Produk[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pesanan, setPesanan] = useState<Order[]>([]);
-  const [user, setUser] = useState<user | null>(null);
+
+  // useEffect, functions, etc. bisa ditambahkan di sini
+
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
       pathname === path

@@ -1,21 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Produk } from "@/features/produk/types";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import FeatherIcon from "feather-icons-react";
-import { usePathname } from "next/navigation";
 
+// Types
+import { Produk, UpdateProdukPayload } from "@/features/produk/types";
+
+// API
 import { getProdukById, updateProduk } from "@/features/produk/api";
-import type { UpdateProdukPayload } from "@/features/produk/types";
 
 export default function MenuPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const pathname = usePathname();
-  const [produk, setProduk] = useState<Produk | null>(null);
-  const [error, setError] = useState<string | null>(null);
+
+  // UI / loading state
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Data state
+  const [produk, setProduk] = useState<Produk | null>(null);
+
+  // useEffect, functions, handlers bisa ditambahkan di sini
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -104,9 +111,7 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {[
-          { path: "/login", icon: "user", label: "Login" },
-        ].map((menu) => (
+        {[{ path: "/login", icon: "user", label: "Login" }].map((menu) => (
           <div
             key={menu.path}
             className={navClass(menu.path)}

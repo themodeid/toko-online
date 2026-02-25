@@ -2,29 +2,37 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import FeatherIcon from "feather-icons-react";
 import Image from "next/image";
+import FeatherIcon from "feather-icons-react";
 
+// Types
+import { Order } from "@/features/cart/types";
+import { Produk } from "@/features/produk/types";
+
+// API
 import {
   getAllOrderActiveItems,
   selesaiOrder,
   cancelOrder,
 } from "@/features/cart/api";
 import { getAllProduk } from "@/features/produk/api";
-import { Produk } from "@/features/produk/types";
-import { Order } from "@/features/cart/types";
 
 export default function Antrian() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Data state
   const [orders, setOrders] = useState<Order[]>([]);
   const [produk, setProduk] = useState<Produk[]>([]);
   const [images, setImages] = useState<{ id: string; image: string }[]>([]);
+
+  // Loading / UI state
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingProduk, setLoadingProduk] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // useEffect, functions, handlers bisa ditambahkan di sini
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -52,7 +60,6 @@ export default function Antrian() {
       setLoadingOrders(false);
     }
   }
-
 
   async function fetchImageProduk() {
     try {

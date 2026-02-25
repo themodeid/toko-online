@@ -1,23 +1,32 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import FeatherIcon from "feather-icons-react";
 import Image from "next/image";
+import FeatherIcon from "feather-icons-react";
+
+// Types
 import { Order } from "@/features/cart/types";
 import { Produk } from "@/features/produk/types";
+
+// API
 import { getAllMyOrders } from "@/features/cart/api";
 import { getAllProduk } from "@/features/produk/api";
 
 export default function HistoryPesanan() {
   const router = useRouter();
   const pathname = usePathname();
-  const [error, setError] = useState<string | null>(null);
+
+  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingProduk, setLoadingProduk] = useState(false);
-  const [history, setHistory] = useState<Order[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Data state
   const [produk, setProduk] = useState<Produk[]>([]);
+  const [history, setHistory] = useState<Order[]>([]);
   const [images, setImages] = useState<{ id: string; image: string }[]>([]);
+
+  // useEffect, functions, etc. bisa ditambahkan di sini
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
