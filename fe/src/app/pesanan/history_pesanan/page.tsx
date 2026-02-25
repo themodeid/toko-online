@@ -17,6 +17,7 @@ export default function HistoryPesanan() {
   const [loadingProduk, setLoadingProduk] = useState(false);
   const [history, setHistory] = useState<Order[]>([]);
   const [produk, setProduk] = useState<Produk[]>([]);
+  const [images, setImages] = useState<{ id: string; image: string }[]>([]);
 
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
@@ -44,13 +45,13 @@ export default function HistoryPesanan() {
     }
   }
 
-  async function fetchProduk() {
+  async function fetchImageProduk() {
     try {
       setLoadingProduk(true);
       const res = await getAllProduk();
-      setProduk(res.produk);
+      setImages(res.produk.map((p) => ({ id: p.id, image: p.image })));
     } catch {
-      setError("Gagal memuat produk");
+      setError("Gagal memuat gambar produk");
     } finally {
       setLoadingProduk(false);
     }
@@ -58,7 +59,7 @@ export default function HistoryPesanan() {
 
   useEffect(() => {
     fetchHistory();
-    fetchProduk();
+    fetchImageProduk();
   }, []);
 
   return (
@@ -130,7 +131,7 @@ export default function HistoryPesanan() {
               {/* Items */}
               <div className="space-y-3 border-t border-white/5 pt-4">
                 {order.items.map((item) => {
-                  const produkItem = produk.find((p) => p.id === item.produkId);
+                  const produkItem = images.find((p) => p.id === item.produkId);
 
                   return (
                     <div

@@ -3,7 +3,7 @@ import {
   Produk,
   CreateProdukPayload,
   UpdateProdukPayload,
-  ProdukResponse
+  ProdukResponse,
 } from "@/features/produk/types";
 
 /* =======================
@@ -13,7 +13,7 @@ export async function createProduk(data: CreateProdukPayload): Promise<Produk> {
   try {
     const formData = new FormData();
 
-    formData.append("image", data.image); 
+    formData.append("image", data.image);
     formData.append("nama", data.nama);
     formData.append("harga", String(data.harga));
     formData.append("stock", String(data.stock));
@@ -44,6 +44,18 @@ export async function getAllProduk(): Promise<{ produk: Produk[] }> {
   } catch (error) {
     console.error(error); // optional, untuk debugging
     throw new Error("Gagal mengambil produk");
+  }
+}
+
+/* =======================
+   GET IMAGES
+======================= */
+export async function getImageProduk(): Promise<{ images: string[] }> {
+  try {
+    const res = await api.get("/api/produk/images");
+    return res.data;
+  } catch (error) {
+    throw new Error("Gagal mengambil gambar produk");
   }
 }
 

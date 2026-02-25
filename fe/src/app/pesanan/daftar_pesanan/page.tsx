@@ -20,6 +20,7 @@ export default function Antrian() {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [produk, setProduk] = useState<Produk[]>([]);
+  const [images, setImages] = useState<{ id: string; image: string }[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingProduk, setLoadingProduk] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,13 +53,14 @@ export default function Antrian() {
     }
   }
 
-  async function fetchProduk() {
+
+  async function fetchImageProduk() {
     try {
       setLoadingProduk(true);
       const res = await getAllProduk();
-      setProduk(res.produk);
+      setImages(res.produk.map((p) => ({ id: p.id, image: p.image })));
     } catch {
-      setError("Gagal memuat produk");
+      setError("Gagal memuat gambar produk");
     } finally {
       setLoadingProduk(false);
     }
@@ -86,7 +88,7 @@ export default function Antrian() {
 
   useEffect(() => {
     fetchOrders();
-    fetchProduk();
+    fetchImageProduk();
   }, []);
 
   const isLoading = loadingOrders || loadingProduk;
@@ -165,7 +167,7 @@ export default function Antrian() {
                 {/* Items */}
                 <div className="space-y-3 border-t border-white/5 pt-4">
                   {order.items.map((item) => {
-                    const produkItem = produk.find(
+                    const produkItem = images.find(
                       (p) => p.id === item.produkId,
                     );
                     return (

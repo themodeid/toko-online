@@ -72,7 +72,7 @@ export default function MenuPage() {
 
     try {
       await updateProduk(produk.id, payload);
-      router.push("/");
+      router.push("/add_menu");
     } catch {
       setError("Gagal update produk");
     } finally {

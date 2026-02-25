@@ -10,6 +10,12 @@ export const produkSchema = z.object({
 
 export type CreateProdukInput = z.infer<typeof produkSchema>;
 
+// mengambil semua data produk fersi ringan
+export const produkImageSchema = z.object({
+  id: z.string(),
+  image: z.string(),
+});
+
 export const updateProdukSchema = z.object({
   nama: z.string().min(1).max(50).optional(),
   harga: z.coerce.number().min(0).optional(),

@@ -8,6 +8,12 @@ export type Produk = {
   image: string;
 };
 
+// mengambil semua data produk fersi ringan
+export type ProdukImage = {
+  id: string;
+  image: string;
+};
+
 /* Payload create */
 export type CreateProdukPayload = {
   nama: string;
