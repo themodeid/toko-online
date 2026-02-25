@@ -6,7 +6,7 @@ import { Produk } from "@/features/produk/types";
 import { getAllProduk } from "@/features/produk/api";
 import FeatherIcon from "feather-icons-react";
 import { usePathname } from "next/navigation";
-import { CartItem, Order,  } from "@/features/cart/types";
+import { CartItem, Order } from "@/features/cart/types";
 import { user } from "@/features/user/type";
 import {
   createOrder,
@@ -236,7 +236,7 @@ export default function MenuPage() {
               <div className="relative h-40 bg-[#222]">
                 {item.image ? (
                   <Image
-                    src={`http://localhost:3000${item.image}`}
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
                     alt={item.nama}
                     fill
                     className="object-cover"
@@ -299,7 +299,7 @@ export default function MenuPage() {
                 <div className="w-12 h-12 bg-gray-200 relative">
                   {produk.find((p) => p.id === item.produkId)?.image ? (
                     <Image
-                      src={`http://localhost:3000${produk.find((p) => p.id === item.produkId)?.image}`}
+                      src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${produk.find((p) => p.id === item.produkId)?.image}`}
                       alt={item.nama}
                       fill
                       className="object-cover rounded"
@@ -404,9 +404,7 @@ export default function MenuPage() {
               <div className="space-y-3">
                 {order.items?.map((item, index) => {
                   // Cari produk sesuai produk_id dari order item
-                  const produkItem = produk.find(
-                    (p) => p.id === item.produkId,
-                  );
+                  const produkItem = produk.find((p) => p.id === item.produkId);
 
                   return (
                     <div

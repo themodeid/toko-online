@@ -499,5 +499,5 @@ export const getMyAllOrdersWithItems = catchAsync(
       total: result.rows.length,
       data: result.rows,
     });
-  }
+  },
 );

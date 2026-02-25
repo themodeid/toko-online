@@ -142,7 +142,7 @@ export default function HistoryPesanan() {
                         <div className="w-12 h-12 bg-[#222] relative rounded">
                           {produkItem?.image ? (
                             <Image
-                              src={`http://localhost:3000${produkItem.image}`}
+                              src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${produkItem.image}`}
                               alt={item.nama}
                               fill
                               className="object-cover rounded"
