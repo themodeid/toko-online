@@ -266,18 +266,3 @@ This project demonstrates:
 Full-Stack Developer
 
 GitHub: [https://github.com/themodeid](https://github.com/themodeid)
-
----
-
-# 🎯 Status
-
-Actively maintained and open for improvement.
-
----
-
-Kalau kamu pakai README ini + deploy project + rapikan service layer…
-
-Ini sudah terlihat seperti portfolio **Strong Junior menuju Mid** 🔥
-
-Kalau kamu mau, saya bisa bantu buat versi README yang lebih "enterprise style" lagi supaya terlihat level mid developer.
-
