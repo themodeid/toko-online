@@ -5,6 +5,7 @@ import {
   GetOrdersResponse,
   GetActiveOrdersWithItemsResponse,
 } from "@/features/cart/types";
+import { imageConfigDefault } from "next/dist/shared/lib/image-config";
 
 // ================= CREATE ORDER =================
 export async function createOrder(items: CartItem[]) {
@@ -28,7 +29,7 @@ export async function getOrders(): Promise<Order[]> {
     totalPrice: o.total_price,
     statusPesanan: o.status_pesanan,
     createdAt: o.created_at,
-    items: [], // Tanpa items
+    items: [],
   }));
 }
 
@@ -66,7 +67,7 @@ export async function getAllMyOrders(): Promise<Order[]> {
   return res.data.data.map((o) => ({
     id: o.id,
     userId: o.user_id,
-    namaUser: "", // karena endpoint ini tidak kirim username
+    namaUser: "",
     totalPrice: o.total_price,
     statusPesanan: o.status_pesanan,
     createdAt: o.created_at,
@@ -75,6 +76,7 @@ export async function getAllMyOrders(): Promise<Order[]> {
       nama: i.nama_produk,
       harga: i.harga_barang,
       quantity: i.qty,
+      image: i.image,
     })),
   }));
 }
@@ -96,6 +98,7 @@ export async function getAllOrderActiveItems(): Promise<Order[]> {
       nama: i.nama_produk,
       harga: i.harga_barang,
       quantity: i.qty,
+      image: i.image,
     })),
   }));
 }
@@ -116,6 +119,7 @@ export async function getMyOrdersActiveWithItems(): Promise<Order[]> {
       nama: i.nama_produk,
       harga: i.harga_barang,
       quantity: i.qty,
+      image: i.image,
     })),
   }));
 }

@@ -4,9 +4,8 @@ const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000",
 });
 
-// ✅ Tambahkan interceptor request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // pastikan nama ini sesuai
+  const token = localStorage.getItem("token");
 
   console.log(token);
   if (token) {

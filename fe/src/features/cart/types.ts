@@ -15,6 +15,7 @@ export interface OrderItem {
   nama: string;
   harga: number;
   quantity: number;
+  image?: string;
 }
 
 export interface Order {
@@ -45,6 +46,7 @@ export interface OrderItemFromApi {
   nama_produk: string;
   harga_barang: number;
   qty: number;
+  image: string;
 }
 
 export interface OrderWithItemsFromApi extends BaseOrderFromApi {

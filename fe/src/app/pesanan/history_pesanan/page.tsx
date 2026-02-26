@@ -54,21 +54,8 @@ export default function HistoryPesanan() {
     }
   }
 
-  async function fetchImageProduk() {
-    try {
-      setLoadingProduk(true);
-      const res = await getAllProduk();
-      setImages(res.produk.map((p) => ({ id: p.id, image: p.image })));
-    } catch {
-      setError("Gagal memuat gambar produk");
-    } finally {
-      setLoadingProduk(false);
-    }
-  }
-
   useEffect(() => {
     fetchHistory();
-    fetchImageProduk();
   }, []);
 
   return (
@@ -149,18 +136,12 @@ export default function HistoryPesanan() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-[#222] relative rounded">
-                          {produkItem?.image ? (
-                            <Image
-                              src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${produkItem.image}`}
-                              alt={item.nama}
-                              fill
-                              className="object-cover rounded"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center h-full text-gray-500 text-xs">
-                              No Image
-                            </div>
-                          )}
+                          <Image
+                            src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item?.image}`}
+                            alt={item.nama}
+                            fill
+                            className="object-cover rounded"
+                          />
                         </div>
 
                         <div>

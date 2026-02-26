@@ -54,22 +54,10 @@ export default function Antrian() {
       setLoadingOrders(true);
       const ordersData = await getAllOrderActiveItems();
       setOrders(ordersData);
-    } catch {
+    } catch (error) {
       setError("Gagal memuat orders");
     } finally {
       setLoadingOrders(false);
-    }
-  }
-
-  async function fetchImageProduk() {
-    try {
-      setLoadingProduk(true);
-      const res = await getAllProduk();
-      setImages(res.produk.map((p) => ({ id: p.id, image: p.image })));
-    } catch {
-      setError("Gagal memuat gambar produk");
-    } finally {
-      setLoadingProduk(false);
     }
   }
 
@@ -95,7 +83,6 @@ export default function Antrian() {
 
   useEffect(() => {
     fetchOrders();
-    fetchImageProduk();
   }, []);
 
   const isLoading = loadingOrders || loadingProduk;
@@ -184,18 +171,12 @@ export default function Antrian() {
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-[#222] relative rounded">
-                            {produkItem?.image ? (
-                              <Image
-                                src={`http://localhost:3000${produkItem.image}`}
-                                alt={item.nama}
-                                fill
-                                className="object-cover rounded"
-                              />
-                            ) : (
-                              <div className="flex items-center justify-center h-full text-gray-500 text-xs">
-                                No Image
-                              </div>
-                            )}
+                            <Image
+                              src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item?.image}`}
+                              alt={item.nama}
+                              fill
+                              className="object-cover rounded"
+                            />
                           </div>
                           <div>
                             <p className="font-medium">{item.nama}</p>

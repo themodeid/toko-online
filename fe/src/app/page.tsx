@@ -33,8 +33,6 @@ export default function MenuPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pesanan, setPesanan] = useState<Order[]>([]);
 
-  // useEffect, functions, etc. bisa ditambahkan di sini
-
   const navClass = (path: string) =>
     `w-10 h-10 cursor-pointer transition-all ${
       pathname === path
@@ -70,7 +68,7 @@ export default function MenuPage() {
     try {
       setLoading(true);
       const data = await getUser();
-      setUser(data); // ✅ object sesuai state
+      setUser(data);
     } catch (error) {
       setError("gagal mengambil data pribadi");
     } finally {
@@ -86,12 +84,10 @@ export default function MenuPage() {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          // hanya ambil produk saja
           await getProduk();
           return;
         }
 
-        // kalau ada token ambil semua
         await Promise.all([getProduk(), fetchPesanan(), getProfil()]);
       } catch {
         setError("Gagal memuat data");
@@ -118,17 +114,15 @@ export default function MenuPage() {
       const exist = prev.find((item) => item.produkId === produk.id);
 
       if (exist) {
-        // jika sudah ada, kurangi 1
         const updated = prev
           .map((item) =>
             item.produkId === produk.id
               ? { ...item, quantity: item.quantity - 1 }
               : item,
           )
-          .filter((item) => item.quantity > 0); // remove jika quantity 0
+          .filter((item) => item.quantity > 0);
         return updated;
       } else {
-        // jika belum ada, tambah 1
         return [
           ...prev,
           {
@@ -423,19 +417,16 @@ export default function MenuPage() {
                     >
                       {/* Image + Info */}
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-200 relative">
-                          {produkItem?.image ? (
-                            <Image
-                              src={`http://localhost:3000${produkItem.image}`}
-                              alt={item.nama}
-                              fill
-                              className="object-cover rounded"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center h-full text-gray-500 text-xs">
-                              No Image
-                            </div>
-                          )}
+                        <div
+                          className="w-12 h-12 bg-gray-200 relative"
+                          key={item.produkId}
+                        >
+                          <Image
+                            src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${produkItem?.image}`}
+                            alt={item.nama}
+                            fill
+                            className="object-cover rounded"
+                          />
                         </div>
 
                         <div>

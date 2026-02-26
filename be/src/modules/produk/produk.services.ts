@@ -10,7 +10,7 @@ export const getAllProduk = async () => {
 export async function getProdukById(id: string) {
   const result = await pool.query(
     "SELECT * FROM produk WHERE id = $1",
-    [id], // ✅ KIRIM UUID UTUH
+    [id], 
   );
 
   return result.rows[0];

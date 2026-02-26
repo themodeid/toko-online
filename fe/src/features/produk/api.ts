@@ -39,10 +39,10 @@ export async function getAllProduk(): Promise<{ produk: Produk[] }> {
   try {
     const res = await api.get("/api/produk");
     return {
-      produk: res.data.produk ?? [], // pastikan response API punya property 'produk'
+      produk: res.data.produk ?? [],
     };
   } catch (error) {
-    console.error(error); // optional, untuk debugging
+    console.error(error); 
     throw new Error("Gagal mengambil produk");
   }
 }
@@ -98,7 +98,6 @@ export async function updateProduk(
 
       return res.data.produk;
     } else {
-      // No file, send as JSON
       const res = await api.patch(`/api/produk/${id}`, data);
       return res.data.produk;
     }

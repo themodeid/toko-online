@@ -4,7 +4,6 @@ import {
   getAllProduk as getAllProdukService,
   getProdukById as getProdukByIdService,
   createProdukService as createProdukService,
-  deleteProduk as deleteProdukService,
 } from "./produk.services";
 import { AppError } from "../../errors/AppError";
 
@@ -30,7 +29,7 @@ export const getImageProduk = catchAsync(
 );
 
 export const getProdukById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params; // ✅ STRING UUID
+  const { id } = req.params; 
 
   // optional: validasi UUID format
   if (!id) {

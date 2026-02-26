@@ -388,7 +388,8 @@ export const getOrdersActiveWithItems = catchAsync(
               'produk_id', oi.produk_id,
               'nama_produk', p.nama,
               'harga_barang', oi.harga_barang,
-              'qty', oi.qty
+              'qty', oi.qty,
+              'image', p.image
             )
           ) FILTER (WHERE oi.id IS NOT NULL),
           '[]'
@@ -477,7 +478,8 @@ export const getMyAllOrdersWithItems = catchAsync(
               'produk_id', oi.produk_id,
               'nama_produk', p.nama,
               'harga_barang', oi.harga_barang,
-              'qty', oi.qty
+              'qty', oi.qty,
+              'image', p.image
             )
           ) FILTER (WHERE oi.id IS NOT NULL),
           '[]'
