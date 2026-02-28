@@ -32,20 +32,18 @@ export default function Antrian() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // useEffect, functions, handlers bisa ditambahkan di sini
-
   const navClass = (path: string) =>
-    `w-10 h-10 cursor-pointer transition-all ${
+    `flex items-center justify-center w-12 h-12 rounded-xl cursor-pointer transition-all duration-300 ${
       pathname === path
-        ? "bg-green-500 text-white p-2 rounded-lg"
-        : "text-gray-400 hover:text-green-400"
+        ? "bg-blue-500 text-zinc-950 shadow-[0_0_15px_rgba(59,130,246,0.5)] scale-110"
+        : "text-zinc-400 hover:text-blue-400 hover:bg-white/5 hover:scale-105"
     }`;
 
   const statusColor: Record<string, string> = {
-    ANTRI: "bg-yellow-100 text-yellow-700",
-    DIPROSES: "bg-blue-100 text-blue-700",
-    SELESAI: "bg-green-100 text-green-700",
-    DIBATALKAN: "bg-red-100 text-red-700",
+    ANTRI: "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
+    DIPROSES: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
+    SELESAI: "bg-green-500/10 text-green-400 border border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.2)]",
+    DIBATALKAN: "bg-red-500/10 text-red-400 border border-red-500/20",
   };
 
   // ================= FETCH ORDERS =================
@@ -89,13 +87,12 @@ export default function Antrian() {
 
   // ================= RENDER =================
   return (
-    <div className="min-h-screen flex bg-[#0F0F0F] text-white">
+    <div className="min-h-screen flex bg-[#09090b] text-zinc-50 font-poppins selection:bg-blue-500/30">
       {/* SIDEBAR */}
-      <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
-        <div className="w-full flex flex-col items-center gap-4 pb-6 border-b border-white/10">
+      <aside className="w-24 bg-white/[0.02] backdrop-blur-xl border-r border-white/5 flex flex-col items-center py-8 gap-8 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-10 sticky top-0 h-screen">
+        <div className="w-full flex flex-col items-center gap-6 pb-8 border-b border-white/10">
           {[
             { path: "/pesanan/daftar_pesanan", icon: "list", label: "Pesanan" },
-
             { path: "/menu/add_menu", icon: "plus", label: "Tambah Menu" },
           ].map((menu) => (
             <div
@@ -104,12 +101,12 @@ export default function Antrian() {
               onClick={() => router.push(menu.path)}
               title={menu.label}
             >
-              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+              <FeatherIcon icon={menu.icon} className="w-5 h-5" />
             </div>
           ))}
         </div>
 
-        {[{ path: "/login_admin", icon: "user", label: "Login" }].map(
+        {[{ path: "/login_admin", icon: "user", label: "Admin Login" }].map(
           (menu) => (
             <div
               key={menu.path}
@@ -117,115 +114,180 @@ export default function Antrian() {
               onClick={() => router.push(menu.path)}
               title={menu.label}
             >
-              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+              <FeatherIcon icon={menu.icon} className="w-5 h-5" />
             </div>
           ),
         )}
       </aside>
-      {/* MAIN1 */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold">Pesanan Aktif</h1>
-          <p className="text-sm text-gray-400">Kelola pesanan pelanggan cafe</p>
+
+      {/* MAIN */}
+      <main className="flex-1 p-8 lg:p-12 overflow-y-auto">
+        <div className="mb-12 max-w-6xl mx-auto">
+          <div className="inline-block px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full mb-4">
+            <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-2">
+              <FeatherIcon icon="shield" className="w-3 h-3" />
+              Admin Dashboard
+            </span>
+          </div>
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400 mb-2">
+            Pesanan Aktif
+          </h1>
+          <p className="text-sm text-zinc-400 max-w-md">
+            Kelola dan pantau seluruh pesanan yang masuk secara realtime.
+          </p>
         </div>
 
-        {isLoading && <p className="text-gray-400">Loading...</p>}
-        {error && <p className="text-red-400">{error}</p>}
+        <div className="max-w-6xl mx-auto">
+          {isLoading && (
+            <div className="flex items-center gap-3 text-zinc-400 mb-8">
+              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p>Memuat data pesanan...</p>
+            </div>
+          )}
+          
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-8 flex items-center gap-3">
+              <FeatherIcon icon="alert-circle" className="w-5 h-5" />
+              <p>{error}</p>
+            </div>
+          )}
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {orders.map((order) => {
-            const isFinished =
-              order.statusPesanan === "SELESAI" ||
-              order.statusPesanan === "DIBATALKAN";
-
-            return (
-              <div
-                key={order.id}
-                className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 hover:scale-[1.02] transition"
-              >
-                {/* Header */}
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h2 className="font-semibold text-lg">{order.namaUser}</h2>
-                    <p className="text-xs text-gray-400">
-                      {new Date(order.createdAt).toLocaleString("id-ID")}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 text-xs rounded-full font-semibold ${statusColor[order.statusPesanan]}`}
-                  >
-                    {order.statusPesanan}
-                  </span>
-                </div>
-
-                {/* Items */}
-                <div className="space-y-3 border-t border-white/5 pt-4">
-                  {order.items.map((item) => {
-                    const produkItem = images.find(
-                      (p) => p.id === item.produkId,
-                    );
-                    return (
-                      <div
-                        key={item.produkId}
-                        className="flex justify-between items-center text-sm"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-[#222] relative rounded">
-                            <Image
-                              src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item?.image}`}
-                              alt={item.nama}
-                              fill
-                              className="object-cover rounded"
-                            />
-                          </div>
-                          <div>
-                            <p className="font-medium">{item.nama}</p>
-                            <p className="text-xs text-gray-400">
-                              {item.quantity} x Rp{" "}
-                              {item.harga.toLocaleString("id-ID")}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="font-semibold text-green-400">
-                          Rp{" "}
-                          {(item.harga * item.quantity).toLocaleString("id-ID")}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Footer */}
-                <div className="border-t border-white/5 mt-4 pt-4 flex justify-between items-center">
-                  <p className="text-sm text-gray-400">
-                    Total Item:{" "}
-                    {order.items.reduce((acc, item) => acc + item.quantity, 0)}
-                  </p>
-                  <p className="font-bold text-lg text-green-400">
-                    Rp {Number(order.totalPrice).toLocaleString("id-ID")}
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="mt-5 flex gap-3">
-                  <button
-                    onClick={() => handleCancel(order.id)}
-                    disabled={isFinished || actionLoading === order.id}
-                    className={`flex-1 py-2 rounded-xl font-medium transition ${isFinished ? "bg-gray-700 text-gray-500 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"}`}
-                  >
-                    {actionLoading === order.id ? "Processing..." : "Cancel"}
-                  </button>
-                  <button
-                    onClick={() => handleDone(order.id)}
-                    disabled={isFinished || actionLoading === order.id}
-                    className={`flex-1 py-2 rounded-xl font-medium transition ${isFinished ? "bg-gray-700 text-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-600 text-black"}`}
-                  >
-                    {actionLoading === order.id ? "Processing..." : "Selesai"}
-                  </button>
-                </div>
+          {!isLoading && orders.length === 0 && !error && (
+            <div className="text-center py-24 px-4 bg-white/[0.02] border border-white/5 rounded-3xl border-dashed">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FeatherIcon icon="inbox" className="w-8 h-8 text-zinc-500" />
               </div>
-            );
-          })}
+              <h2 className="text-xl font-bold text-zinc-300 mb-2">Belum ada pesanan aktif</h2>
+              <p className="text-zinc-500 text-sm">Pesanan baru akan muncul di sini.</p>
+            </div>
+          )}
+
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {orders.map((order) => {
+              const isFinished =
+                order.statusPesanan === "SELESAI" ||
+                order.statusPesanan === "DIBATALKAN";
+
+              return (
+                <div
+                  key={order.id}
+                  className="bg-white/[0.02] rounded-3xl border border-white/5 p-6 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:border-white/10 transition-all duration-500 group flex flex-col relative overflow-hidden"
+                >
+                  {/* Status Indicator Bar */}
+                  <div 
+                    className={`absolute top-0 left-0 w-full h-1 ${
+                      order.statusPesanan === "SELESAI" ? "bg-green-500" :
+                      order.statusPesanan === "DIPROSES" ? "bg-indigo-500" :
+                      order.statusPesanan === "ANTRI" ? "bg-yellow-500" : "bg-red-500"
+                    }`}
+                  ></div>
+
+                  {/* Header */}
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h2 className="font-bold text-lg text-zinc-100 flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm">
+                          {order.namaUser?.charAt(0).toUpperCase() || "U"}
+                        </div>
+                        {order.namaUser}
+                      </h2>
+                      <p className="text-xs text-zinc-500 mt-2 flex items-center gap-1.5 font-mono">
+                        <FeatherIcon icon="hash" className="w-3 h-3" />
+                        {order.id.slice(0, 8)} • {new Date(order.createdAt).toLocaleTimeString("id-ID", {hour: '2-digit', minute:'2-digit'})}
+                      </p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 text-[10px] rounded-full font-bold uppercase tracking-wider ${statusColor[order.statusPesanan] || statusColor["ANTRI"]}`}
+                    >
+                      {order.statusPesanan}
+                    </span>
+                  </div>
+
+                  {/* Items */}
+                  <div className="space-y-4 border-t border-white/5 pt-5 flex-1">
+                    {order.items.map((item) => {
+                      return (
+                        <div
+                          key={item.produkId}
+                          className="flex justify-between items-center text-sm"
+                        >
+                          <div className="flex items-center gap-4 flex-1 min-w-0 pr-4">
+                            <div className="w-12 h-12 bg-zinc-900 relative rounded-xl overflow-hidden border border-white/5 flex-shrink-0">
+                              {item.image ? (
+                                <Image
+                                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item?.image}`}
+                                  alt={item.nama}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full items-center justify-center">
+                                  <FeatherIcon icon="image" className="w-4 h-4 text-zinc-600" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="truncate">
+                              <p className="font-semibold text-zinc-200 truncate">{item.nama}</p>
+                              <p className="text-xs text-zinc-500 mt-0.5">
+                                {item.quantity} x Rp {item.harga.toLocaleString("id-ID")}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="font-bold text-zinc-300">
+                            Rp {(item.harga * item.quantity).toLocaleString("id-ID")}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="border-t border-white/5 mt-5 pt-5 flex justify-between items-center bg-white/[0.01] -mx-6 -mb-6 px-6 pb-6 rounded-b-3xl">
+                    <div>
+                      <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold mb-1">
+                        Total ({order.items.reduce((acc, item) => acc + item.quantity, 0)} Item)
+                      </p>
+                      <p className="font-bold text-xl text-blue-400">
+                        Rp {Number(order.totalPrice).toLocaleString("id-ID")}
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    {!isFinished && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleCancel(order.id)}
+                          disabled={actionLoading === order.id}
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-all shadow-sm"
+                          title="Batalkan Pesanan"
+                        >
+                          {actionLoading === order.id ? (
+                            <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <FeatherIcon icon="x" className="w-5 h-5" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleDone(order.id)}
+                          disabled={actionLoading === order.id}
+                          className="px-4 h-10 flex items-center justify-center gap-2 rounded-xl font-bold bg-blue-500 hover:bg-blue-400 text-zinc-950 transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transform hover:-translate-y-0.5"
+                        >
+                          {actionLoading === order.id ? (
+                            <div className="w-4 h-4 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <>
+                              Selesai
+                              <FeatherIcon icon="check" className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </main>
     </div>

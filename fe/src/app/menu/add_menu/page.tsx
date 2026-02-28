@@ -22,13 +22,11 @@ export default function AddMenuPage() {
   // Data state
   const [produk, setProduk] = useState<Produk[]>([]);
 
-  // useEffect, functions, handlers bisa ditambahkan di sini
-
   const navClass = (path: string) =>
-    `w-10 h-10 cursor-pointer transition-all ${
+    `flex items-center justify-center w-12 h-12 rounded-xl cursor-pointer transition-all duration-300 ${
       pathname === path
-        ? "bg-green-500 text-white p-2 rounded-lg"
-        : "text-gray-400 hover:text-green-400"
+        ? "bg-blue-500 text-zinc-950 shadow-[0_0_15px_rgba(59,130,246,0.5)] scale-110"
+        : "text-zinc-400 hover:text-blue-400 hover:bg-white/5 hover:scale-105"
     }`;
 
   async function getProduk() {
@@ -84,13 +82,12 @@ export default function AddMenuPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#0F0F0F] text-white">
+    <div className="min-h-screen flex bg-[#09090b] text-zinc-50 font-poppins selection:bg-blue-500/30">
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-20 bg-[#0B0B0B] flex flex-col items-center py-6 gap-6 border-r border-white/5">
-        <div className="w-full flex flex-col items-center gap-4 pb-6 border-b border-white/10">
+      <aside className="w-24 bg-white/[0.02] backdrop-blur-xl border-r border-white/5 flex flex-col items-center py-8 gap-8 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-10 sticky top-0 h-screen">
+        <div className="w-full flex flex-col items-center gap-6 pb-8 border-b border-white/10">
           {[
             { path: "/pesanan/daftar_pesanan", icon: "list", label: "Pesanan" },
-
             { path: "/menu/add_menu", icon: "plus", label: "Tambah Menu" },
           ].map((menu) => (
             <div
@@ -99,12 +96,12 @@ export default function AddMenuPage() {
               onClick={() => router.push(menu.path)}
               title={menu.label}
             >
-              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+              <FeatherIcon icon={menu.icon} className="w-5 h-5" />
             </div>
           ))}
         </div>
 
-        {[{ path: "/login_admin", icon: "user", label: "Login" }].map(
+        {[{ path: "/login_admin", icon: "user", label: "Admin Login" }].map(
           (menu) => (
             <div
               key={menu.path}
@@ -112,155 +109,231 @@ export default function AddMenuPage() {
               onClick={() => router.push(menu.path)}
               title={menu.label}
             >
-              <FeatherIcon icon={menu.icon} className="w-6 h-6 text-white" />
+              <FeatherIcon icon={menu.icon} className="w-5 h-5" />
             </div>
           ),
         )}
       </aside>
 
       {/* ================= MAIN ================= */}
-      <main className="flex-1 p-8 overflow-y-auto space-y-10">
-        {/* ===== CREATE FORM CARD ===== */}
-        <div className="max-w-xl bg-[#1A1A1A] p-8 rounded-2xl border border-white/5 shadow-lg">
-          <div className="mb-6">
-            <h1 className="text-2xl font-semibold">Create Menu</h1>
-            <p className="text-sm text-gray-400">
-              Tambahkan produk baru ke cafe
-            </p>
+      <main className="flex-1 p-8 lg:p-12 overflow-y-auto space-y-12">
+        
+        {/* Header Section */}
+        <div className="max-w-6xl mx-auto">
+          <div className="inline-block px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full mb-4">
+            <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-2">
+              <FeatherIcon icon="shield" className="w-3 h-3" />
+              Admin Dashboard
+            </span>
           </div>
-
-          {error && (
-            <div className="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg mb-4 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form action={handleCreate} className="space-y-5">
-            {/* Image */}
-            <div>
-              <label className="block text-sm mb-2 text-gray-300">
-                Gambar Produk
-              </label>
-              <input
-                type="file"
-                name="image"
-                required
-                className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm file:bg-green-500 file:border-0 file:px-4 file:py-2 file:rounded file:text-black hover:file:bg-green-600"
-              />
-            </div>
-
-            {/* Nama */}
-            <input
-              type="text"
-              name="nama"
-              placeholder="Nama produk"
-              className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
-
-            {/* Harga */}
-            <input
-              type="number"
-              name="harga"
-              placeholder="Harga"
-              className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
-
-            {/* Stock */}
-            <input
-              type="number"
-              name="stock"
-              placeholder="Stock"
-              className="w-full bg-[#222] border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-
-            {/* Status */}
-            <div className="flex items-center justify-between bg-[#222] p-3 rounded-lg border border-white/10">
-              <span className="text-sm text-gray-300">Status Produk</span>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="status"
-                  value="true"
-                  className="accent-green-500"
-                />
-                <span className="text-sm">Active</span>
-              </label>
-            </div>
-
-            {/* Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-3 rounded-xl font-semibold transition ${
-                loading
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-green-500 hover:bg-green-600 text-black"
-              }`}
-            >
-              {loading ? "Creating..." : "Create Menu"}
-            </button>
-          </form>
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400 mb-2">
+            Manajemen Menu
+          </h1>
+          <p className="text-sm text-zinc-400 max-w-md">
+            Tambahkan dan kelola menu produk yang akan ditampilkan kepada pelanggan.
+          </p>
         </div>
 
-        {/* ===== LIST MENU GRID ===== */}
-        <div>
-          <h2 className="text-xl font-semibold mb-6">Daftar Menu</h2>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-10">
+          
+          {/* ===== CREATE FORM CARD ===== */}
+          <div className="xl:col-span-4 h-fit sticky top-8">
+            <div className="bg-white/[0.02] p-8 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
+              
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <FeatherIcon icon="plus-circle" className="w-5 h-5 text-blue-400" />
+                  </div>
+                  Menu Baru
+                </h2>
+              </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {produk.map((item) => (
-              <div
-                key={item.id}
-                className="bg-[#1A1A1A] rounded-2xl overflow-hidden border border-white/5 hover:scale-[1.02] transition"
-              >
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2">
+                  <FeatherIcon icon="alert-circle" className="w-4 h-4 flex-shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              <form action={handleCreate} className="space-y-6">
                 {/* Image */}
-                <div className="relative h-40 bg-[#222]">
-                  {item.image ? (
-                    <Image
-                      src={`http://localhost:3000${item.image}`}
-                      alt={item.nama}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-gray-500 text-sm">
-                      No Image
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
+                    Gambar Produk *
+                  </label>
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl bg-zinc-900/50 hover:bg-white/5 hover:border-blue-500/30 transition-all cursor-pointer group">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <FeatherIcon icon="upload-cloud" className="w-8 h-8 text-zinc-500 group-hover:text-blue-400 mb-2" />
+                      <p className="text-xs text-zinc-400"><span className="font-semibold text-blue-400">Upload file</span> atau drag & drop</p>
                     </div>
-                  )}
+                    <input
+                      type="file"
+                      name="image"
+                      required
+                      className="hidden"
+                    />
+                  </label>
                 </div>
 
-                {/* Content */}
-                <div className="p-4 space-y-2">
-                  <p className="font-medium">{item.nama}</p>
+                {/* Nama */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
+                    Nama Produk *
+                  </label>
+                  <input
+                    type="text"
+                    name="nama"
+                    placeholder="Contoh: Kopi Aren Gula"
+                    className="w-full bg-zinc-900/80 border border-white/10 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-zinc-600 text-zinc-100"
+                    required
+                  />
+                </div>
 
-                  <p className="text-green-400 font-semibold">
-                    Rp {Number(item.harga ?? 0).toLocaleString("id-ID")}
-                    <span className="text-xs text-gray-400"> / pcs</span>
-                  </p>
+                {/* Harga */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
+                    Harga (Rp) *
+                  </label>
+                  <input
+                    type="number"
+                    name="harga"
+                    placeholder="Contoh: 25000"
+                    className="w-full bg-zinc-900/80 border border-white/10 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-zinc-600 text-zinc-100"
+                    required
+                  />
+                </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Stock: {item.stock}</span>
-                    <span
-                      className={`px-2 py-0.5 rounded-full ${
-                        item.status
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
-                      }`}
-                    >
-                      {item.status ? "Active" : "Inactive"}
-                    </span>
+                {/* Stock */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
+                    Stok Awal
+                  </label>
+                  <input
+                    type="number"
+                    name="stock"
+                    placeholder="Contoh: 50"
+                    className="w-full bg-zinc-900/80 border border-white/10 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-zinc-600 text-zinc-100"
+                  />
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
+                    Status Produk
+                  </label>
+                  <div className="flex items-center justify-between bg-zinc-900/80 p-3.5 rounded-xl border border-white/10">
+                    <span className="text-sm font-medium text-zinc-300">Tampilkan di Menu?</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" name="status" value="true" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full py-4 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 mt-4 ${
+                    loading
+                      ? "bg-white/10 text-zinc-400 cursor-not-allowed border border-white/5"
+                      : "bg-blue-500 hover:bg-blue-400 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transform hover:-translate-y-1"
+                  }`}
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin"></div>
+                      Menyimpan...
+                    </>
+                  ) : (
+                    <>
+                      Simpan Menu
+                      <FeatherIcon icon="check" className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* ===== LIST MENU GRID ===== */}
+          <div className="xl:col-span-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-3">
+                <FeatherIcon icon="grid" className="w-6 h-6 text-zinc-400" />
+                Daftar Menu Tersedia ({produk.length})
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {produk.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-3xl overflow-hidden hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:border-white/10 transition-all duration-500 group flex flex-col"
+                >
+                  {/* Image */}
+                  <div className="relative h-44 bg-zinc-900/50 m-2 rounded-2xl overflow-hidden">
+                    {item.image ? (
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
+                        alt={item.nama}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-zinc-600">
+                        <FeatherIcon icon="image" className="w-8 h-8 opacity-50" />
+                      </div>
+                    )}
+
+                    <div className="absolute top-3 right-3 z-10 shadow-lg">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md border ${
+                          item.status
+                            ? "bg-green-500/20 text-green-300 border-green-500/30"
+                            : "bg-red-500/20 text-red-300 border-red-500/30"
+                        }`}
+                      >
+                        {item.status ? "Aktif" : "Nonaktif"}
+                      </span>
+                    </div>
                   </div>
 
-                  <Link
-                    href={`/menu/profil_produk/${item.id}`}
-                    className="block text-center bg-green-500 hover:bg-green-600 text-black font-medium py-2 rounded-xl transition"
-                  >
-                    Detail
-                  </Link>
+                  {/* Content */}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="font-semibold text-lg text-zinc-100 group-hover:text-blue-400 transition-colors duration-300 mb-1 leading-tight">
+                      {item.nama}
+                    </h3>
+                    
+                    <div className="flex items-end justify-between mt-4 mb-5">
+                      <div>
+                        <p className="text-xs text-zinc-500 mb-0.5">Harga Dasar</p>
+                        <p className="text-xl font-bold text-zinc-100">
+                          <span className="text-blue-400 text-sm align-top mr-0.5">Rp</span>
+                          {Number(item.harga ?? 0).toLocaleString("id-ID")}
+                        </p>
+                      </div>
+                      
+                      <div className="text-right">
+                        <p className="text-xs text-zinc-500 mb-0.5">Stok</p>
+                        <p className="font-semibold text-zinc-200 bg-white/5 py-1 px-3 border border-white/10 rounded-lg inline-block">
+                          {item.stock}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/menu/profil_produk/${item.id}`}
+                      className="mt-auto block text-center bg-white/5 hover:bg-blue-500 border border-white/10 hover:border-blue-400 text-zinc-300 hover:text-white font-bold py-3 px-4 rounded-xl transition-all duration-300"
+                    >
+                      Edit Detail Produk
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </main>

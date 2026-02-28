@@ -5,16 +5,11 @@ import { produkSchema, updateProdukSchema } from "./produk.schema";
 import { authGuard } from "../../middlewares/auth";
 import { roleGuard } from "../../middlewares/roleGuard";
 import { upload } from "../../middlewares/upload";
-import {
-  getAllProduk,
-  getProdukById,
-  getImageProduk,
-} from "./produk.controller";
+import { getAllProduk, getProdukById } from "./produk.controller";
 const router = Router();
 
 // Public / user login
 router.get("/", getAllProduk);
-router.get("/images", controller.getImageProduk);
 router.get("/:id", getProdukById);
 
 // Admin only

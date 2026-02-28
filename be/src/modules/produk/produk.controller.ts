@@ -17,19 +17,8 @@ export const getAllProduk = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// mengambil semua data produk fersi ringan
-
-export const getImageProduk = catchAsync(
-  async (req: Request, res: Response) => {
-    const query = "SELECT id, image FROM produk";
-    const result = await pool.query(query);
-
-    res.status(200).json(result.rows);
-  },
-);
-
 export const getProdukById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params; 
+  const { id } = req.params;
 
   // optional: validasi UUID format
   if (!id) {
