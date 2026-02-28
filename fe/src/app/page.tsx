@@ -26,6 +26,7 @@ export default function MenuPage() {
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Data state
   const [user, setUser] = useState<user | null>(null);
@@ -179,14 +180,14 @@ export default function MenuPage() {
   const total = subtotal - discount;
 
   return (
-    <div className="min-h-screen flex bg-[#09090b] text-zinc-50 font-poppins selection:bg-green-500/30">
-      {/* ================= SIDEBAR ================= */}
-      <aside className="w-24 bg-white/[0.02] backdrop-blur-xl border-r border-white/5 flex flex-col items-center py-8 gap-8 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-10 sticky top-0 h-screen">
-        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 mb-8 cursor-pointer hover:scale-105 transition-transform" onClick={() => router.push("/")}>
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#09090b] text-zinc-50 font-poppins selection:bg-green-500/30">
+      {/* ================= SIDEBAR / BOTTOM NAV ================= */}
+      <aside className="w-full md:w-24 h-20 md:h-screen fixed bottom-0 md:sticky md:top-0 bg-zinc-950/80 md:bg-white/[0.02] backdrop-blur-xl border-t md:border-t-0 md:border-r border-white/5 flex flex-row md:flex-col items-center justify-around md:justify-start py-0 md:py-8 gap-0 md:gap-8 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] md:shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-50">
+        <div className="hidden md:flex w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl items-center justify-center shadow-lg shadow-green-500/30 mb-8 cursor-pointer hover:scale-105 transition-transform" onClick={() => router.push("/")}>
           <FeatherIcon icon="coffee" className="w-6 h-6 text-zinc-950" />
         </div>
 
-        <div className="flex flex-col gap-6 w-full items-center">
+        <div className="flex flex-row md:flex-col gap-2 md:gap-6 w-full items-center justify-evenly md:justify-start px-4 md:px-0">
           <div className={navClass("/")} onClick={() => router.push("/")} title="Menu">
             <FeatherIcon icon="home" className="w-5 h-5" />
           </div>
@@ -209,24 +210,43 @@ export default function MenuPage() {
         </div>
       </aside>
 
-      {/* ================= MAIN CONTENT ================= */}
-      <main className="flex-1 p-8 lg:p-12 overflow-y-auto w-full custom-scrollbar">
+      {/* ================= CONTENT WRAPPER ================= */}
+      <div className="flex-1 flex flex-col lg:flex-row w-full min-w-0">
+        {/* ================= MAIN CONTENT ================= */}
+        <main className="flex-1 p-4 md:p-8 lg:p-12 pb-12 lg:pb-12 overflow-y-auto w-full custom-scrollbar">
         {/* Header Section */}
-        <div className="mb-12">
-          <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-4">
-            <span className="text-xs font-medium text-green-400 tracking-wider uppercase">Menu Kafe</span>
+        <div className="mb-8 md:mb-12 pt-4 md:pt-0">
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-4">
+                <span className="text-xs font-medium text-green-400 tracking-wider uppercase">Menu Kafe</span>
+              </div>
+              {user?.username && (
+                <p className="text-zinc-400 text-lg mb-2">
+                  Selamat datang kembali, <span className="text-green-400 font-medium">{user.username}</span> 👋
+                </p>
+              )}
+              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400">
+                Pilih Menu Favoritmu
+              </h1>
+              <p className="text-sm text-zinc-500 mt-3 max-w-md">
+                Pilih ragam kopi dan camilan terbaik kami, lalu tambahkan pesanan dengan mudah.
+              </p>
+            </div>
+            
+            {/* Mobile Cart Toggle Button */}
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="lg:hidden relative flex items-center justify-center w-12 h-12 bg-white/5 border border-white/10 rounded-2xl text-zinc-300 hover:bg-white/10 hover:text-green-400 transition-all shadow-lg"
+            >
+              <FeatherIcon icon="shopping-bag" className="w-5 h-5" />
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-green-500 text-zinc-950 text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#09090b]">
+                  {cart.length}
+                </span>
+              )}
+            </button>
           </div>
-          {user?.username && (
-            <p className="text-zinc-400 text-lg mb-2">
-              Selamat datang kembali, <span className="text-green-400 font-medium">{user.username}</span> 👋
-            </p>
-          )}
-          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400">
-            Pilih Menu Favoritmu
-          </h1>
-          <p className="text-sm text-zinc-500 mt-3 max-w-md">
-            Pilih ragam kopi dan camilan terbaik kami, lalu tambahkan pesanan dengan mudah.
-          </p>
         </div>
 
         {/* Status Messages */}
@@ -245,7 +265,7 @@ export default function MenuPage() {
         )}
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 lg:gap-8 pb-24">
           {produk.map((item) => (
             <div
               key={item.id}
@@ -321,14 +341,31 @@ export default function MenuPage() {
       </main>
 
       {/* ================= RIGHT PANEL (CART & ORDERS) ================= */}
-      <aside className="w-[400px] flex-shrink-0 bg-white/[0.02] backdrop-blur-2xl border-l border-white/5 flex flex-col h-screen sticky top-0 shadow-[-4px_0_24px_rgba(0,0,0,0.2)]">
-        <div className="p-8 flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+      {/* Mobile Overlay Background */}
+      {isCartOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
+          onClick={() => setIsCartOpen(false)}
+        ></div>
+      )}
+
+      <aside className={`fixed inset-y-0 right-0 z-[70] w-full sm:w-[400px] lg:w-[400px] flex-shrink-0 bg-zinc-950/95 lg:bg-white/[0.02] backdrop-blur-3xl lg:border-l border-white/5 flex flex-col h-full lg:h-screen lg:sticky lg:top-0 shadow-[-20px_0_40px_rgba(0,0,0,0.5)] lg:shadow-[-4px_0_24px_rgba(0,0,0,0.2)] transition-transform duration-500 ease-in-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}`}>
+        <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar flex flex-col pb-28 lg:pb-8">
           {/* Current Order Section */}
           <div className="mb-10 flex-1">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-zinc-100">
-              <FeatherIcon icon="shopping-bag" className="w-5 h-5 text-green-400" />
-              Keranjang <span className="text-sm font-medium text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">{cart.length}</span>
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold flex items-center gap-3 text-zinc-100">
+                <FeatherIcon icon="shopping-bag" className="w-5 h-5 text-green-400" />
+                Keranjang <span className="text-sm font-medium text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">{cart.length}</span>
+              </h2>
+              
+              <button 
+                onClick={() => setIsCartOpen(false)}
+                className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <FeatherIcon icon="x" className="w-5 h-5" />
+              </button>
+            </div>
             
             {cart.length === 0 ? (
               <div className="text-center py-12 px-4 bg-white/[0.02] border border-white/5 rounded-3xl border-dashed flex flex-col items-center justify-center">
@@ -485,6 +522,8 @@ export default function MenuPage() {
           )}
         </div>
       </aside>
+      
+      </div>
     </div>
   );
 }

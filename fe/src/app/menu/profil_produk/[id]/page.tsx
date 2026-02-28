@@ -99,10 +99,10 @@ export default function MenuPage() {
   if (!produk && !loading) return null;
 
   return (
-    <div className="min-h-screen flex bg-[#09090b] text-zinc-50 font-poppins selection:bg-blue-500/30">
-      {/* ================= SIDEBAR ================= */}
-      <aside className="w-24 bg-white/[0.02] backdrop-blur-xl border-r border-white/5 flex flex-col items-center py-8 gap-8 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-10 sticky top-0 h-screen">
-        <div className="w-full flex flex-col items-center gap-6 pb-8 border-b border-white/10">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#09090b] text-zinc-50 font-poppins selection:bg-blue-500/30">
+      {/* ================= SIDEBAR / BOTTOM NAV ================= */}
+      <aside className="w-full md:w-24 h-20 md:h-screen fixed bottom-0 md:sticky md:top-0 bg-zinc-950/80 md:bg-white/[0.02] backdrop-blur-xl border-t md:border-t-0 md:border-r border-white/5 flex flex-row md:flex-col items-center justify-around md:justify-start py-0 md:py-8 gap-0 md:gap-8 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] md:shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-50">
+        <div className="flex flex-row md:flex-col gap-2 md:gap-6 w-full items-center justify-evenly md:justify-start px-4 md:px-0">
           {[
             { path: "/pesanan/daftar_pesanan", icon: "list", label: "Pesanan" },
             { path: "/menu/add_menu", icon: "plus", label: "Tambah Menu" },
@@ -118,20 +118,24 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {[{ path: "/login_admin", icon: "user", label: "Login Admin" }].map((menu) => (
-          <div
-            key={menu.path}
-            className={navClass(menu.path)}
-            onClick={() => router.push(menu.path)}
-            title={menu.label}
-          >
-            <FeatherIcon icon={menu.icon} className="w-5 h-5" />
-          </div>
-        ))}
+        <div className="hidden md:flex flex-col gap-6 w-full items-center mt-auto">
+          {[{ path: "/login_admin", icon: "user", label: "Admin Login" }].map(
+            (menu) => (
+              <div
+                key={menu.path}
+                className={navClass(menu.path)}
+                onClick={() => router.push(menu.path)}
+                title={menu.label}
+              >
+                <FeatherIcon icon={menu.icon} className="w-5 h-5" />
+              </div>
+            ),
+          )}
+        </div>
       </aside>
 
       {/* ================= MAIN ================= */}
-      <main className="flex-1 p-8 lg:p-12 overflow-y-auto w-full relative">
+      <main className="flex-1 p-4 md:p-8 lg:p-12 pb-24 md:pb-12 overflow-y-auto w-full relative">
         <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div className="max-w-4xl mx-auto relative z-10">

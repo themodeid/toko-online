@@ -57,14 +57,14 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#09090b] text-zinc-50 font-poppins selection:bg-green-500/30">
-      {/* ================= SIDEBAR ================= */}
-      <aside className="w-24 bg-white/[0.02] backdrop-blur-xl border-r border-white/5 flex flex-col items-center py-8 gap-8 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-10 sticky top-0 h-screen">
-        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 mb-8 cursor-pointer hover:scale-105 transition-transform" onClick={() => router.push("/")}>
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#09090b] text-zinc-50 font-poppins selection:bg-green-500/30">
+      {/* ================= SIDEBAR / BOTTOM NAV ================= */}
+      <aside className="w-full md:w-24 h-20 md:h-screen fixed bottom-0 md:sticky md:top-0 bg-zinc-950/80 md:bg-white/[0.02] backdrop-blur-xl border-t md:border-t-0 md:border-r border-white/5 flex flex-row md:flex-col items-center justify-around md:justify-start py-0 md:py-8 gap-0 md:gap-8 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] md:shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-50">
+        <div className="hidden md:flex w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl items-center justify-center shadow-lg shadow-green-500/30 mb-8 cursor-pointer hover:scale-105 transition-transform" onClick={() => router.push("/")}>
           <FeatherIcon icon="coffee" className="w-6 h-6 text-zinc-950" />
         </div>
 
-        <div className="flex flex-col gap-6 w-full items-center">
+        <div className="flex flex-row md:flex-col gap-2 md:gap-6 w-full items-center justify-evenly md:justify-start px-4 md:px-0">
           <div className={navClass("/")} onClick={() => router.push("/")} title="Menu">
             <FeatherIcon icon="home" className="w-5 h-5" />
           </div>
@@ -88,7 +88,7 @@ export default function AuthPage() {
       </aside>
 
       {/* ================= MAIN ================= */}
-      <main className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
+      <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-8 lg:p-12 pb-28 md:pb-12 relative overflow-hidden w-full">
         {/* Decorative effects */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
