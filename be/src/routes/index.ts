@@ -1,5 +1,4 @@
 import { Router } from "express";
-import kontakRoutes from "../modules/kontak/kontak.route";
 import produkRoutes from "../modules/produk/produk.route";
 import AuthRoutes from "../modules/auth/auth.route";
 import ordersRoutes from "../modules/orders/orders.routes";
@@ -13,7 +12,6 @@ router.get("/test", (req, res) => {
   res.send("Server hidup");
 });
 router.use("/auth", AuthRoutes);
-router.use("/kontak", kontakRoutes);
 router.use("/produk", produkRoutes);
 router.use("/orders", ordersRoutes);
 router.use("/user", userRoutes);
