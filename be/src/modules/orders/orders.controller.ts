@@ -458,7 +458,8 @@ export const getMyOrdersActiveWithItems = catchAsync(
           'nama_produk', p.nama,
           'harga_barang', oi.harga_barang,
           'qty', oi.qty,
-          'queue_number', dq.queue_number
+          'queue_number', dq.queue_number,
+          'image', p.image
         )
       ) FILTER (WHERE oi.id IS NOT NULL),
       '[]'

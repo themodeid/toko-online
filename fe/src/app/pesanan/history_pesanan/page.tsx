@@ -9,8 +9,11 @@ import { Order } from "@/features/cart/types";
 import { Produk } from "@/features/produk/types";
 
 // API
-import { getAllMyOrders } from "@/features/cart/api";
-import { getAllProduk } from "@/features/produk/api";
+import {
+  getAllMyOrders,
+  getMyOrdersActiveWithItems,
+  cancelOrder,
+} from "@/features/cart/api";
 
 export default function HistoryPesanan() {
   const router = useRouter();
@@ -22,6 +25,7 @@ export default function HistoryPesanan() {
 
   // Data state
   const [history, setHistory] = useState<Order[]>([]);
+  const [pesanan, setPesanan] = useState<Order[]>([]);
 
   const navClass = (path: string) =>
     `flex items-center justify-center w-12 h-12 rounded-xl cursor-pointer transition-all duration-300 ${
@@ -50,8 +54,49 @@ export default function HistoryPesanan() {
     }
   }
 
+  async function fetchPesanan() {
+    try {
+      setLoading(true);
+      const data = await getMyOrdersActiveWithItems();
+      setPesanan(data);
+    } catch (error) {
+      setError("Gagal mengambil data pesanan");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleCancel = async (orderId: string) => {
+    try {
+      await cancelOrder(orderId);
+      alert("order berhasil dibatalkan");
+      fetchPesanan();
+    } catch (error) {
+      setError("gagal membatalkan pesanan");
+    }
+  };
+
   useEffect(() => {
-    fetchHistory();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+
+        await Promise.all([fetchHistory(), fetchPesanan()]);
+      } catch (error) {
+        console.error("Gagal load data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   return (
@@ -96,6 +141,157 @@ export default function HistoryPesanan() {
       <main className="flex-1 p-4 md:p-8 lg:p-12 pb-24 md:pb-12 overflow-y-auto w-full">
         {/* Header */}
         <div className="mb-8 md:mb-12 max-w-5xl mx-auto pt-4 md:pt-0">
+          <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-4">
+            <span className="text-xs font-medium text-green-400 tracking-wider uppercase">
+              Pesanan saya
+            </span>
+          </div>
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400 mb-2">
+            Daftar Pesanan Saya
+          </h1>
+          <p className="text-sm text-zinc-400 max-w-md">
+            Daftar seluruh pesanan saya yang sedang diproses maupun yang sudah
+            selesai. Pantau status pesananmu
+          </p>
+        </div>
+
+        {/* Active Orders Section */}
+        {pesanan.length > 0 && (
+          <div className="mt-10 pt-10 border-t border-white/5">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold flex items-center gap-2 text-zinc-100">
+                <FeatherIcon icon="clock" className="w-5 h-5 text-zinc-400" />
+                Pesanan Aktif
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {pesanan.map((order) => {
+                const showQueue =
+                  (order.statusPesanan === "ANTRI" ||
+                    order.statusPesanan === "DIPROSES") &&
+                  order.items?.[0]?.queue;
+
+                const queueNumber = showQueue
+                  ? `Antrian Ke = ${order.items[0].queue}`
+                  : "—";
+
+                return (
+                  <div
+                    key={order.id}
+                    className="relative overflow-hidden bg-white/[0.03] p-5 rounded-2xl border border-white/10 hover:bg-white/[0.05] transition-colors"
+                  >
+                    {/* Left Indicator */}
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500" />
+
+                    {/* Header */}
+                    <div className="flex justify-between items-start mb-4 pl-2">
+                      <div>
+                        <p className="flex items-center gap-2 font-mono font-bold text-lg text-zinc-100">
+                          <FeatherIcon
+                            icon="hash"
+                            className="w-4 h-4 text-zinc-500"
+                          />
+                          {queueNumber}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="inline-block px-2.5 py-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-full text-[10px] font-bold tracking-wider mb-1">
+                          {order.statusPesanan || "ANTRI"}
+                        </span>
+
+                        <p className="text-[10px] text-zinc-500 font-medium">
+                          {new Date(order.createdAt).toLocaleTimeString(
+                            "id-ID",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Items */}
+                    <div className="space-y-2 mb-4 pl-2">
+                      {order.items?.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center text-sm gap-3"
+                        >
+                          {/* Image */}
+                          <div className="relative w-10 h-10 rounded-md overflow-hidden bg-zinc-800 flex-shrink-0">
+                            {item.image ? (
+                              <Image
+                                src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
+                                alt={item.nama}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full items-center justify-center">
+                                <FeatherIcon
+                                  icon="image"
+                                  className="w-4 h-4 text-zinc-600"
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Name */}
+                          <p className="flex-1 text-zinc-300 truncate font-medium">
+                            <span className="text-zinc-500 mr-2 text-xs">
+                              {item.quantity}x
+                            </span>
+                            {item.nama}
+                          </p>
+
+                          {/* Price */}
+                          <p className="text-zinc-300 font-semibold text-xs whitespace-nowrap">
+                            Rp{" "}
+                            {(item.harga * item.quantity).toLocaleString(
+                              "id-ID",
+                            )}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="pt-4 border-t border-white/5 flex justify-between items-center pl-2">
+                      <div>
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-0.5">
+                          Total Bayar
+                        </p>
+                        <p className="font-bold text-green-400 text-sm">
+                          Rp{" "}
+                          {Number(order.totalPrice ?? 0).toLocaleString(
+                            "id-ID",
+                          )}
+                        </p>
+                      </div>
+
+                      {order.statusPesanan === "ANTRI" && (
+                        <button
+                          onClick={() => handleCancel(order.id)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300
+                       bg-red-500/10 text-red-400 border border-red-500/20
+                       hover:bg-red-500 hover:text-white"
+                        >
+                          Batalkan
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* daftar pesanan */}
+        <div className="mb-8 md:mb-12 max-w-5xl mx-auto pt-4 md:pt-0 mt-6">
           <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-4">
             <span className="text-xs font-medium text-green-400 tracking-wider uppercase">
               Histori
