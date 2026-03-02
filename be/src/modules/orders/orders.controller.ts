@@ -22,36 +22,31 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
     }
   }
 
-  const produksIds = items.map((i: any) => i.produk_id);
+  const produkIds = items.map((i: any) => i.produk_id);
 
-  const produksQuery = `
-    SELECT id, nama, harga, stock , status
-    FROM produk 
+  const produkQuery = `
+    SELECT id, nama, harga, stock, status
+    FROM produk
     WHERE id = ANY($1::uuid[])
   `;
 
-  const productsResult = await pool.query(produksQuery, [produksIds]);
-  const products = productsResult.rows;
+  const produkResult = await pool.query(produkQuery, [produkIds]);
+  const products = produkResult.rows;
 
   if (products.length !== items.length) {
     throw new AppError("Ada produk yang tidak ditemukan", 400);
   }
 
-  const unavailableProduct = products.find((p) => p.status === false);
-
-  if (unavailableProduct) {
+  const unavailable = products.find((p) => p.status === false);
+  if (unavailable) {
     throw new AppError(
-      `Produk ${unavailableProduct.nama} tidak tersedia untuk dipesan`,
+      `Produk ${unavailable.nama} tidak tersedia untuk dipesan`,
       400,
     );
   }
 
   const orderItems = items.map((item: any) => {
-    const produk = products.find((p) => p.id === item.produk_id);
-
-    if (!produk) {
-      throw new AppError("Produk tidak ditemukan", 400);
-    }
+    const produk = products.find((p) => p.id === item.produk_id)!;
 
     if (produk.stock < item.quantity) {
       throw new AppError(`Stok ${produk.nama} tidak cukup`, 400);
@@ -65,38 +60,75 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
     };
   });
 
-  const total_price = orderItems.reduce(
-    (acc: number, item: any) => acc + item.subtotal,
-    0,
-  );
+  const total_price = orderItems.reduce((acc, item) => acc + item.subtotal, 0);
+
+  // hitung batas hari
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
+    // 1️⃣ INSERT ORDER DULU
     const orderQuery = `
-      INSERT INTO orders (user_id, total_price, status_pesanan)
-      VALUES ($1, $2, 'ANTRI')
-      RETURNING id
-    `;
+    INSERT INTO orders (user_id, total_price, status_pesanan)
+    VALUES ($1, $2, 'ANTRI')
+    RETURNING id
+  `;
 
     const orderResult = await client.query(orderQuery, [userId, total_price]);
 
     const orderId = orderResult.rows[0].id;
 
+    // ==============================
+    // 🔥 TARUH CODE ANTRIAN DI SINI
+    // ==============================
+
+    const queueResult = await client.query(
+      `
+    SELECT queue_number
+    FROM daily_queue
+    WHERE queue_date = $1
+    ORDER BY queue_number DESC
+    LIMIT 1
+    FOR UPDATE
+    `,
+      [today],
+    );
+
+    let queueNumber = 1;
+
+    if (queueResult.rows.length > 0) {
+      queueNumber = queueResult.rows[0].queue_number + 1;
+    }
+
+    // 2️⃣ INSERT KE daily_queue
+    await client.query(
+      `
+    INSERT INTO daily_queue (order_id, queue_number, queue_date)
+    VALUES ($1, $2, $3)
+    `,
+      [orderId, queueNumber, today],
+    );
+
+    // lanjut insert order_items dan update stock...
+
+    // 📦 INSERT ORDER ITEMS
     const itemsQuery = `
-      INSERT INTO order_items 
-      (order_id, produk_id, harga_barang, qty, subtotal)
-      VALUES ${orderItems
-        .map(
-          (_, i) =>
-            `($${i * 5 + 1}, $${i * 5 + 2}, $${i * 5 + 3}, $${i * 5 + 4}, $${
-              i * 5 + 5
-            })`,
-        )
-        .join(", ")}
-    `;
+    INSERT INTO order_items
+    (order_id, produk_id, harga_barang, qty, subtotal)
+    VALUES ${orderItems
+      .map(
+        (_, i) =>
+          `($${i * 5 + 1}, $${i * 5 + 2}, $${i * 5 + 3}, $${i * 5 + 4}, $${i * 5 + 5})`,
+      )
+      .join(", ")}
+  `;
 
     const values = orderItems.flatMap((item) => [
       orderId,
@@ -108,6 +140,7 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
 
     await client.query(itemsQuery, values);
 
+    // 📉 UPDATE STOCK
     for (const item of orderItems) {
       await client.query("UPDATE produk SET stock = stock - $1 WHERE id = $2", [
         item.quantity,
@@ -117,22 +150,12 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
 
     await client.query("COMMIT");
 
-    const fetchOrderQuery = `
-      SELECT
-        o.id as order_id,
-        o.status_pesanan,
-        u.username,
-        o.total_price as total_amount,
-        o.created_at
-      FROM orders o
-      JOIN users u ON o.user_id = u.id
-      WHERE o.id = $1
-    `;
-
-    const orderData = await pool.query(fetchOrderQuery, [orderId]);
-    const order = orderData.rows[0];
-
-    res.status(201).json(order);
+    res.status(201).json({
+      message: "Checkout berhasil",
+      order_id: orderId,
+      no_antrian: queueNumber,
+      total_price,
+    });
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
