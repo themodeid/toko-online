@@ -445,33 +445,36 @@ export const getMyOrdersActiveWithItems = catchAsync(
     const userId = req.user.id;
 
     const query = `
-      SELECT 
-        o.id,
-        o.user_id,
-        o.total_price,
-        o.status_pesanan,
-        o.created_at,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'produk_id', oi.produk_id,
-              'nama_produk', p.nama,
-              'harga_barang', oi.harga_barang,
-              'qty', oi.qty
-            )
-          ) FILTER (WHERE oi.id IS NOT NULL),
-          '[]'
-        ) AS items
-      FROM orders o
-      LEFT JOIN order_items oi 
-        ON o.id = oi.order_id
-      LEFT JOIN produk p 
-        ON oi.produk_id = p.id
-      WHERE o.user_id = $1
-      AND o.status_pesanan IN ('ANTRI', 'DIPROSES')
-      GROUP BY o.id
-      ORDER BY o.created_at DESC
-    `;
+  SELECT 
+    o.id,
+    o.user_id,
+    o.total_price,
+    o.status_pesanan,
+    o.created_at,
+    COALESCE(
+      json_agg(
+        json_build_object(
+          'produk_id', oi.produk_id,
+          'nama_produk', p.nama,
+          'harga_barang', oi.harga_barang,
+          'qty', oi.qty,
+          'queue_number', dq.queue_number
+        )
+      ) FILTER (WHERE oi.id IS NOT NULL),
+      '[]'
+    ) AS items
+  FROM orders o
+  LEFT JOIN order_items oi 
+    ON o.id = oi.order_id
+  LEFT JOIN produk p 
+    ON oi.produk_id = p.id
+  LEFT JOIN daily_queue dq
+    ON dq.order_id = o.id
+  WHERE o.user_id = $1
+  AND o.status_pesanan IN ('ANTRI', 'DIPROSES')
+  GROUP BY o.id
+  ORDER BY o.created_at DESC
+`;
 
     const result = await pool.query(query, [userId]);
 
@@ -502,7 +505,8 @@ export const getMyAllOrdersWithItems = catchAsync(
               'nama_produk', p.nama,
               'harga_barang', oi.harga_barang,
               'qty', oi.qty,
-              'image', p.image
+              'image', p.image,
+              'queue_number', dq.queue_number
             )
           ) FILTER (WHERE oi.id IS NOT NULL),
           '[]'
@@ -512,6 +516,8 @@ export const getMyAllOrdersWithItems = catchAsync(
         ON o.id = oi.order_id
       LEFT JOIN produk p 
         ON oi.produk_id = p.id
+      LEFT JOIN daily_queue dq
+        ON dq.order_id = o.id
       WHERE o.user_id = $1
       GROUP BY o.id
       ORDER BY o.created_at DESC

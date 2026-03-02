@@ -16,6 +16,7 @@ export interface OrderItem {
   harga: number;
   quantity: number;
   image?: string;
+  queue?: number;
 }
 
 export interface Order {
@@ -47,6 +48,7 @@ export interface OrderItemFromApi {
   harga_barang: number;
   qty: number;
   image: string;
+  queue_number: number;
 }
 
 export interface OrderWithItemsFromApi extends BaseOrderFromApi {
