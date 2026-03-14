@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AppError } from "../errors/AppError";
+import type { JwtPayloadUser } from "../types/express";
 
 export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -12,10 +13,7 @@ export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-      role: string;
-    };
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayloadUser;
 
     req.user = payload;
     next();
