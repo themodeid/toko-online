@@ -3,6 +3,22 @@ import jwt from "jsonwebtoken";
 import { AppError } from "../errors/AppError";
 import type { JwtPayloadUser } from "../types/express";
 
+// ===== JWT Payload Interface =====
+interface JwtPayloadUser {
+  id: string; // UUID
+  role: string;
+}
+
+// ===== Extend Express Request =====
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JwtPayloadUser;
+    }
+  }
+}
+
+// ===== AUTH GUARD MIDDLEWARE =====
 export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 

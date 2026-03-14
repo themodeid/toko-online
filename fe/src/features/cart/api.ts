@@ -77,6 +77,7 @@ export async function getAllMyOrders(): Promise<Order[]> {
       harga: i.harga_barang,
       quantity: i.qty,
       image: i.image,
+      queue: i.queue_number,
     })),
   }));
 }
@@ -120,6 +121,7 @@ export async function getMyOrdersActiveWithItems(): Promise<Order[]> {
       harga: i.harga_barang,
       quantity: i.qty,
       image: i.image,
+      queue: i.queue_number,
     })),
   }));
 }
