@@ -7,12 +7,13 @@ import FeatherIcon from "feather-icons-react";
 
 // Types
 import { Produk } from "@/features/produk/types";
-import { CartItem} from "@/features/cart/types";
+import { CartItem } from "@/features/cart/types";
 import { user } from "@/features/user/type";
 
 // API
 import { getAllProduk } from "@/features/produk/api";
 import { createOrder } from "@/features/cart/api";
+import { logout } from "@/features/auth/api";
 import { getUser } from "@/features/user/api";
 
 export default function MenuPage() {
@@ -135,6 +136,18 @@ export default function MenuPage() {
     }
   };
 
+  const handleLogout = async () => {
+    const confirm = window.confirm("Apakah Anda yakin ingin logout?");
+    if (!confirm) return;
+    try {
+      await logout();
+      setUser(null);
+      localStorage.removeItem("token");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   const updateQuantity = (produkId: string, quantity: number) => {
     setCart((prev) =>
       prev
@@ -187,12 +200,18 @@ export default function MenuPage() {
           >
             <FeatherIcon icon="user" className="w-5 h-5" />
           </div>
+
+          <div
+            className={navClass("/logout")}
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <FeatherIcon icon="log-out" className="w-5 h-5" />
+          </div>
         </div>
       </aside>
 
-      {/* ================= CONTENT WRAPPER ================= */}
       <div className="flex-1 flex flex-col lg:flex-row w-full min-w-0">
-        {/* ================= MAIN CONTENT ================= */}
         <main className="flex-1 p-4 md:p-8 lg:p-12 pb-12 lg:pb-12 overflow-y-auto w-full custom-scrollbar">
           {/* Header Section */}
           <div className="mb-8 md:mb-12 pt-4 md:pt-0">
@@ -221,7 +240,6 @@ export default function MenuPage() {
                 </p>
               </div>
 
-              {/* Mobile Cart Toggle Button */}
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="lg:hidden relative flex items-center justify-center w-12 h-12 bg-white/5 border border-white/10 rounded-2xl text-zinc-300 hover:bg-white/10 hover:text-green-400 transition-all shadow-lg"
@@ -236,7 +254,6 @@ export default function MenuPage() {
             </div>
           </div>
 
-          {/* Status Messages */}
           {loading && (
             <div className="flex items-center gap-3 text-zinc-400 mb-8">
               <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
@@ -251,7 +268,6 @@ export default function MenuPage() {
             </div>
           )}
 
-          {/* Product Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 lg:gap-8 pb-24">
             {produk.map((item) => (
               <div
@@ -332,8 +348,6 @@ export default function MenuPage() {
           </div>
         </main>
 
-        {/* ================= RIGHT PANEL (CART & ORDERS) ================= */}
-        {/* Mobile Overlay Background */}
         {isCartOpen && (
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
@@ -443,7 +457,6 @@ export default function MenuPage() {
               )}
             </div>
 
-            {/* Checkout Area - Stick to bottom of cart area if needed, otherwise flows naturally */}
             {cart.length > 0 && (
               <div className="mt-6 bg-zinc-900/80 p-6 rounded-3xl border border-white/10 shadow-xl relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-green-500 to-emerald-400"></div>
@@ -476,8 +489,6 @@ export default function MenuPage() {
                 </button>
               </div>
             )}
-
-            
           </div>
         </aside>
       </div>

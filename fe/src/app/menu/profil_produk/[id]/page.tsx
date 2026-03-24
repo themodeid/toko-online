@@ -100,7 +100,6 @@ export default function MenuPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#09090b] text-zinc-50 font-poppins selection:bg-blue-500/30">
-      {/* ================= SIDEBAR / BOTTOM NAV ================= */}
       <aside className="w-full md:w-24 h-20 md:h-screen fixed bottom-0 md:sticky md:top-0 bg-zinc-950/80 md:bg-white/[0.02] backdrop-blur-xl border-t md:border-t-0 md:border-r border-white/5 flex flex-row md:flex-col items-center justify-around md:justify-start py-0 md:py-8 gap-0 md:gap-8 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] md:shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-50">
         <div className="flex flex-row md:flex-col gap-2 md:gap-6 w-full items-center justify-evenly md:justify-start px-4 md:px-0">
           {[
@@ -134,7 +133,6 @@ export default function MenuPage() {
         </div>
       </aside>
 
-      {/* ================= MAIN ================= */}
       <main className="flex-1 p-4 md:p-8 lg:p-12 pb-24 md:pb-12 overflow-y-auto w-full relative">
         <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
@@ -149,7 +147,6 @@ export default function MenuPage() {
 
           <div className="bg-white/[0.03] backdrop-blur-2xl p-8 lg:p-10 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden">
             
-            {/* Header */}
             <div className="mb-10 flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-zinc-100 flex items-center gap-3">
@@ -273,7 +270,6 @@ export default function MenuPage() {
                 </div>
               </div>
 
-              {/* Buttons */}
               <div className="md:col-span-2 pt-6 mt-4 border-t border-white/10">
                 <button
                   type="submit"

@@ -30,3 +30,15 @@ export async function register(data: RegisterType): Promise<AuthResponse> {
   if (!response.ok) throw new Error("Failed to register");
   return response.json();
 }
+
+export async function logout() {
+
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  if (refreshToken) {
+    await api.post("/api/auth/logout", { refreshToken });
+  }
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+}
