@@ -1,27 +1,31 @@
+version: "3.8"
+
 services:
-  mongodb:
-    image: mongo:7
-    container_name: mongodb
+  postgres:
+    image: postgres:16
+    container_name: postgres-db
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongo_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      MONGO_INITDB_DATABASE: kontakdb1
+      POSTGRES_DB: toko
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: adamwahyukur
     restart: always
 
   backend:
     build: ./backend
     container_name: backend-api
     ports:
-      - "3000:3000"
+      - "5000:5000"
     volumes:
       - ./backend:/app
     depends_on:
-      - mongodb
+      - postgres
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/kontakdb1
-      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:adamwahyukur@postgres:5432/toko
+      - PORT=5000
       - NODE_ENV=development
     restart: always
 
@@ -36,7 +40,7 @@ services:
       - backend
     restart: always
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
 
 volumes:
-  mongo_data:
+  postgres_data:
