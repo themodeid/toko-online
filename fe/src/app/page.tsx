@@ -4,17 +4,15 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import FeatherIcon from "feather-icons-react";
+import { useAuth } from "@/context/AuthContext";
 
 // Types
 import { Produk } from "@/features/produk/types";
 import { CartItem } from "@/features/cart/types";
-import { user } from "@/features/user/type";
 
 // API
 import { getAllProduk } from "@/features/produk/api";
 import { createOrder } from "@/features/cart/api";
-import { logout } from "@/features/auth/api";
-import { getUser } from "@/features/user/api";
 
 export default function MenuPage() {
   const router = useRouter();
@@ -26,7 +24,7 @@ export default function MenuPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Data state
-  const [user, setUser] = useState<user | null>(null);
+  const { user, isAuthenticated, logout , } = useAuth();
   const [produk, setProduk] = useState<Produk[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
 
@@ -49,39 +47,8 @@ export default function MenuPage() {
     }
   }
 
-  async function getProfil() {
-    try {
-      setLoading(true);
-      const data = await getUser();
-      setUser(data);
-    } catch (error) {
-      setError("gagal mengambil data pribadi");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          await getProduk();
-          return;
-        }
-
-        await Promise.all([getProduk(), getProfil()]);
-      } catch {
-        setError("Gagal memuat data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
+    getProduk();
   }, []);
 
   useEffect(() => {
@@ -136,16 +103,12 @@ export default function MenuPage() {
     }
   };
 
+
   const handleLogout = async () => {
     const confirm = window.confirm("Apakah Anda yakin ingin logout?");
     if (!confirm) return;
-    try {
-      await logout();
-      setUser(null);
-      localStorage.removeItem("token");
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+
+    await logout();
   };
 
   const updateQuantity = (produkId: string, quantity: number) => {
@@ -329,7 +292,7 @@ export default function MenuPage() {
                       </p>
                     </div>
 
-                    {item.status && item.stock > 0 && (
+                    {item.status && item.stock > 0 && isAuthenticated && (
                       <button
                         onClick={() => updateCart(item)}
                         className="w-12 h-12 bg-white/5 hover:bg-green-500 border border-white/10 hover:border-green-400 rounded-xl flex items-center justify-center transition-all duration-300 group/btn shadow-lg"
