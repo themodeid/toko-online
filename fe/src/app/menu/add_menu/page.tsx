@@ -72,7 +72,7 @@ export default function AddMenuPage() {
         status,
       });
 
-      router.push("/"); // redirect setelah sukses
+      router.push("/"); 
     } catch (err) {
       setError("Gagal membuat produk");
       setTimeout(() => setError(null), 3000);
@@ -117,10 +117,8 @@ export default function AddMenuPage() {
         </div>
       </aside>
 
-      {/* ================= MAIN ================= */}
       <main className="flex-1 p-4 md:p-8 lg:p-12 pb-24 md:pb-12 overflow-y-auto space-y-12 w-full">
         
-        {/* Header Section */}
         <div className="max-w-6xl mx-auto pt-4 md:pt-0">
           <div className="inline-block px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full mb-4">
             <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-2">
@@ -138,7 +136,6 @@ export default function AddMenuPage() {
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-10">
           
-          {/* ===== CREATE FORM CARD ===== */}
           <div className="xl:col-span-4 h-fit sticky top-8">
             <div className="bg-white/[0.02] p-8 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
@@ -160,7 +157,6 @@ export default function AddMenuPage() {
               )}
 
               <form action={handleCreate} className="space-y-6">
-                {/* Image */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
                     Gambar Produk *
@@ -179,7 +175,6 @@ export default function AddMenuPage() {
                   </label>
                 </div>
 
-                {/* Nama */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
                     Nama Produk *
@@ -193,7 +188,6 @@ export default function AddMenuPage() {
                   />
                 </div>
 
-                {/* Harga */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
                     Harga (Rp) *
@@ -207,7 +201,6 @@ export default function AddMenuPage() {
                   />
                 </div>
 
-                {/* Stock */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
                     Stok Awal
@@ -220,7 +213,6 @@ export default function AddMenuPage() {
                   />
                 </div>
 
-                {/* Status */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-zinc-400">
                     Status Produk
@@ -234,7 +226,6 @@ export default function AddMenuPage() {
                   </div>
                 </div>
 
-                {/* Button */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -260,7 +251,6 @@ export default function AddMenuPage() {
             </div>
           </div>
 
-          {/* ===== LIST MENU GRID ===== */}
           <div className="xl:col-span-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-3">
@@ -275,7 +265,6 @@ export default function AddMenuPage() {
                   key={item.id}
                   className="bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-3xl overflow-hidden hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:border-white/10 transition-all duration-500 group flex flex-col"
                 >
-                  {/* Image */}
                   <div className="relative h-44 bg-zinc-900/50 m-2 rounded-2xl overflow-hidden">
                     {item.image ? (
                       <Image
@@ -303,7 +292,6 @@ export default function AddMenuPage() {
                     </div>
                   </div>
 
-                  {/* Content */}
                   <div className="p-5 flex-1 flex flex-col">
                     <h3 className="font-semibold text-lg text-zinc-100 group-hover:text-blue-400 transition-colors duration-300 mb-1 leading-tight">
                       {item.nama}

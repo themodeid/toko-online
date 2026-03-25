@@ -107,7 +107,6 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
       queueNumber = queueResult.rows[0].queue_number + 1;
     }
 
-    // 2️⃣ INSERT KE daily_queue
     await client.query(
       `
     INSERT INTO daily_queue (order_id, queue_number, queue_date)
@@ -116,9 +115,7 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
       [orderId, queueNumber, today],
     );
 
-    // lanjut insert order_items dan update stock...
-
-    // 📦 INSERT ORDER ITEMS
+   
     const itemsQuery = `
     INSERT INTO order_items
     (order_id, produk_id, harga_barang, qty, subtotal)

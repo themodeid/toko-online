@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { login, register } from "@/features/auth/api";
 import { usePathname } from "next/navigation";
 import FeatherIcon from "feather-icons-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -14,6 +14,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { refreshUser } = useAuth();
 
   const navClass = (path: string) =>
     `flex items-center justify-center w-12 h-12 rounded-xl cursor-pointer transition-all duration-300 ${
@@ -38,7 +39,7 @@ export default function AuthPage() {
 
       if (mode === "login") {
         const user = await login({ username, password });
-
+        await refreshUser();
         console.log("ROLE DARI BACKEND:", user.role);
 
         router.replace(user.role === "admin" ? "/pesanan/daftar_pesanan" : "/");
