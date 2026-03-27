@@ -15,7 +15,7 @@ services:
     restart: always
 
   backend:
-    build: ./backend
+    build: ./be
     container_name: backend-api
     ports:
       - "5000:5000"
@@ -30,7 +30,7 @@ services:
     restart: always
 
   frontend:
-    build: ./frontend
+    build: ./fe
     container_name: frontend-app
     ports:
       - "3000:3000"
