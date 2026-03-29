@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   postgres-dev:
     image: postgres:16
@@ -12,18 +14,18 @@ services:
       POSTGRES_PASSWORD: adamwahyukur
     restart: always
 
-    postgres-pro:
-      image: postgres:16
-      container_name: postgres-db-pro
-      ports:
-        - "5433:5432"
-      volumes:
-        - postgres_data_pro:/var/lib/postgresql/data
-      environment:
-        POSTGRES_DB: pro_db
-        POSTGRES_USER: pro_user
-        POSTGRES_PASSWORD: adamwahyukur
-      restart: always
+  postgres-pro:
+    image: postgres:16
+    container_name: postgres-db-pro
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_pro:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: pro_db
+      POSTGRES_USER: pro_user
+      POSTGRES_PASSWORD: adamwahyukur
+    restart: always
 
   backend:
     build: ./be
@@ -34,9 +36,9 @@ services:
       - ./be:/app
       - /app/node_modules
     depends_on:
-      - postgres
+      - postgres-dev
     environment:
-      - DATABASE_URL=postgresql://postgres:adamwahyukur@postgres:5432/dev_db
+      - DATABASE_URL=postgresql://dev_user:adamwahyakur@postgres-dev:5432/dev_db
       - PORT=5000
       - NODE_ENV=development
     restart: always
@@ -51,9 +53,10 @@ services:
       - /app/node_modules
     depends_on:
       - backend
-    restart: always
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:5000
+    restart: always
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
+  postgres_data_pro:
