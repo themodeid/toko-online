@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { AppError } from "../../errors/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { pool } from "../../config/database";
-import { request } from "http";
 
 // checkout penting
 export const checkout = catchAsync(async (req: Request, res: Response) => {
