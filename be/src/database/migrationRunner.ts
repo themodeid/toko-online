@@ -4,7 +4,7 @@ import { pool } from "../config/database";
 
 const migrationsPath = path.join(__dirname, "migrations");
 
-// menyimpan data migration yang sudah pernah dijalankan 
+// menyimpan data migration yang sudah pernah dijalankan
 const ensureMigrationsTable = async () => {
   const query = `
     CREATE TABLE IF NOT EXISTS migrations (
@@ -16,24 +16,28 @@ const ensureMigrationsTable = async () => {
   await pool.query(query);
 };
 
-// mengambil data migration yang sudah pernah dijalankan 
+// mengambil data migration yang sudah pernah dijalankan
 const getAppliedMigrations = async (): Promise<string[]> => {
-  const { rows } = await pool.query("SELECT name FROM migrations ORDER BY id ASC");
+  const { rows } = await pool.query(
+    "SELECT name FROM migrations ORDER BY id ASC",
+  );
   return rows.map((row) => row.name);
 };
 
-// menjalankan migration yang belum dijalankan 
+// menjalankan migration yang belum dijalankan
 export const runMigrations = async () => {
+  console.log("🚀 Start migration");
   await ensureMigrationsTable();
   const appliedMigrations = await getAppliedMigrations();
-  
+
   // ensure the migrations directory exists
   if (!fs.existsSync(migrationsPath)) {
     fs.mkdirSync(migrationsPath, { recursive: true });
   }
 
-  const files = fs.readdirSync(migrationsPath)
-    .filter(file => file.endsWith("_up.sql"))
+  const files = fs
+    .readdirSync(migrationsPath)
+    .filter((file) => file.endsWith("_up.sql"))
     .sort();
 
   if (files.length === 0) {
@@ -43,22 +47,26 @@ export const runMigrations = async () => {
 
   let migratedCount = 0;
 
+  console.log("🚀 Migration runner started");
+
   for (const file of files) {
     const migrationName = file.replace("_up.sql", "");
 
     if (!appliedMigrations.includes(migrationName)) {
       console.log(`⏳ Applying migration: ${migrationName}...`);
-      
+
       const sql = fs.readFileSync(path.join(migrationsPath, file), "utf-8");
-      
+
       // menggunakan transaksi agar jika terjadi error maka migration akan di rollback
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
         await client.query(sql);
-        await client.query("INSERT INTO migrations (name) VALUES ($1)", [migrationName]);
+        await client.query("INSERT INTO migrations (name) VALUES ($1)", [
+          migrationName,
+        ]);
         await client.query("COMMIT");
-        
+
         console.log(`✅ Migration executed: ${migrationName}`);
         migratedCount++;
       } catch (error) {
@@ -78,7 +86,7 @@ export const runMigrations = async () => {
   }
 };
 
-// rollback migration yang terakhir dijalankan 
+// rollback migration yang terakhir dijalankan
 export const rollbackMigration = async () => {
   await ensureMigrationsTable();
   const appliedMigrations = await getAppliedMigrations();
@@ -98,16 +106,18 @@ export const rollbackMigration = async () => {
   }
 
   console.log(`⏳ Rolling back migration: ${lastMigration}...`);
-  
+
   const sql = fs.readFileSync(filePath, "utf-8");
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
     await client.query(sql);
-    await client.query("DELETE FROM migrations WHERE name = $1", [lastMigration]);
+    await client.query("DELETE FROM migrations WHERE name = $1", [
+      lastMigration,
+    ]);
     await client.query("COMMIT");
-    
+
     console.log(`✅ Rollback successful: ${lastMigration}`);
   } catch (error) {
     await client.query("ROLLBACK");

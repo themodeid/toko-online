@@ -8,7 +8,9 @@
     "start": "node dist/server.js",
     "db:migrate": "ts-node-dev --transpile-only src/database/cli.ts up",
     "db:rollback": "ts-node-dev --transpile-only src/database/cli.ts down",
-    "db:make": "ts-node-dev --transpile-only src/database/cli.ts make"
+    "db:make": "ts-node-dev --transpile-only src/database/cli.ts make",
+    "db:up": "ts-node src/database/cli.ts up",
+    "db:down": "ts-node src/database/cli.ts down"
   },
   "keywords": [],
   "author": "",
