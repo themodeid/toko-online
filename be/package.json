@@ -2,15 +2,14 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "app.js",
+  "id": "clean1",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "db:migrate": "ts-node-dev --transpile-only src/database/cli.ts up",
-    "db:rollback": "ts-node-dev --transpile-only src/database/cli.ts down",
-    "db:make": "ts-node-dev --transpile-only src/database/cli.ts make",
-    "db:up": "ts-node src/database/cli.ts up",
-    "db:down": "ts-node src/database/cli.ts down"
+    "db:migrate": "ts-node src/database/cli.ts up",
+    "db:rollback": "ts-node src/database/cli.ts down",
+    "db:make": "ts-node src/database/cli.ts make"
   },
   "keywords": [],
   "author": "",

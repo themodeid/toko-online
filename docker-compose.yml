@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   postgres-dev:
@@ -30,6 +29,7 @@ services:
   backend:
     build: ./be
     container_name: backend-api
+    
     ports:
       - "5000:5000"
     volumes:
