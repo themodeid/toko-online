@@ -13,6 +13,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["backend/**/*", "frontend/**/*"],
+  "include": ["backend/**/*", "frontend/**/*", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "**/dist", "**/build", "**/.next"]
 }

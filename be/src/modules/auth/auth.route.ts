@@ -5,7 +5,8 @@ import { RegisterSchema, LoginSchema } from "./auth.schema";
 
 const router = Router();
 
-router.post("/register", validateBody(RegisterSchema), controller.register);
+// router.post("/registerAdmin", validateBody(RegisterSchema), controller.registerAdmin);
+router.post("/registerUser", validateBody(RegisterSchema), controller.registerUser);
 router.post("/login", validateBody(LoginSchema), controller.login);
 router.post("/logout", controller.logout);
 export default router;

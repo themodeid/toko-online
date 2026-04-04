@@ -7,29 +7,45 @@ import { AppError } from "../../errors/AppError";
 import { LoginSchema, LoginResponseSchema } from "./auth.schema";
 
 // ===================== REGISTER =====================
-export const register = catchAsync(async (req: Request, res: Response) => {
-  const { username, password, role } = req.body as {
+export const registerAdmin = catchAsync(async (req: Request, res: Response) => {
+  const { username, password } = req.body as {
     username: string;
     password: string;
-    role: "user" | "admin";
   };
 
-  // hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // simpan user langsung ke DB
   const result = await pool.query(
     `INSERT INTO auth (username, password, role)
-     VALUES ($1, $2, $3)
+     VALUES ($1, $2, 'admin')
      RETURNING id, username, role, created_at`,
-    [username, hashedPassword, role],
+    [username, hashedPassword],
   );
 
-  const user = result.rows[0];
+  res.status(201).json({
+    message: "Admin berhasil dibuat",
+    user: result.rows[0],
+  });
+});
+
+export const registerUser = catchAsync(async (req: Request, res: Response) => {
+  const { username, password } = req.body as {
+    username: string;
+    password: string;
+  };
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const result = await pool.query(
+    `INSERT INTO auth (username, password, role)
+     VALUES ($1, $2, 'user')
+     RETURNING id, username, role, created_at`,
+    [username, hashedPassword],
+  );
 
   res.status(201).json({
-    message: "berhasil mendaftar",
-    user,
+    message: "User berhasil mendaftar",
+    user: result.rows[0],
   });
 });
 
