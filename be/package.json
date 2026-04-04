@@ -4,7 +4,7 @@
   "main": "app.js",
   "id": "clean1",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --poll src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "db:migrate": "ts-node src/database/cli.ts up",

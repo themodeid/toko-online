@@ -8,7 +8,11 @@ import { LoginSchema, LoginResponseSchema } from "./auth.schema";
 
 // ===================== REGISTER =====================
 export const register = catchAsync(async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body as {
+    username: string;
+    password: string;
+    role: "user" | "admin";
+  };
 
   // hash password
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -16,9 +20,9 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   // simpan user langsung ke DB
   const result = await pool.query(
     `INSERT INTO auth (username, password, role)
-     VALUES ($1, $2, 'user')
+     VALUES ($1, $2, $3)
      RETURNING id, username, role, created_at`,
-    [username, hashedPassword]
+    [username, hashedPassword, role],
   );
 
   const user = result.rows[0];
@@ -39,7 +43,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     `SELECT id, username, password, role
      FROM auth
      WHERE username = $1`,
-    [username]
+    [username],
   );
 
   const user = result.rows[0];
@@ -54,7 +58,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   const token = jwt.sign(
     { id: user.id, role: user.role },
     process.env.JWT_SECRET!,
-    { expiresIn: "1d" }
+    { expiresIn: "1d" },
   );
 
   const responseData = {
@@ -81,10 +85,9 @@ export const logout = catchAsync(async (req: Request, res: Response) => {
     return;
   }
 
-  await pool.query(
-    `DELETE FROM refresh_tokens WHERE token = $1`,
-    [refreshToken]
-  );
+  await pool.query(`DELETE FROM refresh_tokens WHERE token = $1`, [
+    refreshToken,
+  ]);
 
   void res.json({ message: "Logout berhasil" });
 });

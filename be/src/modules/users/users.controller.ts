@@ -24,3 +24,10 @@ export const getMe = catchAsync(async (req: Request, res: Response) => {
 
   res.json(user);
 });
+
+export const deleteAllUsers = catchAsync(
+  async (req: Request, res: Response) => {
+    await pool.query("DELETE FROM auth");
+    res.json({ message: "Semua user berhasil dihapus" });
+  },
+);
