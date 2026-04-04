@@ -15,7 +15,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
 
   // simpan user langsung ke DB
   const result = await pool.query(
-    `INSERT INTO users (username, password, role)
+    `INSERT INTO auth (username, password, role)
      VALUES ($1, $2, 'user')
      RETURNING id, username, role, created_at`,
     [username, hashedPassword]
@@ -37,7 +37,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   // ambil user langsung dari DB
   const result = await pool.query(
     `SELECT id, username, password, role
-     FROM users
+     FROM auth
      WHERE username = $1`,
     [username]
   );
