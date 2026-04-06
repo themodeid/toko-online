@@ -396,7 +396,7 @@ export const getOrdersActiveWithItems = catchAsync(
     const query = `
       SELECT 
         o.id,
-        o.user_id,
+        o.auth_id,
         u.username,
         o.total_price,
         o.status_pesanan,
@@ -414,8 +414,8 @@ export const getOrdersActiveWithItems = catchAsync(
           '[]'
         ) AS items
       FROM orders o
-      INNER JOIN users u 
-        ON o.user_id = u.id
+      INNER JOIN auth u 
+        ON o.auth_id = u.id
       LEFT JOIN order_items oi 
         ON o.id = oi.order_id
       LEFT JOIN produk p 
@@ -443,7 +443,7 @@ export const getMyOrdersActiveWithItems = catchAsync(
     const query = `
   SELECT 
     o.id,
-    o.user_id,
+    o.auth_id,
     o.total_price,
     o.status_pesanan,
     o.created_at,
@@ -467,7 +467,7 @@ export const getMyOrdersActiveWithItems = catchAsync(
     ON oi.produk_id = p.id
   LEFT JOIN daily_queue dq
     ON dq.order_id = o.id
-  WHERE o.user_id = $1
+  WHERE o.auth_id = $1
   AND o.status_pesanan IN ('ANTRI', 'DIPROSES')
   GROUP BY o.id
   ORDER BY o.created_at DESC
@@ -491,7 +491,7 @@ export const getMyAllOrdersWithItems = catchAsync(
     const query = `
       SELECT 
         o.id,
-        o.user_id,
+        o.auth_id,
         o.total_price,
         o.status_pesanan,
         o.created_at,
@@ -515,7 +515,7 @@ export const getMyAllOrdersWithItems = catchAsync(
         ON oi.produk_id = p.id
       LEFT JOIN daily_queue dq
         ON dq.order_id = o.id
-      WHERE o.user_id = $1
+      WHERE o.auth_id = $1
       GROUP BY o.id
       ORDER BY o.created_at DESC
     `;
