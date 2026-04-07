@@ -12,7 +12,7 @@ export const getMe = catchAsync(async (req: Request, res: Response) => {
   }
 
   const result = await pool.query(
-    "SELECT id, username, role FROM users WHERE id = $1",
+    "SELECT id, username, role FROM auth WHERE id = $1",
     [userId],
   );
 
