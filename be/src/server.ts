@@ -1,6 +1,7 @@
 import { app } from "./app";
 import { pool } from "./config/database";
 import { ENV } from "./config/env";
+import { runMigrations } from "./database/migrationRunner";
 
 async function startServer(): Promise<void> {
   console.log("===================================");
@@ -10,6 +11,10 @@ async function startServer(): Promise<void> {
     // ================= TEST DB CONNECTION
     await pool.query("SELECT 1");
     console.log("✅ Database connected successfully");
+
+    // ================= RUN MIGRATIONS
+    console.log("🔄 Running database migrations...");
+    await runMigrations();
 
     // ================= START HTTP SERVER
     app.listen(ENV.PORT, () => {

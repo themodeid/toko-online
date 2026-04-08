@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { AppError } from "../../errors/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { pool } from "../../config/database";
-import { request } from "http";
 
 // checkout penting
 export const checkout = catchAsync(async (req: Request, res: Response) => {
@@ -76,7 +75,7 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
 
     // 1️⃣ INSERT ORDER DULU
     const orderQuery = `
-    INSERT INTO orders (user_id, total_price, status_pesanan)
+    INSERT INTO orders (auth_id, total_price, status_pesanan)
     VALUES ($1, $2, 'ANTRI')
     RETURNING id
   `;
@@ -118,7 +117,7 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
    
     const itemsQuery = `
     INSERT INTO order_items
-    (order_id, produk_id, harga_barang, qty, subtotal)
+    (order_id, produk_id, harga_barang, quantity, subtotal)
     VALUES ${orderItems
       .map(
         (_, i) =>
@@ -218,13 +217,13 @@ export const cancelOrder = catchAsync(async (req: Request, res: Response) => {
 
     // kembalikan stok
     const items = await client.query(
-      `SELECT produk_id, qty FROM order_items WHERE order_id = $1`,
+      `SELECT produk_id, quantity FROM order_items WHERE order_id = $1`,
       [id],
     );
 
     for (const item of items.rows) {
       await client.query(`UPDATE produk SET stock = stock + $1 WHERE id = $2`, [
-        item.qty,
+        item.quantity,
         item.produk_id,
       ]);
     }
@@ -291,9 +290,9 @@ export const getOrders = catchAsync(async (req: Request, res: Response) => {
       orders.total_price,
       orders.status_pesanan,
       orders.created_at,
-      users.username
+      auth.username
     FROM orders
-    JOIN users ON orders.user_id = users.id
+    JOIN auth ON orders.auth_id = auth.id
     ORDER BY orders.created_at ASC
   `;
 
@@ -330,7 +329,7 @@ export const getMyOrders = catchAsync(async (req: Request, res: Response) => {
   const query = `
     SELECT *
     FROM orders
-    WHERE user_id = $1
+    WHERE auth_id = $1
     ORDER BY created_at DESC
   `;
 
@@ -349,7 +348,7 @@ export const getMyOrdersActive = catchAsync(
     const query = `
     SELECT *
     FROM orders
-    WHERE user_id = $1
+    WHERE auth_id = $1
     AND status_pesanan IN ('ANTRI', 'DIPROSES', 'SELESAI')
     ORDER BY created_at DESC
   `;
@@ -374,7 +373,7 @@ export const getOrdersItems = catchAsync(
       oi.produk_id,
       p.nama AS nama_produk,
       oi.harga_barang,
-      oi.qty
+      oi.quantity
     FROM order_items oi
     INNER JOIN produk p
       ON oi.produk_id = p.id
@@ -397,7 +396,7 @@ export const getOrdersActiveWithItems = catchAsync(
     const query = `
       SELECT 
         o.id,
-        o.user_id,
+        o.auth_id,
         u.username,
         o.total_price,
         o.status_pesanan,
@@ -408,15 +407,15 @@ export const getOrdersActiveWithItems = catchAsync(
               'produk_id', oi.produk_id,
               'nama_produk', p.nama,
               'harga_barang', oi.harga_barang,
-              'qty', oi.qty,
+              'quantity', oi.quantity,
               'image', p.image
             )
           ) FILTER (WHERE oi.id IS NOT NULL),
           '[]'
         ) AS items
       FROM orders o
-      INNER JOIN users u 
-        ON o.user_id = u.id
+      INNER JOIN auth u 
+        ON o.auth_id = u.id
       LEFT JOIN order_items oi 
         ON o.id = oi.order_id
       LEFT JOIN produk p 
@@ -444,7 +443,7 @@ export const getMyOrdersActiveWithItems = catchAsync(
     const query = `
   SELECT 
     o.id,
-    o.user_id,
+    o.auth_id,
     o.total_price,
     o.status_pesanan,
     o.created_at,
@@ -454,7 +453,7 @@ export const getMyOrdersActiveWithItems = catchAsync(
           'produk_id', oi.produk_id,
           'nama_produk', p.nama,
           'harga_barang', oi.harga_barang,
-          'qty', oi.qty,
+          'quantity', oi.quantity,
           'queue_number', dq.queue_number,
           'image', p.image
         )
@@ -468,7 +467,7 @@ export const getMyOrdersActiveWithItems = catchAsync(
     ON oi.produk_id = p.id
   LEFT JOIN daily_queue dq
     ON dq.order_id = o.id
-  WHERE o.user_id = $1
+  WHERE o.auth_id = $1
   AND o.status_pesanan IN ('ANTRI', 'DIPROSES')
   GROUP BY o.id
   ORDER BY o.created_at DESC
@@ -492,7 +491,7 @@ export const getMyAllOrdersWithItems = catchAsync(
     const query = `
       SELECT 
         o.id,
-        o.user_id,
+        o.auth_id,
         o.total_price,
         o.status_pesanan,
         o.created_at,
@@ -502,7 +501,7 @@ export const getMyAllOrdersWithItems = catchAsync(
               'produk_id', oi.produk_id,
               'nama_produk', p.nama,
               'harga_barang', oi.harga_barang,
-              'qty', oi.qty,
+              'quantity', oi.quantity,
               'image', p.image,
               'queue_number', dq.queue_number
             )
@@ -516,7 +515,7 @@ export const getMyAllOrdersWithItems = catchAsync(
         ON oi.produk_id = p.id
       LEFT JOIN daily_queue dq
         ON dq.order_id = o.id
-      WHERE o.user_id = $1
+      WHERE o.auth_id = $1
       GROUP BY o.id
       ORDER BY o.created_at DESC
     `;

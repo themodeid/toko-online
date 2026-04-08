@@ -7,25 +7,45 @@ import { AppError } from "../../errors/AppError";
 import { LoginSchema, LoginResponseSchema } from "./auth.schema";
 
 // ===================== REGISTER =====================
-export const register = catchAsync(async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+export const registerAdmin = catchAsync(async (req: Request, res: Response) => {
+  const { username, password } = req.body as {
+    username: string;
+    password: string;
+  };
 
-  // hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // simpan user langsung ke DB
   const result = await pool.query(
-    `INSERT INTO users (username, password, role)
-     VALUES ($1, $2, 'user')
+    `INSERT INTO auth (username, password, role)
+     VALUES ($1, $2, 'admin')
      RETURNING id, username, role, created_at`,
-    [username, hashedPassword]
+    [username, hashedPassword],
   );
 
-  const user = result.rows[0];
+  res.status(201).json({
+    message: "Admin berhasil dibuat",
+    user: result.rows[0],
+  });
+});
+
+export const registerUser = catchAsync(async (req: Request, res: Response) => {
+  const { username, password } = req.body as {
+    username: string;
+    password: string;
+  };
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const result = await pool.query(
+    `INSERT INTO auth (username, password, role)
+     VALUES ($1, $2, 'user')
+     RETURNING id, username, role, created_at`,
+    [username, hashedPassword],
+  );
 
   res.status(201).json({
-    message: "berhasil mendaftar",
-    user,
+    message: "User berhasil mendaftar",
+    user: result.rows[0],
   });
 });
 
@@ -37,9 +57,9 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   // ambil user langsung dari DB
   const result = await pool.query(
     `SELECT id, username, password, role
-     FROM users
+     FROM auth
      WHERE username = $1`,
-    [username]
+    [username],
   );
 
   const user = result.rows[0];
@@ -54,7 +74,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   const token = jwt.sign(
     { id: user.id, role: user.role },
     process.env.JWT_SECRET!,
-    { expiresIn: "1d" }
+    { expiresIn: "1d" },
   );
 
   const responseData = {
@@ -81,10 +101,9 @@ export const logout = catchAsync(async (req: Request, res: Response) => {
     return;
   }
 
-  await pool.query(
-    `DELETE FROM refresh_tokens WHERE token = $1`,
-    [refreshToken]
-  );
+  await pool.query(`DELETE FROM refresh_tokens WHERE token = $1`, [
+    refreshToken,
+  ]);
 
   void res.json({ message: "Logout berhasil" });
 });

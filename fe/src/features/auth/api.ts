@@ -6,7 +6,7 @@ import {
 
 import api from "@/lib/axios";
 
-const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000"}/api/auth`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"}/api/auth`;
 
 export async function login(data: LoginType): Promise<AuthResponse> {
   const res = await api.post("/api/auth/login", data);

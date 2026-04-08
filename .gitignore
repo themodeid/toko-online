@@ -47,3 +47,4 @@ Thumbs.db
 
 # Docker overrides (safe to ignore)
 docker-compose.override.yml
+terminalCode.md

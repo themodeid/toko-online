@@ -21,6 +21,7 @@ export default function AddMenuPage() {
 
   // Data state
   const [produk, setProduk] = useState<Produk[]>([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const navClass = (path: string) =>
     `flex items-center justify-center w-12 h-12 rounded-xl cursor-pointer transition-all duration-300 ${
@@ -46,6 +47,12 @@ export default function AddMenuPage() {
     getProduk();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
   async function handleCreate(formData: FormData) {
     setLoading(true);
 
@@ -54,6 +61,13 @@ export default function AddMenuPage() {
     const harga = Number(formData.get("harga"));
     const stock = Number(formData.get("stock")) || 0;
     const status = formData.get("status") === "true";
+
+    if (!image.type.startsWith("image/")) {
+      setError("Harus gambar!");
+      setLoading(false);
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
 
     if (!image || !nama || !harga) {
       setError("Image, nama produk, dan harga wajib dicantumkan");
@@ -71,8 +85,6 @@ export default function AddMenuPage() {
         stock,
         status,
       });
-
-      router.push("/"); 
     } catch (err) {
       setError("Gagal membuat produk");
       setTimeout(() => setError(null), 3000);
@@ -118,7 +130,6 @@ export default function AddMenuPage() {
       </aside>
 
       <main className="flex-1 p-4 md:p-8 lg:p-12 pb-24 md:pb-12 overflow-y-auto space-y-12 w-full">
-        
         <div className="max-w-6xl mx-auto pt-4 md:pt-0">
           <div className="inline-block px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full mb-4">
             <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-2">
@@ -130,20 +141,23 @@ export default function AddMenuPage() {
             Manajemen Menu
           </h1>
           <p className="text-sm text-zinc-400 max-w-md">
-            Tambahkan dan kelola menu produk yang akan ditampilkan kepada pelanggan.
+            Tambahkan dan kelola menu produk yang akan ditampilkan kepada
+            pelanggan.
           </p>
         </div>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-10">
-          
           <div className="xl:col-span-4 h-fit sticky top-8">
             <div className="bg-white/[0.02] p-8 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
-              
+
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                    <FeatherIcon icon="plus-circle" className="w-5 h-5 text-blue-400" />
+                    <FeatherIcon
+                      icon="plus-circle"
+                      className="w-5 h-5 text-blue-400"
+                    />
                   </div>
                   Menu Baru
                 </h2>
@@ -151,7 +165,10 @@ export default function AddMenuPage() {
 
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2">
-                  <FeatherIcon icon="alert-circle" className="w-4 h-4 flex-shrink-0" />
+                  <FeatherIcon
+                    icon="alert-circle"
+                    className="w-4 h-4 flex-shrink-0"
+                  />
                   {error}
                 </div>
               )}
@@ -162,15 +179,38 @@ export default function AddMenuPage() {
                     Gambar Produk *
                   </label>
                   <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl bg-zinc-900/50 hover:bg-white/5 hover:border-blue-500/30 transition-all cursor-pointer group">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <FeatherIcon icon="upload-cloud" className="w-8 h-8 text-zinc-500 group-hover:text-blue-400 mb-2" />
-                      <p className="text-xs text-zinc-400"><span className="font-semibold text-blue-400">Upload file</span> atau drag & drop</p>
-                    </div>
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover rounded-xl"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <FeatherIcon
+                          icon="upload-cloud"
+                          className="w-8 h-8 text-zinc-500 group-hover:text-blue-400 mb-2"
+                        />
+                        <p className="text-xs text-zinc-400">
+                          <span className="font-semibold text-blue-400">
+                            Upload file
+                          </span>{" "}
+                          atau drag & drop
+                        </p>
+                      </div>
+                    )}
+
                     <input
                       type="file"
                       name="image"
                       required
                       className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setImagePreview(URL.createObjectURL(file));
+                        }
+                      }}
                     />
                   </label>
                 </div>
@@ -218,9 +258,17 @@ export default function AddMenuPage() {
                     Status Produk
                   </label>
                   <div className="flex items-center justify-between bg-zinc-900/80 p-3.5 rounded-xl border border-white/10">
-                    <span className="text-sm font-medium text-zinc-300">Tampilkan di Menu?</span>
+                    <span className="text-sm font-medium text-zinc-300">
+                      Tampilkan di Menu?
+                    </span>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" name="status" value="true" className="sr-only peer" defaultChecked />
+                      <input
+                        type="checkbox"
+                        name="status"
+                        value="true"
+                        className="sr-only peer"
+                        defaultChecked
+                      />
                       <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                     </label>
                   </div>
@@ -275,7 +323,10 @@ export default function AddMenuPage() {
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-zinc-600">
-                        <FeatherIcon icon="image" className="w-8 h-8 opacity-50" />
+                        <FeatherIcon
+                          icon="image"
+                          className="w-8 h-8 opacity-50"
+                        />
                       </div>
                     )}
 
@@ -296,16 +347,20 @@ export default function AddMenuPage() {
                     <h3 className="font-semibold text-lg text-zinc-100 group-hover:text-blue-400 transition-colors duration-300 mb-1 leading-tight">
                       {item.nama}
                     </h3>
-                    
+
                     <div className="flex items-end justify-between mt-4 mb-5">
                       <div>
-                        <p className="text-xs text-zinc-500 mb-0.5">Harga Dasar</p>
+                        <p className="text-xs text-zinc-500 mb-0.5">
+                          Harga Dasar
+                        </p>
                         <p className="text-xl font-bold text-zinc-100">
-                          <span className="text-blue-400 text-sm align-top mr-0.5">Rp</span>
+                          <span className="text-blue-400 text-sm align-top mr-0.5">
+                            Rp
+                          </span>
                           {Number(item.harga ?? 0).toLocaleString("id-ID")}
                         </p>
                       </div>
-                      
+
                       <div className="text-right">
                         <p className="text-xs text-zinc-500 mb-0.5">Stok</p>
                         <p className="font-semibold text-zinc-200 bg-white/5 py-1 px-3 border border-white/10 rounded-lg inline-block">

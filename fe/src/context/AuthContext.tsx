@@ -7,6 +7,7 @@ import { logout as logoutApi } from "@/features/auth/api";
 type User = {
   id: string;
   username: string;
+  role: string;
 };
 
 type AuthContextType = {

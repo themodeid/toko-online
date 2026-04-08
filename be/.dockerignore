@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Logs
+logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Build output (jika pakai)
+dist
+build
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Editor
+.vscode
+.idea
+
+# Misc
+coverage
+*.md

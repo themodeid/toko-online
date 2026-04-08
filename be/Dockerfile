@@ -11,15 +11,12 @@ RUN npm install
 # Copy application code
 COPY . .
 
-# Install dotenv for environment variables
-RUN npm install dotenv
-
 # Expose port
-EXPOSE 3000
+EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+  CMD node -e "const http=require('http');const url='http://localhost:5000/api/health';const req=http.get(url,(res)=>{const ok=res.statusCode===200;res.resume();res.on('end',()=>process.exit(ok?0:1));});req.setTimeout(2000,()=>{req.destroy();process.exit(1);});req.on('error',()=>process.exit(1));"
 
 # Run development server
 CMD ["npm", "run", "dev"]

@@ -1,46 +1,64 @@
-version: "3.8"
 
 services:
-  postgres:
+  postgres-dev:
     image: postgres:16
-    container_name: postgres-db
+    container_name: postgres-db-dev
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: toko
-      POSTGRES_USER: postgres
+      POSTGRES_DB: dev_db
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: adamwahyukur
+    restart: always
+
+  postgres-pro:
+    image: postgres:16
+    container_name: postgres-db-pro
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data_pro:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: pro_db
+      POSTGRES_USER: pro_user
       POSTGRES_PASSWORD: adamwahyukur
     restart: always
 
   backend:
-    build: ./backend
+    build: ./be
     container_name: backend-api
+    
     ports:
       - "5000:5000"
     volumes:
-      - ./backend:/app
+      - ./be:/app
+      - /app/node_modules
     depends_on:
-      - postgres
+      - postgres-dev
     environment:
-      - DATABASE_URL=postgresql://postgres:adamwahyukur@postgres:5432/toko
+      - DATABASE_URL=postgresql://dev_user:adamwahyukur@postgres-dev:5432/dev_db
       - PORT=5000
       - NODE_ENV=development
+      - CORS_ORIGIN=http://localhost:3000,http://127.0.0.1:3000
     restart: always
 
   frontend:
-    build: ./frontend
+    build: ./fe
     container_name: frontend-app
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
+      - ./fe:/app
+      - /app/node_modules
     depends_on:
       - backend
-    restart: always
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5000
+      # Browser di host memanggil API lewat port yang di-publish (bukan hostname "backend").
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+    restart: always
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
+  postgres_data_pro:
