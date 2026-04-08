@@ -150,6 +150,10 @@ export const updateProduk = catchAsync(async (req: Request, res: Response) => {
 
   const { nama, harga, stock, status } = req.body;
 
+  const parsedStatus = status !== undefined
+    ? status === true || status === "true"
+    : undefined;
+
   if (!id) throw new AppError("ID tidak valid", 400);
 
   const existing = await pool.query("SELECT * FROM produk WHERE id = $1", [id]);
@@ -163,7 +167,7 @@ export const updateProduk = catchAsync(async (req: Request, res: Response) => {
     nama,
     harga: harga !== undefined ? Number(harga) : undefined,
     stock: stock !== undefined ? Number(stock) : undefined,
-    status: status !== undefined ? status === "true" : undefined,
+    status: parsedStatus,
     image: imagePath,
   });
 

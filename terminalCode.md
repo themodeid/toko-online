@@ -34,13 +34,13 @@ docker compose exec postgres-dev psql -U dev_user -d dev_db -c "\dt"
 ### 🔹 Melihat struktur tabel
 
 ```bash
-docker compose exec postgres-dev psql -U dev_user -d dev_db -c "\d auth"
+docker compose exec postgres-dev psql -U dev_user -d dev_db -c "\d produk"
 ```
 
 ### 🔹 Melihat isi data
 
 ```bash
-docker compose exec postgres-dev psql -U dev_user -d dev_db -c "SELECT * FROM orders;"
+docker compose exec postgres-dev psql -U dev_user -d dev_db -c "SELECT * FROM produk;"
 ```
 
 ---
