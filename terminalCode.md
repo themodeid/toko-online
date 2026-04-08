@@ -1,4 +1,4 @@
-# 🐳 Docker Notes
+========================= 🐳 Docker Notes =================================
 
 ## 📊 Cek Database di Docker
 
@@ -88,3 +88,8 @@ docker compose logs -f
 * Gunakan `-d` agar terminal tetap bisa dipakai
 * Gunakan `logs -f` untuk monitoring realtime
 * Simpan file ini sebagai `DOCKER.md` di root project agar mudah diakses
+
+
+
+=============================== git ==============================
+
