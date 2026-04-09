@@ -1,268 +1,518 @@
-## 📁 Project Structure
+Berikut draft `README.md` yang sudah disesuaikan dengan kondisi projekmu sekarang (backend `be/`, frontend `fe/`, jalan lewat Docker, port 5000/3000, dsb). Kamu bisa langsung **replace isi file `README.md`** dengan ini.
 
-```
+---
+
+## ☕ Toko Online / Cafe Ordering System
+
+Full-stack web app untuk pemesanan menu (cafe / resto) dengan:
+
+- Backend **Express + TypeScript + PostgreSQL**
+- Frontend **Next.js App Router + Tailwind CSS**
+- Infrastruktur **Docker + docker-compose**
+
+User bisa daftar/login, melihat menu, membuat pesanan, dan melihat status antrian. Admin bisa mengelola produk dan mengelola pesanan.
+
+---
+
+### 📁 Struktur Project
+
+```text
 .
-├── backend/
+├── be/                     # Backend (Express + TS)
 │   ├── src/
-│   │   ├── controllers/
-│   │   ├── routes/
-│   │   ├── middlewares/
-│   │   ├── config/
-│   │   └── utils/
-│   └── package.json
+│   │   ├── app.ts          # Inisialisasi express + routes
+│   │   ├── server.ts       # Entry point server
+│   │   ├── config/         # DB & env config
+│   │   ├── database/       # migration runner + migrations (*.sql)
+│   │   ├── modules/
+│   │   │   ├── auth/       # auth.controller / auth.route / schema
+│   │   │   ├── users/      # getMe, deleteAllUsers
+│   │   │   ├── produk/     # CRUD produk
+│   │   │   └── orders/     # checkout, antrian, cancel, history
+│   │   ├── middlewares/    # authGuard, roleGuard, validateBody, dll
+│   │   └── errors/utils/   # AppError, catchAsync, errorHandler
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── Dockerfile
 │
-├── frontend/
+├── fe/                     # Frontend (Next.js)
 │   ├── src/
-│   │   ├── app/
-│   │   ├── features/
-│   │   └── components/
-│   └── package.json
+│   │   ├── app/            # App Router pages (menu, login, pesanan, dll)
+│   │   ├── context/        # AuthContext
+│   │   ├── features/       # auth / produk / cart / user / kontak
+│   │   └── lib/            # axios client
+│   ├── next.config.js
+│   ├── package.json
+│   ├── dockerfile
+│   └── .env.local
 │
-└── docker-compose.yml
-```
-
-# ☕ Cafe Ordering System
-
-Full-Stack Web Application (Express + PostgreSQL + Next.js)
-
-A modern full-stack ordering system where users can browse products, add items to cart, checkout orders, and manage order status.
-Built with clean REST architecture, transaction-safe checkout logic, and responsive UI.
-
----
-
-## 🚀 Live Architecture Overview
-
-```
-Next.js (Frontend - React 19)
-        ↓
-Express API (TypeScript)
-        ↓
-PostgreSQL (Transaction & Row Locking)
+├── docker-compose.yml      # Orkestrasi backend, frontend, postgres
+└── README.md
 ```
 
 ---
 
-## ✨ Features
+### 🛠 Tech Stack
 
-### 👤 Authentication & Authorization
+- **Backend**
+  - Node.js + **Express 5** + **TypeScript**
+  - PostgreSQL + `pg`
+  - Zod (validasi schema)
+  - JWT (auth)
+  - Custom error handling (`AppError`, `errorHandler`)
+  - SQL migrations dengan file `*.sql` + `migrationRunner.ts`
 
-* JWT-based authentication
-* Role-based access (USER / ADMIN)
-* Protected routes
-* Secure order cancellation rules
+- **Frontend**
+  - **Next.js 14** (App Router)
+  - React 18
+  - TypeScript
+  - Tailwind CSS
+  - Feather Icons
+  - Context API untuk auth
 
-### 🛒 Ordering System
-
-* Add to cart
-* Checkout with transaction (`BEGIN / COMMIT / ROLLBACK`)
-* Stock validation before and during checkout
-* Prevent race condition using `SELECT ... FOR UPDATE`
-* Automatic stock deduction
-* Cancel order with stock restoration
-* Order queue logic (Top 3 orders protected from cancellation)
-
-### 📦 Order Management
-
-* View active orders
-* View order history
-* Get orders with items (aggregated JSON)
-* Admin view all active orders
-* Complete order (ADMIN)
-
-### 🗃 Database Design
-
-* Relational database (PostgreSQL)
-* Foreign key relationships
-* Transaction-safe checkout
-* Row-level locking for concurrency safety
-
-### 🎨 Frontend
-
-* Responsive modern UI (Tailwind CSS)
-* Sidebar navigation
-* Cart system with dynamic total calculation
-* Conditional UI based on product availability
-* Order list with item preview
+- **Infra**
+  - Docker & docker-compose
+  - Healthcheck container (backend & frontend)
+  - Volume untuk Postgres dev/prod
 
 ---
 
-## 🛠 Tech Stack
+## 🚀 Menjalankan dengan Docker (disarankan)
 
-### Backend
+Pastikan **Docker** sudah terinstall dan berjalan.
 
-* Express.js
-* TypeScript
-* PostgreSQL
-* Node-Postgres (`pg`)
-* Zod (validation)
-* Custom Error Handling
-* Transaction-based logic
-
-### Frontend
-
-* Next.js 16 (App Router)
-* React 19
-* TypeScript
-* Tailwind CSS
-* Feather Icons
-
----
-
-## ⚙️ Installation
-
-### 1️⃣ Clone Repository
+Di root project (`toko-online`):
 
 ```bash
-git clone https://github.com/themodeid/toko-online.git
-cd toko-online
+docker compose up -d --build
+```
+
+Container yang akan jalan:
+
+- **frontend-app** → Next.js dev server  
+  `http://localhost:3000`
+- **backend-api** → Express API  
+  `http://localhost:5000/api`
+- **postgres-db-dev** → Postgres dev  
+  `localhost:5433`
+- **postgres-db-pro** → Postgres “prod”  
+  `localhost:5434`
+
+Cek status:
+
+```bash
+docker compose ps
+```
+
+Semua service idealnya berstatus **Up (...) (healthy)**.
+
+Stop semua:
+
+```bash
+docker compose down
+```
+
+Reset semua data Postgres dev/pro:
+
+```bash
+docker compose down -v
 ```
 
 ---
 
-### 2️⃣ Backend Setup
+### 🌍 URL Penting
+
+- Frontend: `http://localhost:3000`
+- Backend base: `http://localhost:5000/api`
+- Health backend: `http://localhost:5000/api/health`
+- Health frontend: `http://localhost:3000/api/health`
+
+---
+
+## ⚙️ Konfigurasi Environment
+
+### Backend (`be/`)
+
+Untuk **local (tanpa Docker)**, buat file `.env` di folder `be/`:
+
+```env
+# contoh local
+DATABASE_URL=postgresql://postgres:password@localhost:5433/toko_docker
+PORT=5000
+CORS_ORIGIN=http://localhost:3000,http://127.0.0.1:3000
+JWT_SECRET=super_secret_key
+JWT_EXPIRES_IN=1d
+```
+
+Di mode Docker, sebagian env di-inject dari `docker-compose.yml`:
+
+```yaml
+backend:
+  build: ./be
+  container_name: backend-api
+  environment:
+    - DATABASE_URL=postgresql://dev_user:adamwahyukur@postgres-dev:5432/dev_db
+    - PORT=5000
+    - NODE_ENV=development
+    - CORS_ORIGIN=http://localhost:3000,http://127.0.0.1:3000
+```
+
+### Frontend (`fe/`)
+
+File `.env.local` (baik saat jalan lokal maupun di dalam container):
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+```
+
+Di `docker-compose.yml`:
+
+```yaml
+frontend:
+  build: ./fe
+  container_name: frontend-app
+  environment:
+    - NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+```
+
+`NEXT_PUBLIC_API_BASE_URL` selalu menunjuk ke **port API yang di-publish ke host** (5000), karena request dilakukan dari browser.
+
+---
+
+## ▶️ Menjalankan Tanpa Docker (opsional)
+
+### 1️⃣ Jalankan Postgres sendiri
+
+Buat database manual (contoh):
+
+```sql
+CREATE DATABASE dev_db;
+CREATE USER dev_user WITH PASSWORD 'adamwahyukur';
+GRANT ALL PRIVILEGES ON DATABASE dev_db TO dev_user;
+```
+
+Sesuaikan `DATABASE_URL` di `.env` backend.
+
+### 2️⃣ Backend
 
 ```bash
-cd backend
+cd be
 npm install
+
+# jalankan migrations
+npm run db:migrate
+
+# development
+npm run dev
+# atau build + start
+npm run build
+npm start
 ```
 
-Create `.env` file:
+Backend jalan di `http://localhost:5000/api`.
 
-```
-PORT=3000
-DATABASE_URL=postgresql://user:password@localhost:5432/cafe_db
-JWT_SECRET=your_secret_key
-NODE_ENV=development
-```
-
-Run:
+### 3️⃣ Frontend
 
 ```bash
+cd fe
+npm install
 npm run dev
 ```
 
-Backend runs at:
+Frontend jalan di `http://localhost:3000`.
 
+---
+
+## 🧱 Desain Database (ringkas)
+
+Tabel utama (setelah migrasi terbaru):
+
+- **`auth`**
+  - `id UUID PK`
+  - `username VARCHAR`
+  - `password VARCHAR (bcrypt)`
+  - `role VARCHAR(50) DEFAULT 'user'`
+  - `created_at TIMESTAMP`
+
+- **`produk`**
+  - `id UUID PK`
+  - `nama VARCHAR`
+  - `harga NUMERIC(10,2)`
+  - `stock INT`
+  - `status BOOLEAN` (tersedia / tidak)
+  - `image VARCHAR` (path `/uploads/...`)
+  - `created_at`, `updated_at`
+
+- **`orders`**
+  - `id UUID PK`
+  - `auth_id UUID FK → auth(id)`
+  - `total_price NUMERIC(10,2)`
+  - `status_pesanan VARCHAR(20)` (`ANTRI`, `DIPROSES`, `SELESAI`, `DIBATALKAN`)
+  - `created_at TIMESTAMPTZ`
+
+- **`order_items`**
+  - `id UUID PK`
+  - `order_id UUID FK → orders(id)`
+  - `produk_id UUID FK → produk(id)`
+  - `harga_barang NUMERIC(10,2)`
+  - `quantity INT`
+  - `subtotal NUMERIC(10,2)`
+
+- **`daily_queue`**
+  - Menyimpan nomor antrian harian per order.
+
+Migrations ada di `be/src/database/migrations`, dijalankan otomatis saat server start (`runMigrations()` di `server.ts`).
+
+---
+
+## 🔐 Auth & User Endpoints
+
+Base URL backend: `http://localhost:5000/api`
+
+Semua body contoh dalam **JSON**.
+
+### Register user biasa
+
+```http
+POST /api/auth/register
+POST /api/auth/registerUser
+Content-Type: application/json
+
+{
+  "username": "fuga",
+  "password": "adamwahyu"
+}
 ```
-http://localhost:3000
+
+Respon:
+
+```json
+{
+  "message": "User berhasil mendaftar",
+  "user": {
+    "id": "...",
+    "username": "fuga",
+    "role": "user",
+    "created_at": "..."
+  }
+}
+```
+
+### Register admin
+
+> Gunakan endpoint ini hanya untuk setup awal admin.
+
+```http
+POST /api/auth/registerAdmin
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "adamwahyu"
+}
+```
+
+### Login
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "fuga",
+  "password": "adamwahyu"
+}
+```
+
+Respon berisi `token` (JWT) dan data user. Simpan `token` di frontend (localStorage) dan kirim di header:
+
+```http
+Authorization: Bearer <token>
+```
+
+### Logout
+
+```http
+POST /api/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "..."  // jika dipakai
+}
+```
+
+### Get profil saya
+
+```http
+GET /api/users/getMe
+Authorization: Bearer <token>
 ```
 
 ---
 
-### 3️⃣ Frontend Setup
+## 🛒 Produk (Menu) Endpoints
 
-```bash
-cd frontend
-npm install
+Semua biasanya di-protect dengan `authGuard` untuk operasi tulis.
+
+- **GET semua produk**
+
+```http
+GET /api/produk
 ```
 
-Create `.env.local`:
+- **GET produk by id**
 
-```
-NEXT_PUBLIC_API_URL=http://localhost:3000
-```
-
-Run:
-
-```bash
-npm run dev
+```http
+GET /api/produk/:id
 ```
 
-Frontend runs at:
+- **POST buat produk** (admin)
 
+```http
+POST /api/produk
+Authorization: Bearer <ADMIN_TOKEN>
+Content-Type: multipart/form-data
+
+image: <file>
+nama: "Kopi Hitam"
+harga: 15000
+stock: 10
+status: true
 ```
-http://localhost:3001
+
+- **PATCH update produk** (admin)
+
+```http
+PATCH /api/produk/:id
+Authorization: Bearer <ADMIN_TOKEN>
+# multipart/form-data kalau ganti gambar, atau JSON kalau hanya data
+```
+
+- **DELETE hapus produk** (admin)
+
+```http
+DELETE /api/produk/:id
+Authorization: Bearer <ADMIN_TOKEN>
 ```
 
 ---
 
-## 📡 API Endpoints (Orders)
+## 📦 Orders & Antrian
 
-### Checkout
+### Checkout (buat order baru)
 
+```http
+POST /api/orders
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "produk_id": "<UUID produk>",
+      "quantity": 2
+    }
+  ]
+}
 ```
-POST /api/orders/checkout
+
+- Mengecek ketersediaan stok
+- Mengurangi stok
+- Membuat record di `orders`, `order_items`, `daily_queue`
+- Mengembalikan `order_id`, `no_antrian`, dan `total_price`
+
+### Ambil semua orders (admin / kasir)
+
+```http
+GET /api/orders
+Authorization: Bearer <token>
 ```
 
-### Cancel Order
+### Ambil semua order aktif + items (admin view)
 
+```http
+GET /api/orders/activeItems
+Authorization: Bearer <token>
 ```
+
+### Ambil semua order aktif saya + items
+
+```http
+GET /api/orders/myActiveItems
+Authorization: Bearer <token>
+```
+
+### Ambil semua order saya (riwayat) + items
+
+```http
+GET /api/orders/myAllOrders
+Authorization: Bearer <token>
+```
+
+### Ambil items dari 1 order
+
+```http
+GET /api/orders/:id/items
+Authorization: Bearer <token>
+```
+
+### Tandai order selesai (admin)
+
+```http
+PATCH /api/orders/:id/selesai
+Authorization: Bearer <ADMIN_TOKEN>
+```
+
+### Cancel order
+
+```http
 PATCH /api/orders/:id/cancel
+Authorization: Bearer <token>
 ```
 
-### Complete Order (Admin)
-
-```
-PATCH /api/orders/:id/done
-```
-
-### Get My Active Orders
-
-```
-GET /api/orders/my/active
-```
-
-### Get All Active Orders (Admin)
-
-```
-GET /api/orders/active
-```
+- Admin bisa cancel order apa saja.
+- User hanya bisa cancel order miliknya sendiri.
+- Order di status tertentu / top 3 antrian bisa **tidak boleh dicancel**.
 
 ---
 
-## 🔐 Concurrency Safety
+## 🎨 Frontend (Next.js)
 
-This project implements:
+Di frontend, API dipanggil lewat:
 
-* `SELECT ... FOR UPDATE`
-* Explicit database transactions
-* Stock consistency validation
-* Safe order cancellation with row locking
+- `src/lib/axios.ts` dengan `baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"`
+- `features/*/api.ts` membungkus pemanggilan endpoint (auth/produk/orders/user).
 
-Ensures no overselling and prevents race conditions during high traffic.
+Halaman utama:
 
----
-
-## 📸 Screenshots
-
-(Add your screenshots here)
-
-```
-/docs/home.png
-/docs/cart.png
-/docs/orders.png
-```
+- `/` → daftar menu + cart
+- `/login` → login user
+- `/login_admin` → login admin
+- `/pesanan/...` → daftar pesanan, history, dsb
+- `/menu/...` → detail / tambah menu
 
 ---
 
-## 🧪 Recommended Improvements (Future Roadmap)
+## 🧪 Smoke Test Manual
 
-* Payment Gateway Integration (Midtrans / Stripe)
-* Email Notification
-* React Query for better data fetching
-* Service Layer separation
-* Unit & Integration Testing
-* CI/CD Pipeline
-* Deployment (Vercel + Railway)
+Setelah `docker compose up -d --build`:
 
----
-
-## 🏗 Why This Project Matters
-
-This project demonstrates:
-
-* Understanding of relational database integrity
-* Transaction-safe business logic
-* Concurrency handling
-* Role-based authorization
-* Full-stack integration
-* Clean UI implementation
+1. Buka `http://localhost:3000` → UI muncul.
+2. Coba register via frontend atau Postman:
+   - `POST http://localhost:5000/api/auth/register`
+3. Login → pastikan token tersimpan dan API lain bisa dipanggil.
+4. Tambah produk (via UI atau Postman).
+5. Checkout order dari UI → cek stok berkurang dan pesanan muncul di halaman pesanan.
 
 ---
 
-## 👨‍💻 Author
+## 👤 Author
 
-**Adam Wahyu Kurniawan**
+**Adam Wahyu Kurniawan**  
 Full-Stack Developer
 
-GitHub: [https://github.com/themodeid](https://github.com/themodeid)
+GitHub: [`https://github.com/themodeid`](https://github.com/themodeid)
+
+---
+
+Kalau kamu mau, aku juga bisa menambahkan contoh **Postman collection** section atau **step khusus untuk deployment** (mis. ke Railway/Vercel) di README ini.
