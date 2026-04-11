@@ -1,90 +1,51 @@
-# 🐳 Docker Notes
+ ===================================== Docker Notes
 
-## 📊 Cek Database di Docker
+//Cek Database di Docker
 
-### 🔹 Cek status container
-
-```bash
+/Cek status container
 docker ps
-```
 
-### 🔹 Masuk ke PostgreSQL (interactive)
-
-```bash
+/ Masuk ke PostgreSQL (interactive)
 docker compose exec postgres-dev psql -U dev_user -d dev_db
-```
 
-### 🔹 Perintah di dalam PostgreSQL
-
-```sql
+/Perintah di dalam PostgreSQL
 \dt        -- melihat daftar tabel
 \d users   -- melihat struktur tabel users
-```
 
----
-
-## 🔍 Cek Database Tanpa Masuk (Direct Command)
-
-### 🔹 Melihat daftar tabel
-
-```bash
+//Cek Database Tanpa Masuk (Direct Command)
+/Melihat daftar tabel
 docker compose exec postgres-dev psql -U dev_user -d dev_db -c "\dt"
-```
 
-### 🔹 Melihat struktur tabel
-
-```bash
+// Melihat struktur tabel
 docker compose exec postgres-dev psql -U dev_user -d dev_db -c "\d produk"
-```
 
-### 🔹 Melihat isi data
-
-```bash
+//Melihat isi data
 docker compose exec postgres-dev psql -U dev_user -d dev_db -c "SELECT * FROM order_items;"
-```
 
----
-
-## 🚀 Menjalankan Docker
-
-### 🔹 Menyalakan container
-
-```bash
+// Menjalankan Docker
+/Menyalakan container
 docker compose up
-```
 
-### 🔹 Menyalakan + build ulang
+//Menyalakan + build ulang
 
-```bash
 docker compose up --build
-```
 
-### 🔹 Menjalankan di background
-
-```bash
+// Menjalankan di background
 docker compose up -d
-```
 
-### 🔹 Menghentikan container
-
-```bash
+// Menghentikan container
 docker compose down
-```
 
----
 
-## 📜 Logs & Debugging
+//Logs & Debugging
+Melihat logs realtime
 
-### 🔹 Melihat logs
 
-```bash
-docker compose logs -f
-```
 
----
+================================= Git Commands
 
-## 💡 Tips
+//Menghapus branch
+git branch -d switch
 
-* Gunakan `-d` agar terminal tetap bisa dipakai
-* Gunakan `logs -f` untuk monitoring realtime
-* Simpan file ini sebagai `DOCKER.md` di root project agar mudah diakses
+//Menghapus branch secara paksa (meskipun belum merge)
+git branch -D switch
