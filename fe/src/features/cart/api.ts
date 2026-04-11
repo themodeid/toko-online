@@ -75,9 +75,10 @@ export async function getAllMyOrders(): Promise<Order[]> {
       produkId: i.produk_id,
       nama: i.nama_produk,
       harga: i.harga_barang,
-      quantity: i.qty,
-      image: i.image,
+      quantity: i.quantity,
+      subtotal: i.subtotal,
       queue: i.queue_number,
+      image: i.image,
     })),
   }));
 }
@@ -98,7 +99,9 @@ export async function getAllOrderActiveItems(): Promise<Order[]> {
       produkId: i.produk_id,
       nama: i.nama_produk,
       harga: i.harga_barang,
-      quantity: i.qty,
+      quantity: i.quantity,
+      subtotal: i.subtotal,
+      queue: i.queue_number,
       image: i.image,
     })),
   }));
@@ -119,9 +122,10 @@ export async function getMyOrdersActiveWithItems(): Promise<Order[]> {
       produkId: i.produk_id,
       nama: i.nama_produk,
       harga: i.harga_barang,
-      quantity: i.qty,
-      image: i.image,
+      quantity: i.quantity,
+      subtotal: i.subtotal,
       queue: i.queue_number,
+      image: i.image,
     })),
   }));
 }

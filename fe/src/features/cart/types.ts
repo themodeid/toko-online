@@ -7,6 +7,8 @@ export interface CartItem {
   nama: string;
   harga: number;
   quantity: number;
+  subtotal: number;
+  queue: number;
   image?: string;
 }
 
@@ -15,8 +17,9 @@ export interface OrderItem {
   nama: string;
   harga: number;
   quantity: number;
+  subtotal: number;
+  queue: number;
   image?: string;
-  queue?: number;
 }
 
 export interface Order {
@@ -46,9 +49,10 @@ export interface OrderItemFromApi {
   produk_id: string;
   nama_produk: string;
   harga_barang: number;
-  qty: number;
+  quantity: number;
   image: string;
   queue_number: number;
+  subtotal: number;
 }
 
 export interface OrderWithItemsFromApi extends BaseOrderFromApi {

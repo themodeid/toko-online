@@ -40,7 +40,7 @@ docker compose exec postgres-dev psql -U dev_user -d dev_db -c "\d produk"
 ### 🔹 Melihat isi data
 
 ```bash
-docker compose exec postgres-dev psql -U dev_user -d dev_db -c "SELECT * FROM produk;"
+docker compose exec postgres-dev psql -U dev_user -d dev_db -c "SELECT * FROM order_items;"
 ```
 
 ---

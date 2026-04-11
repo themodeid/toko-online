@@ -114,7 +114,6 @@ export const checkout = catchAsync(async (req: Request, res: Response) => {
       [orderId, queueNumber, today],
     );
 
-   
     const itemsQuery = `
     INSERT INTO order_items
     (order_id, produk_id, harga_barang, quantity, subtotal)
@@ -408,6 +407,8 @@ export const getOrdersActiveWithItems = catchAsync(
               'nama_produk', p.nama,
               'harga_barang', oi.harga_barang,
               'quantity', oi.quantity,
+              'subtotal', oi.subtotal,
+              'queue_number', dq.queue_number,
               'image', p.image
             )
           ) FILTER (WHERE oi.id IS NOT NULL),
@@ -420,7 +421,9 @@ export const getOrdersActiveWithItems = catchAsync(
         ON o.id = oi.order_id
       LEFT JOIN produk p 
         ON oi.produk_id = p.id
-      WHERE o.status_pesanan IN ('ANTRI', 'DIPROSES')
+      LEFT JOIN daily_queue dq
+        ON dq.order_id = o.id
+      WHERE o.status_pesanan IN ('ANTRI', 'DIPROSES') 
       GROUP BY o.id, u.username
       ORDER BY o.created_at ASC
     `;
