@@ -1,5 +1,13 @@
-
 services:
+  redis:
+    image: redis:7
+    container_name: redis-toko-online
+    ports:
+      - "6381:6379"
+    restart: always
+    volumes:
+      - redis_data_to:/data
+
   postgres-dev:
     image: postgres:16
     container_name: postgres-db-dev
@@ -29,7 +37,7 @@ services:
   backend:
     build: ./be
     container_name: backend-api
-    
+
     ports:
       - "5000:5000"
     volumes:
@@ -37,8 +45,10 @@ services:
       - /app/node_modules
     depends_on:
       - postgres-dev
+      - redis
     environment:
       - DATABASE_URL=postgresql://dev_user:adamwahyukur@postgres-dev:5432/dev_db
+      - REDIS_URL=redis://redis:6379
       - PORT=5000
       - NODE_ENV=development
       - CORS_ORIGIN=http://localhost:3000,http://127.0.0.1:3000
@@ -55,10 +65,10 @@ services:
     depends_on:
       - backend
     environment:
-      # Browser di host memanggil API lewat port yang di-publish (bukan hostname "backend").
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
     restart: always
 
 volumes:
   postgres_data_dev:
   postgres_data_pro:
+  redis_data_to:
